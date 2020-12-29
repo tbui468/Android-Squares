@@ -11,23 +11,29 @@ import java.nio.ByteOrder
 import android.opengl.Matrix
 import android.opengl.GLES20
 
-val vertices = floatArrayOf(-0.5f, -0.5f, 0.0f,
-                            0.5f, -0.5f, 0.0f,
-                            0.5f, 0.5f, 0.0f,
-                            -0.5f, 0.5f, 0.0f)
+import android.util.Log
+
+val vertices = floatArrayOf(-0.5f, -0.5f, 0.0f, 0f, 1f,
+                            0.5f, -0.5f, 0.0f, 1f, 1f,
+                            0.5f, 0.5f, 0.0f, 1f, 0f,
+                            -0.5f, 0.5f, 0.0f, 0f, 0f)
 
 val indices = shortArrayOf(0, 1, 2, 0, 2, 3)
 
 const val vertexShaderCode = "attribute vec4 aPosition;" +
+                            "attribute vec2 aTexCoord;" +
                             "uniform mat4 uMVPMatrix;" +
+                            "varying vec2 vTexCoord;" +
                             "void main() {" +
+                            "   vTexCoord = aTexCoord;" +
                             "   gl_Position = uMVPMatrix * aPosition;" +
                             "}"
 
 const val fragmentShaderCode = "precision mediump float;" +
-                                "uniform vec4 uColor;" +
+                                "uniform sampler2D uTexture;" +
+                                "varying vec2 vTexCoord;" +
                                 "void main() {" +
-                                "   gl_FragColor = uColor;" +
+                                "   gl_FragColor = texture2D(uTexture, vTexCoord);" +
                                 "}"
 
 const val FLOAT_SIZE = 4
@@ -35,7 +41,6 @@ const val SHORT_SIZE = 2
 
 class Fractal(initPos: FloatArray, initScale: FloatArray): Entity(), Drawable {
 
-    private val mColor = floatArrayOf(1f, 1f, 1f, 1f)
     private val mModelMatrix = FloatArray(16)
 
     init {
@@ -81,20 +86,31 @@ class Fractal(initPos: FloatArray, initScale: FloatArray): Entity(), Drawable {
 
         GLES20.glUseProgram(mProgram)
 
-        GLES20.glGetAttribLocation(mProgram, "aPosition").also {
-            GLES20.glEnableVertexAttribArray(it)
-            GLES20.glVertexAttribPointer(it, 3, GLES20.GL_FLOAT, false, 3 * FLOAT_SIZE, mVertexBuffer)
+        val posAttrib = GLES20.glGetAttribLocation(mProgram, "aPosition")
+        GLES20.glEnableVertexAttribArray(posAttrib)
+        mVertexBuffer.position(0)
+        GLES20.glVertexAttribPointer(posAttrib, 3, GLES20.GL_FLOAT, false, 5 * FLOAT_SIZE, mVertexBuffer)
 
-            GLES20.glGetUniformLocation(mProgram, "uMVPMatrix").also { matrixHandle ->
-                GLES20.glUniformMatrix4fv(matrixHandle, 1, false, mvpMatrix, 0)
-            }
+        val texCoordAttrib = GLES20.glGetAttribLocation(mProgram, "aTexCoord")
+        GLES20.glEnableVertexAttribArray(texCoordAttrib)
+        mVertexBuffer.position(3)
+        GLES20.glVertexAttribPointer(texCoordAttrib, 2, GLES20.GL_FLOAT, false, 5 * FLOAT_SIZE, mVertexBuffer)
 
-            GLES20.glGetUniformLocation(mProgram, "uColor").also { colorHandle ->
-                GLES20.glUniform4fv(colorHandle, 1, mColor, 0)
-            }
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, SquaresRenderer.mTextureHandle)
 
-            GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
-            GLES20.glDisableVertexAttribArray(it)
+        GLES20.glGetUniformLocation(mProgram, "uTexture").also {
+            GLES20.glUniform1i(it, 0)
         }
+
+        GLES20.glGetUniformLocation(mProgram, "uMVPMatrix").also {
+            GLES20.glUniformMatrix4fv(it, 1, false, mvpMatrix, 0)
+        }
+
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
+
+        GLES20.glDisableVertexAttribArray(posAttrib)
+        GLES20.glDisableVertexAttribArray(texCoordAttrib)
+
     }
 }

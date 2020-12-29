@@ -9,7 +9,7 @@ class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
 
     init {
         setEGLContextClientVersion(2)
-        renderer = SquaresRenderer()
+        renderer = SquaresRenderer(context)
         setRenderer(renderer)
     }
 }

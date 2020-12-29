@@ -1,7 +1,6 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
     //simple colored faces with curved edges for textures (start here and then work my way down into the details)
         //make a 4 color png (make each fractal a 32x32 sprite) - try different texture options to see how smooth it looks
-            //make the fractals textured (just a random color is fine for now)
             //get squares, composed of fractals, drawing by calling the fractals it's composed of - rotate them so I can see front/back sides too
             //get cubes, composed of squares, trickle down the draw call to fractals - rotate them so I can see that it's actually a cube
         //use glFrustum (since perspective projection will be needed for finals levels)
