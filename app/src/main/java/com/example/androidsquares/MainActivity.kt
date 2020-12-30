@@ -1,10 +1,15 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
-    //simple colored faces with curved edges for textures (start here and then work my way down into the details)
-        //make a 4 color png (make each fractal a 32x32 sprite) - try different texture options to see how smooth it looks
-            //get squares, composed of fractals, drawing by calling the fractals it's composed of - rotate them so I can see front/back sides too
-            //get cubes, composed of squares, trickle down the draw call to fractals - rotate them so I can see that it's actually a cube
-        //use glFrustum (since perspective projection will be needed for finals levels)
-        //get Fractals, Faces, Cubes displayed and user able to transition between the three stages.  Get 8 cubes forming into Dahl Cross/tesseract
+
+    //up texture size/change anti-aliasing so that there are no jaggies (and maybe add a thin border or put a small space between fractals)
+
+    //get a cube up and animating (rotating on screen)
+
+    //implement a function to swap texture coords in a given fractal, square, or cube (this also helps test to see if cube really is animating correctly)
+
+    //animations of cubes, squares and fractals for transition between screens
+
+    //each element type can be associated with an array of texture coordinates
+    //get Fractals, Faces, Cubes displayed and user able to transition between the three stages.  Get 8 cubes forming into Dali Cross/tesseract
 
     //3 transformations with forming and splitting (all the coordinate values can be hard coded - only about 25 with a 4x4 with fractal sizes 1, 2 4)
     //all animations transitioning from 3d cube to unwrapped 6 square faces, to splitting to (up to) 16 fractals

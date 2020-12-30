@@ -11,14 +11,6 @@ import java.nio.ByteOrder
 import android.opengl.Matrix
 import android.opengl.GLES20
 
-import android.util.Log
-
-val vertices = floatArrayOf(-0.5f, -0.5f, 0.0f, 0f, 1f,
-                            0.5f, -0.5f, 0.0f, 1f, 1f,
-                            0.5f, 0.5f, 0.0f, 1f, 0f,
-                            -0.5f, 0.5f, 0.0f, 0f, 0f)
-
-val indices = shortArrayOf(0, 1, 2, 0, 2, 3)
 
 const val vertexShaderCode = "attribute vec4 aPosition;" +
                             "attribute vec2 aTexCoord;" +
@@ -39,47 +31,69 @@ const val fragmentShaderCode = "precision mediump float;" +
 const val FLOAT_SIZE = 4
 const val SHORT_SIZE = 2
 
-class Fractal(initPos: FloatArray, initScale: FloatArray): Entity(), Drawable {
+class Fractal(size: Int): Entity(), Drawable {
 
+    lateinit var mVertices: FloatArray
+    lateinit var mIndices: ShortArray
+    private var mVertexBuffer: FloatBuffer
+    private var mIndexBuffer: ShortBuffer
     private val mModelMatrix = FloatArray(16)
 
     init {
-        //temp: caching model matrix using only translation for now (will need to integrate scaling and rotation)
-        pos = initPos
-        scale = initScale
+        when(size) {
+            1 -> {
+                mVertices = vertices1
+                mIndices = indices1
+            }
+            2 -> {
+                mVertices = vertices2
+                mIndices = indices2
+            }
+            4 -> {
+                mVertices = vertices4
+                mIndices = indices4
+            }
+        }
 
-        val scaleM = FloatArray(16)
-        Matrix.setIdentityM(scaleM, 0)
-        Matrix.scaleM(scaleM, 0, scale[0], scale[1], scale[2])
+        //put vertices and indices into buffer
+        mVertexBuffer = ByteBuffer.allocateDirect(mVertices.size * FLOAT_SIZE).run {
+            order(ByteOrder.nativeOrder())
+            asFloatBuffer().apply {
+                put(mVertices)
+                position(0)
+            }
+        }
 
-        val translationM = FloatArray(16)
-        Matrix.setIdentityM(translationM, 0)
-        Matrix.translateM(translationM, 0, pos[0], pos[1], pos[2])
-
-        Matrix.multiplyMM(mModelMatrix, 0, translationM, 0, scaleM, 0)
-    }
-
-    //put vertices and indices into buffer
-    private val mVertexBuffer: FloatBuffer = ByteBuffer.allocateDirect(vertices.size * FLOAT_SIZE).run {
-        order(ByteOrder.nativeOrder())
-        asFloatBuffer().apply {
-            put(vertices)
-            position(0)
+        mIndexBuffer = ByteBuffer.allocateDirect(mIndices.size * SHORT_SIZE).run {
+            order(ByteOrder.nativeOrder())
+            asShortBuffer().apply {
+                put(mIndices)
+                position(0)
+            }
         }
     }
 
-    private val mIndexBuffer: ShortBuffer = ByteBuffer.allocateDirect(indices.size * SHORT_SIZE).run {
-        order(ByteOrder.nativeOrder())
-        asShortBuffer().apply {
-            put(indices)
-            position(0)
-        }
-    }
 
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
 
 
     override fun draw(vpMatrix: FloatArray) {
+
+        val scaleM = FloatArray(16)
+        Matrix.setIdentityM(scaleM, 0)
+        Matrix.scaleM(scaleM, 0, scale[0], scale[1], scale[2])
+
+        val rotateM = FloatArray(16)
+        Matrix.setIdentityM(rotateM, 0)
+        Matrix.rotateM(rotateM, 0, angle[2], 0f, 0f, 1f)
+
+        val translationM = FloatArray(16)
+        Matrix.setIdentityM(translationM, 0)
+        Matrix.translateM(translationM, 0, pos[0], pos[1], pos[2])
+
+        val srMatrix = FloatArray(16)
+        Matrix.multiplyMM(srMatrix, 0, rotateM, 0, scaleM, 0)
+        Matrix.multiplyMM(mModelMatrix, 0, translationM, 0, srMatrix, 0)
 
         val mvpMatrix = FloatArray(16)
         Matrix.multiplyMM(mvpMatrix, 0, vpMatrix, 0, mModelMatrix, 0)
@@ -107,7 +121,7 @@ class Fractal(initPos: FloatArray, initScale: FloatArray): Entity(), Drawable {
             GLES20.glUniformMatrix4fv(it, 1, false, mvpMatrix, 0)
         }
 
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndices.size, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
 
         GLES20.glDisableVertexAttribArray(posAttrib)
         GLES20.glDisableVertexAttribArray(texCoordAttrib)

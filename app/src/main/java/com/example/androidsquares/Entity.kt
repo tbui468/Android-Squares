@@ -14,18 +14,18 @@ interface Drawable {
 
 open class Entity {
     var pos = floatArrayOf(0f, 0f, 0f)
-    var fromPos = floatArrayOf(0f, 0f, 0f)
-    var toPos = floatArrayOf(0f, 0f, 0f)
+    private var fromPos = floatArrayOf(0f, 0f, 0f)
+    private var toPos = floatArrayOf(0f, 0f, 0f)
 
     var scale = floatArrayOf(1f, 1f, 1f)
-    var fromScale = floatArrayOf(1f, 1f, 1f)
-    var toScale = floatArrayOf(1f, 1f, 1f)
+    private var fromScale = floatArrayOf(1f, 1f, 1f)
+    private var toScale = floatArrayOf(1f, 1f, 1f)
 
     var angle = floatArrayOf(0f, 0f, 0f)
-    var fromAngle = floatArrayOf(0f, 0f, 0f)
-    var toAngle = floatArrayOf(0f, 0f, 0f)
+    private var fromAngle = floatArrayOf(0f, 0f, 0f)
+    private var toAngle = floatArrayOf(0f, 0f, 0f)
 
-    fun moveTo(newPosition: FloatArray) {
+    fun moveTo(newPos: FloatArray) {
     }
     fun scaleTo(newScale: FloatArray) {
     }

@@ -14,8 +14,9 @@ import android.opengl.GLUtils
 
 class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
-    lateinit var fractal0: Fractal
     lateinit var fractal1: Fractal
+    lateinit var fractal2: Fractal
+    lateinit var fractal4: Fractal
     private val mProjectionMatrix = FloatArray(16)
     private val mViewMatrix = FloatArray(16)
     private val mContext = context
@@ -28,18 +29,32 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         mTextureHandle = loadTexture(mContext, R.drawable.fractal_colors)
 
-        fractal0 = Fractal(floatArrayOf(0f, -400f, 0f), floatArrayOf(500f, 500f, 1f))
-        fractal1 = Fractal(floatArrayOf(0f, 400f, 14f), floatArrayOf(500f, 500f, 1f))
+        fractal1 = Fractal(1)
+        fractal2 = Fractal(2)
+        fractal4 = Fractal(4)
+
+        fractal1.pos = floatArrayOf(0f, 400f, 0f)
+        fractal2.pos = floatArrayOf(0f, 0f, 0f)
+        fractal4.pos = floatArrayOf(0f, -400f, 0f)
+
+        fractal1.scale = floatArrayOf(100f, 100f, 1f)
+        fractal2.scale = floatArrayOf(100f, -100f, 1f)
+        fractal4.scale = floatArrayOf(-100f, 100f, 1f)
     }
+
     override fun onDrawFrame(unused: GL10) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
         val vpMatrix = FloatArray(16)
         Matrix.setLookAtM(mViewMatrix, 0, 0f, 0f, -3f, 0f, 0f, 0f, 0f, 1f, 0f)
         Matrix.multiplyMM(vpMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0)
 
-        fractal0.draw(vpMatrix)
+        fractal2.angle[2] += 1f
+
         fractal1.draw(vpMatrix)
+        fractal2.draw(vpMatrix)
+        fractal4.draw(vpMatrix)
     }
+
     override fun onSurfaceChanged(unused: GL10, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
 
