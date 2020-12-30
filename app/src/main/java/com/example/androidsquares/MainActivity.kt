@@ -1,12 +1,20 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //up texture size/change anti-aliasing so that there are no jaggies (and maybe add a thin border or put a small space between fractals)
+    //problem with depth testing and transparent textures
+        //bc of depth testing, if opaque quads are drawn behind a transparent quad, it won't pass the depth test
+        //if it's drawn before, then it will be drawn along with the transparent texture later
 
-    //get a cube up and animating (rotating on screen)
-
-    //implement a function to swap texture coords in a given fractal, square, or cube (this also helps test to see if cube really is animating correctly)
+        //options:
+            //need to order quads by z depth or draw opaque quads before all transparent ones - dont' like this idea
+            //or instead of having transparent textures, just don't have a quad there - this idea is better
+                //remove the vertex (5 floats) and the 6 indices associated with it
+                //could easily make a function to do this
+                //code this along with setting textures based on input elements string (or array)
 
     //animations of cubes, squares and fractals for transition between screens
+        //have cubes unfold into 6 squares surfaces
+        //have squares separate into 1x1 fractals
+        //merging them goes backwards
 
     //each element type can be associated with an array of texture coordinates
     //get Fractals, Faces, Cubes displayed and user able to transition between the three stages.  Get 8 cubes forming into Dali Cross/tesseract

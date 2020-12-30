@@ -53,6 +53,10 @@ class Fractal(size: Int): Entity(), Drawable {
                 mVertices = vertices4
                 mIndices = indices4
             }
+            else -> {
+                mVertices = verticesCube
+                mIndices = indicesCube
+            }
         }
 
         //put vertices and indices into buffer
@@ -85,7 +89,7 @@ class Fractal(size: Int): Entity(), Drawable {
 
         val rotateM = FloatArray(16)
         Matrix.setIdentityM(rotateM, 0)
-        Matrix.rotateM(rotateM, 0, angle[2], 0f, 0f, 1f)
+        Matrix.rotateM(rotateM, 0, angle[2], 0f, 1f, 2f)
 
         val translationM = FloatArray(16)
         Matrix.setIdentityM(translationM, 0)
