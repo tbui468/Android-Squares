@@ -7,9 +7,11 @@ import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import android.util.Log
 
 import android.opengl.Matrix
 import android.opengl.GLES20
+import kotlin.math.sqrt
 
 
 const val vertexShaderCode = "attribute vec4 aPosition;" +
@@ -30,48 +32,91 @@ const val fragmentShaderCode = "precision mediump float;" +
 
 const val FLOAT_SIZE = 4
 const val SHORT_SIZE = 2
+const val FLOATS_PER_QUAD = 4 * 5 //four vertices, and 5 floats per vertex
 
-class Fractal(size: Int): Entity(), Drawable {
+class Fractal(elements: Array<FractalType>): Entity(), Drawable {
 
-    lateinit var mVertices: FloatArray
-    lateinit var mIndices: ShortArray
+    val mIndexCount: Int
     private var mVertexBuffer: FloatBuffer
     private var mIndexBuffer: ShortBuffer
     private val mModelMatrix = FloatArray(16)
+    private val mSize: Int
 
     init {
-        when(size) {
+        val vertices: FloatArray
+        val indices: ShortArray
+
+        when(elements.size) {
             1 -> {
-                mVertices = vertices1
-                mIndices = indices1
-            }
-            2 -> {
-                mVertices = vertices2
-                mIndices = indices2
+                vertices = vertices1
+                indices = indices1
+                mSize = 1
             }
             4 -> {
-                mVertices = vertices4
-                mIndices = indices4
+                vertices = vertices2
+                indices = indices2
+                mSize = 2
+            }
+            16 -> {
+                vertices = vertices4
+                indices = indices4
+                mSize = 4
+            }
+            96 -> {
+                vertices = verticesCube
+                indices = indicesCube
+                mSize = 4 //per face
             }
             else -> {
-                mVertices = verticesCube
-                mIndices = indicesCube
+                //temp: this should be an assert false
+                vertices = vertices1
+                indices = indices1
+                mSize = 0
             }
         }
 
+
+        val emptyFractalCount = findEmptyFractalCount(elements)
+        val floatsToTrim = emptyFractalCount * FLOATS_PER_QUAD //four vertices per fractal, and 5 floats per vertex
+        val trimmedVertices = FloatArray(vertices.size - floatsToTrim)
+
+        var trimmedVerticesOffset = 0
+        //problem is I'm assuming everything is a 2d square - mSize doesn't work for cubes!
+        //instead, iterate through elements and find the row and column from that???  Still causes pro
+        var col: Int
+        var row: Int
+        elements.forEachIndexed { index, element ->
+            run {
+                col = index % mSize
+                row = index / mSize
+                if (element != FractalType.Empty) {
+                    setTexture(vertices, col, row, element)
+                    vertices.copyInto(trimmedVertices, trimmedVerticesOffset, (row * mSize + col) * FLOATS_PER_QUAD, (row * mSize + col + 1) * FLOATS_PER_QUAD)
+                    trimmedVerticesOffset += FLOATS_PER_QUAD
+                }
+            }
+        }
+
+        val trimmedIndices = ShortArray(indices.size - 6 * emptyFractalCount)
+        indices.copyInto(trimmedIndices, 0, 0, trimmedIndices.size)
+        mIndexCount = trimmedIndices.size
+
+        Log.d("index", "Size: " + mSize.toString())
+        Log.d("index", "Indices: " + mIndexCount.toString())
+
         //put vertices and indices into buffer
-        mVertexBuffer = ByteBuffer.allocateDirect(mVertices.size * FLOAT_SIZE).run {
+        mVertexBuffer = ByteBuffer.allocateDirect(trimmedVertices.size * FLOAT_SIZE).run {
             order(ByteOrder.nativeOrder())
             asFloatBuffer().apply {
-                put(mVertices)
+                put(trimmedVertices)
                 position(0)
             }
         }
 
-        mIndexBuffer = ByteBuffer.allocateDirect(mIndices.size * SHORT_SIZE).run {
+        mIndexBuffer = ByteBuffer.allocateDirect(trimmedIndices.size * SHORT_SIZE).run {
             order(ByteOrder.nativeOrder())
             asShortBuffer().apply {
-                put(mIndices)
+                put(trimmedIndices)
                 position(0)
             }
         }
@@ -79,6 +124,68 @@ class Fractal(size: Int): Entity(), Drawable {
 
 
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
+
+    private fun setTexture(vertices: FloatArray, col: Int, row: Int, type: FractalType) {
+        //need to jump 5 floats per vertex, and 4 vertices per quad depending on col/row
+        //texture coords start 3 floats in (after the three vertices)
+        val textureIndex = IntArray(4)
+        for(i in 0 until 4) {
+            textureIndex[i] = (row * mSize + col) * FLOATS_PER_QUAD + 3 + i * 5
+        }
+        when (type) {
+            FractalType.Red -> {
+                vertices[textureIndex[0]] = .5f
+                vertices[textureIndex[0] + 1] = .5f
+                vertices[textureIndex[1]] = 1f
+                vertices[textureIndex[1] + 1] = .5f
+                vertices[textureIndex[2]] = 1f
+                vertices[textureIndex[2] + 1] = 0f
+                vertices[textureIndex[3]] = .5f
+                vertices[textureIndex[3] + 1] = 0f
+            }
+            FractalType.Green -> {
+                vertices[textureIndex[0]] = 0f
+                vertices[textureIndex[0] + 1] = 1f
+                vertices[textureIndex[1]] = .5f
+                vertices[textureIndex[1] + 1] = 1f
+                vertices[textureIndex[2]] = .5f
+                vertices[textureIndex[2] + 1] = .5f
+                vertices[textureIndex[3]] = 0f
+                vertices[textureIndex[3] + 1] = .5f
+            }
+            FractalType.Blue -> {
+                vertices[textureIndex[0]] = .5f
+                vertices[textureIndex[0] + 1] = 1f
+                vertices[textureIndex[1]] = 1f
+                vertices[textureIndex[1] + 1] = 1f
+                vertices[textureIndex[2]] = 1f
+                vertices[textureIndex[2] + 1] = .5f
+                vertices[textureIndex[3]] = .5f
+                vertices[textureIndex[3] + 1] = .5f
+            }
+            FractalType.Normal -> {
+                vertices[textureIndex[0]] = 0f
+                vertices[textureIndex[0] + 1] = .5f
+                vertices[textureIndex[1]] = .5f
+                vertices[textureIndex[1] + 1] = .5f
+                vertices[textureIndex[2]] = .5f
+                vertices[textureIndex[2] + 1] = 0f
+                vertices[textureIndex[3]] = 0f
+                vertices[textureIndex[3] + 1] = 0f
+            }
+            FractalType.Empty -> {
+                //do nothing
+            }
+        }
+    }
+
+    private fun findEmptyFractalCount(elements: Array<FractalType>): Int {
+        var count = 0
+        for(element in elements) {
+            if(element == FractalType.Empty) count++
+        }
+        return count
+    }
 
 
     override fun draw(vpMatrix: FloatArray) {
@@ -125,7 +232,7 @@ class Fractal(size: Int): Entity(), Drawable {
             GLES20.glUniformMatrix4fv(it, 1, false, mvpMatrix, 0)
         }
 
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndices.size, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexCount, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
 
         GLES20.glDisableVertexAttribArray(posAttrib)
         GLES20.glDisableVertexAttribArray(texCoordAttrib)

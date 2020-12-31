@@ -22,19 +22,29 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private val mContext = context
 
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
-        GLES20.glClearColor(0.5f, 0.5f, .7f, 1f)
+        GLES20.glClearColor(0.0f, 0.167f, .212f, 1f)
         GLES20.glEnable(GLES20.GL_BLEND)
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)
         GLES20.glDepthFunc(GLES20.GL_LESS)
-        //GLES20.glDisable(GLES20.GL_CULL_FACE)
+        //GLES20.glEnable(GLES20.GL_CULL_FACE)
         //GLES20.glCullFace(GLES20.GL_BACK)
 
         mTextureHandle = loadTexture(mContext, R.drawable.fractal_colors)
 
-        fractal1 = Fractal(5)
-        fractal2 = Fractal(5) //setting it to 5 to make cube
-        fractal4 = Fractal(5)
+        val elements: Array<FractalType> = arrayOf(FractalType.Empty, FractalType.Red, FractalType.Green, FractalType.Blue)
+        val elementsSquare: Array<FractalType> = Array(16) {FractalType.Blue}
+        val elementsCube: Array<FractalType> = Array(96) {FractalType.Green}
+        for(i in 0 until 96) {
+            if(i % 5 == 0) elementsCube[i] = FractalType.Red
+            if(i % 7 == 0) elementsCube[i] = FractalType.Blue
+            if(i % 11 == 0) elementsCube[i] = FractalType.Normal
+            if(i % 3 == 0) elementsCube[i] = FractalType.Empty
+        }
+
+        fractal1 = Fractal(elements)
+        fractal2 = Fractal(elementsSquare) //setting it to 5 to make cube
+        fractal4 = Fractal(elementsCube)
 
         fractal1.pos = floatArrayOf(0f, 1f, .1f)
         fractal2.pos = floatArrayOf(0f, 0f, 0f)

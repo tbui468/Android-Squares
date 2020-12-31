@@ -2,6 +2,10 @@ package com.example.androidsquares
 
 import android.opengl.Matrix
 
+enum class FractalType {
+    Red, Blue, Green, Normal, Empty
+}
+
 //quads start at top left.  Left to right.  Top to bottom
 //sizes 1x1, 2x2 and 4x4.  Cubes will consist of 6 4x4s that are transformed into correct position
 
@@ -184,7 +188,6 @@ val verticesCube = FloatArray(64 * 6 * 5).also {
 
 
     Matrix.translateM(matrix1, 0, 0f, 0f, 2f)
-
 
     Matrix.translateM(matrix2, 0, 0f, 0f, -2f)
     Matrix.rotateM(matrix2, 0, 180f, 0f, 1f, 0f)
