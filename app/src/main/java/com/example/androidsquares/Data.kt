@@ -2,6 +2,8 @@ package com.example.androidsquares
 
 import android.opengl.Matrix
 
+data class CoordinatePair(val x: Float, val y: Float)
+
 enum class FractalType {
     Red, Blue, Green, Normal, Empty
 }

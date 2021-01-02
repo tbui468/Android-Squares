@@ -1,5 +1,9 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
+    //collision box is offset if cube is not directly on near plane
+        //should be able to take x,y,z,w of cube and multiply by projection, and then grab the projected x and y to do collision check
+        //view proj matrix isn't taking z into account...
+
     //abstract all code in fractal into shared class (make it a super class of Fractal, Square and Cube)
         //need to do this bc we want to destroy the cube on expansion, and create squares in the correct place (same with Squares and Fractals)
         //also, cubes, squares and fractals respond to different inputs, so we'll need different onTouch/etc functions

@@ -11,7 +11,6 @@ import android.util.Log
 
 import android.opengl.Matrix
 import android.opengl.GLES20
-import kotlin.math.sqrt
 
 
 const val vertexShaderCode = "attribute vec4 aPosition;" +
@@ -34,13 +33,15 @@ const val FLOAT_SIZE = 4
 const val SHORT_SIZE = 2
 const val FLOATS_PER_QUAD = 4 * 5 //four vertices, and 5 floats per vertex
 
-class Fractal(elements: Array<FractalType>): Entity(), Drawable {
+class Fractal(elements: Array<FractalType>, size: Int): Entity(size.toFloat(), size.toFloat()), Drawable {
+
+    var rotating: Boolean = true //temp: testing
 
     val mIndexCount: Int
     private var mVertexBuffer: FloatBuffer
     private var mIndexBuffer: ShortBuffer
     private val mModelMatrix = FloatArray(16)
-    private val mSize: Int
+    private val mSize: Int = size
 
     init {
         val vertices: FloatArray
@@ -50,28 +51,23 @@ class Fractal(elements: Array<FractalType>): Entity(), Drawable {
             1 -> {
                 vertices = vertices1
                 indices = indices1
-                mSize = 1
             }
             4 -> {
                 vertices = vertices2
                 indices = indices2
-                mSize = 2
             }
             16 -> {
                 vertices = vertices4
                 indices = indices4
-                mSize = 4
             }
             96 -> {
                 vertices = verticesCube
                 indices = indicesCube
-                mSize = 4 //per face
             }
             else -> {
                 //temp: this should be an assert false
                 vertices = vertices1
                 indices = indices1
-                mSize = 0
             }
         }
 
