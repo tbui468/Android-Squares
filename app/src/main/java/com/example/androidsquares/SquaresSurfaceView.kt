@@ -22,8 +22,15 @@ class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
             MotionEvent.ACTION_DOWN -> {
                 for(i in 0 until event.pointerCount) {
                     pair = screenToWorldCoords(event.getX(i), event.getY(i))
-                    if(renderer.cube0.pointCollision(pair.x, pair.y)) renderer.cube0.rotating = !renderer.cube0.rotating
-                    if(renderer.cube1.pointCollision(pair.x, pair.y)) renderer.cube1.rotating = !renderer.cube1.rotating
+                    if(renderer.mCubes[0].pointCollision(pair.x, pair.y)) {
+                        //renderer.cube0.rotating = !renderer.cube0.rotating
+                        renderer.mCamera.moveTo(floatArrayOf(renderer.mCubes[0].pos[0], renderer.mCubes[0].pos[1], -.5f))
+                    }else if(renderer.mCubes[1].pointCollision(pair.x, pair.y)) {
+                        //renderer.cube1.rotating = !renderer.cube1.rotating
+                        renderer.mCamera.moveTo(floatArrayOf(renderer.mCubes[1].pos[0], renderer.mCubes[1].pos[1], -.5f))
+                    }else {
+                        renderer.mCamera.moveTo(floatArrayOf(0f, 0f, -3f))
+                    }
                 }
             }
         }

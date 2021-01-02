@@ -1,63 +1,32 @@
-//Fractals are the smallest object user can interact with (along with larger Squares and Cubes)
-//all drawing from Cubes/Squares trickles down to the Fractal, which draws the basic quad
-
 package com.example.androidsquares
 
+import android.opengl.Matrix
+import android.opengl.GLES20
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import android.util.Log
 
-import android.opengl.Matrix
-import android.opengl.GLES20
-
-
-
-class Fractal(elements: Array<FractalType>, size: Int): Entity(floatArrayOf(0f, 0f, 0f), floatArrayOf(1f, 1f, 1f), floatArrayOf(size.toFloat(), size.toFloat())), Transformable {
-
-    val mIndexCount: Int
+class Cube(elements: Array<FractalType>, pos: FloatArray): Entity(pos, floatArrayOf(.075f, .075f, .075f), floatArrayOf(4f * .075f, 4f * .075f)), Transformable {
+    private var mSurfaceModels: Array<FloatArray> //6 surface models
+    private var mIndexCount: Int = 0
     private var mVertexBuffer: FloatBuffer
     private var mIndexBuffer: ShortBuffer
-    private val mModelMatrix = FloatArray(16)
-    private val mSize: Int = size
+    private val mModelMatrix = FloatArray(16) //cube model
+    private val mSize: Int = 4
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
 
     init {
-        val vertices: FloatArray
-        val indices: ShortArray
+        mSurfaceModels = initModels()
 
-        when(elements.size) {
-            1 -> {
-                vertices = vertices1
-                indices = indices1
-            }
-            4 -> {
-                vertices = vertices2
-                indices = indices2
-            }
-            16 -> {
-                vertices = vertices4
-                indices = indices4
-            }
-            96 -> {
-                vertices = verticesCube
-                indices = indicesCube
-            }
-            else -> {
-                //temp: this should be an assert false
-                vertices = vertices1
-                indices = indices1
-            }
-        }
+        val vertices = verticesCube
+        val indices = indicesCube
 
         val emptyFractalCount = findEmptyFractalCount(elements)
         val floatsToTrim = emptyFractalCount * FLOATS_PER_QUAD //four vertices per fractal, and 5 floats per vertex
         val trimmedVertices = FloatArray(vertices.size - floatsToTrim)
 
         var trimmedVerticesOffset = 0
-        //problem is I'm assuming everything is a 2d square - mSize doesn't work for cubes!
-        //instead, iterate through elements and find the row and column from that???  Still causes pro
         var col: Int
         var row: Int
         elements.forEachIndexed { index, element ->
@@ -75,9 +44,6 @@ class Fractal(elements: Array<FractalType>, size: Int): Entity(floatArrayOf(0f, 
         val trimmedIndices = ShortArray(indices.size - 6 * emptyFractalCount)
         indices.copyInto(trimmedIndices, 0, 0, trimmedIndices.size)
         mIndexCount = trimmedIndices.size
-
-        Log.d("index", "Size: " + mSize.toString())
-        Log.d("index", "Indices: " + mIndexCount.toString())
 
         //put vertices and indices into buffer
         mVertexBuffer = ByteBuffer.allocateDirect(trimmedVertices.size * FLOAT_SIZE).run {
@@ -98,8 +64,36 @@ class Fractal(elements: Array<FractalType>, size: Int): Entity(floatArrayOf(0f, 
     }
 
 
-    override fun draw(vpMatrix: FloatArray) {
 
+    private fun initModels(): Array<FloatArray> {
+        val models: Array<FloatArray> = arrayOf(FloatArray(16), FloatArray(16), FloatArray(16), FloatArray(16), FloatArray(16), FloatArray(16))
+        for(array in models) {
+            Matrix.setIdentityM(array, 0)
+        }
+
+        Matrix.translateM(models[0], 0, 0f, 0f, 2f)
+
+        Matrix.translateM(models[1], 0, 0f, 0f, -2f)
+        Matrix.rotateM(models[1], 0, 180f, 0f, 1f, 0f)
+
+        Matrix.translateM(models[2], 0, -2f, 0f, 0f)
+        Matrix.rotateM(models[2], 0, 270f, 0f, 1f, 0f)
+
+        Matrix.translateM(models[3], 0, 2f, 0f, 0f)
+        Matrix.rotateM(models[3], 0, 90f, 0f, 1f, 0f)
+
+        //bottom
+        Matrix.translateM(models[4], 0, 0f, -2f, 0f)
+        Matrix.rotateM(models[4], 0, 90f, 1f, 0f, 0f)
+
+        //top
+        Matrix.translateM(models[5], 0, 0f, 2f, 0f)
+        Matrix.rotateM(models[5], 0, 270f, 1f, 0f, 0f)
+        return models
+    }
+
+
+    override fun draw(vpMatrix: FloatArray) {
         val scaleM = FloatArray(16)
         Matrix.setIdentityM(scaleM, 0)
         Matrix.scaleM(scaleM, 0, scale[0], scale[1], scale[2])

@@ -4,6 +4,27 @@ import android.opengl.Matrix
 
 data class CoordinatePair(val x: Float, val y: Float)
 
+
+const val vertexShaderCode = "attribute vec4 aPosition;" +
+        "attribute vec2 aTexCoord;" +
+        "uniform mat4 uMVPMatrix;" +
+        "varying vec2 vTexCoord;" +
+        "void main() {" +
+        "   vTexCoord = aTexCoord;" +
+        "   gl_Position = uMVPMatrix * aPosition;" +
+        "}"
+
+const val fragmentShaderCode = "precision mediump float;" +
+        "uniform sampler2D uTexture;" +
+        "varying vec2 vTexCoord;" +
+        "void main() {" +
+        "   gl_FragColor = texture2D(uTexture, vTexCoord);" +
+        "}"
+
+const val FLOAT_SIZE = 4
+const val SHORT_SIZE = 2
+const val FLOATS_PER_QUAD = 4 * 5 //four vertices, and 5 floats per vertex
+
 enum class FractalType {
     Red, Blue, Green, Normal, Empty
 }

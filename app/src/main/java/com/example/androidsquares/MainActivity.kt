@@ -1,22 +1,25 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //collision box is offset if cube is not directly on near plane
-        //should be able to take x,y,z,w of cube and multiply by projection, and then grab the projected x and y to do collision check
-        //view proj matrix isn't taking z into account...
+    //make a function to unfold cube
+        //need to pass shader 6 different model matrices (the model matrices can be multiplied cpu side and then the vp matrix multiplied on gpu side)
+        //cube needs to track angle of each face
 
-    //abstract all code in fractal into shared class (make it a super class of Fractal, Square and Cube)
-        //need to do this bc we want to destroy the cube on expansion, and create squares in the correct place (same with Squares and Fractals)
-        //also, cubes, squares and fractals respond to different inputs, so we'll need different onTouch/etc functions
-        //this will simplify transformations too (since we also want to recreate most things after an animation is over)
+        //or make a cube shader that takes in array of model matrices (6 total that are pre-multiplied on cpu side)
+        //the shader can take in 3 attributes: vertex positions, texture coords and model matrix index
 
-    //animations of cubes, squares and fractals for transition between screens
-        //first, simple set onTouch for opening puzzles, and onHold for closing puzzles (and zooming out) - can do the pinch in pinch out later
-        //have cube oriented correctly (with square panes 2 and 3 centered) as default.  Can add animation to orient itself later
-        //have cubes unfold into 6 squares surfaces
-            //once unfolded, destroy cube and replace with 6 squares.  Then animate squares animating to final positions (slightly separated from other squares)
-        //have squares separate into <= 16 fractals.  OnOpen, destroy square and replace with fractals.  Animate fractals to final position
-        //merging them goes backwards - animate together.  OnAnimationEnd, destroy and replace with formed object
-        //idea: pinching with normal distance is for forming fractals, but a large (~ > 75% of screen height) is a go back to previous screen pinch
+        //or compose a cube from 6 different squares (this might make more sense).  It would also simplify the process of animating, since I wouldn't need to destroy it
+        //and I could use the same shader, just making the draw call 6 times per cube
+
+        //essentially, create a function that takes in square number (1-6), square edge for rotation, and angle of rotation
+            //square number is always the same
+            //square edge will be set (as long as the order of rotations is set, eg going from outer wings to inner two/cube)
+                //need to send three different model matrices to shader (rotation of four wings, rotation of inner two squares + four wings, and entire cube)
+            //angle of rotation is set by client
+
+        //animate using transformations going from edge square all the way to all squares (cube)
+        //animate and test the edges 'wings' first (the four outer squares)
+        //animate the inner two squares (along with the outer four)
+        //animate entire cube along with the 6 above
 
     //each element type can be associated with an array of texture coordinates
     //get Fractals, Faces, Cubes displayed and user able to transition between the three stages.  Get 8 cubes forming into Dali Cross/tesseract
