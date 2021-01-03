@@ -31,12 +31,15 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mTextureHandle = loadTexture(mContext, R.drawable.fractal_colors)
 
         val elementsSquare: Array<FractalType> = Array(16) {FractalType.Blue}
-        val elementsCube: Array<FractalType> = Array(96){FractalType.Green}
-        for(i in 0 until 96) {
-            if (i % 5 == 0) elementsCube[i] = FractalType.Red
-            if (i % 7 == 0) elementsCube[i] = FractalType.Blue
-            if (i % 11 == 0) elementsCube[i] = FractalType.Normal
-            if (i % 3 == 0) elementsCube[i] = FractalType.Empty
+        val elementsCube: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal}}
+
+        for(i in 0 until 16) {
+            for(j in 0 until 6) {
+                if (i % 5 == 0) elementsCube[j][i] = FractalType.Red
+                if (i % 7 == 0) elementsCube[j][i] = FractalType.Blue
+                if (i % 11 == 0) elementsCube[j][i] = FractalType.Normal
+                if (i % 3 == 0) elementsCube[j][i] = FractalType.Empty
+            }
         }
 
         mCubes = arrayOf(Cube(elementsCube, floatArrayOf(0f, 1f, 3f)), Cube(elementsCube, floatArrayOf(1f, .5f, 3f)))
@@ -61,6 +64,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
 
         for(cube in mCubes) {
+            cube.mParameter += .01f
             cube.angle[2] += .5f
             cube.draw(mVPMatrix)
         }

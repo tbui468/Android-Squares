@@ -40,10 +40,6 @@ class Fractal(elements: Array<FractalType>, size: Int): Entity(floatArrayOf(0f, 
                 vertices = vertices4
                 indices = indices4
             }
-            96 -> {
-                vertices = verticesCube
-                indices = indicesCube
-            }
             else -> {
                 //temp: this should be an assert false
                 vertices = vertices1

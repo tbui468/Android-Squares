@@ -7,24 +7,35 @@ import java.nio.ShortBuffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class Cube(elements: Array<FractalType>, pos: FloatArray): Entity(pos, floatArrayOf(.075f, .075f, .075f), floatArrayOf(4f * .075f, 4f * .075f)), Transformable {
-    private var mSurfaceModels: Array<FloatArray> //6 surface models
-    private var mIndexCount: Int = 0
-    private var mVertexBuffer: FloatBuffer
-    private var mIndexBuffer: ShortBuffer
+//we need to stagger rotations around axis for the bloom effect
+
+class Cube(elements: Array<Array<FractalType>>, pos: FloatArray): Entity(pos, floatArrayOf(.075f, .075f, .075f), floatArrayOf(4f * .075f, 4f * .075f)), Transformable {
+    var mParameter = 0f
+    private var mVertexBuffer: Array<FloatBuffer>
+    private var mIndexBuffer: Array<ShortBuffer>
     private val mModelMatrix = FloatArray(16) //cube model
     private val mSize: Int = 4
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
 
     init {
-        mSurfaceModels = initModels()
 
-        val vertices = verticesCube
-        val indices = indicesCube
+        mVertexBuffer = arrayOf(calculateVertexBuffer(elements[0]),
+                                calculateVertexBuffer(elements[1]),
+                                calculateVertexBuffer(elements[2]),
+                                calculateVertexBuffer(elements[3]),
+                                calculateVertexBuffer(elements[4]),
+                                calculateVertexBuffer(elements[5]))
+        mIndexBuffer = arrayOf(calculateIndexBuffer(elements[0]),
+                                calculateIndexBuffer(elements[1]),
+                                calculateIndexBuffer(elements[2]),
+                                calculateIndexBuffer(elements[3]),
+                                calculateIndexBuffer(elements[4]),
+                                calculateIndexBuffer(elements[5]))
+    }
 
-        val emptyFractalCount = findEmptyFractalCount(elements)
-        val floatsToTrim = emptyFractalCount * FLOATS_PER_QUAD //four vertices per fractal, and 5 floats per vertex
-        val trimmedVertices = FloatArray(vertices.size - floatsToTrim)
+    private fun calculateVertexBuffer(elements: Array<FractalType>): FloatBuffer {
+        val vertices = vertices4
+        val trimmedVertices = FloatArray(vertices.size - findEmptyFractalCount(elements) * FLOATS_PER_QUAD )
 
         var trimmedVerticesOffset = 0
         var col: Int
@@ -41,20 +52,23 @@ class Cube(elements: Array<FractalType>, pos: FloatArray): Entity(pos, floatArra
             }
         }
 
-        val trimmedIndices = ShortArray(indices.size - 6 * emptyFractalCount)
-        indices.copyInto(trimmedIndices, 0, 0, trimmedIndices.size)
-        mIndexCount = trimmedIndices.size
-
         //put vertices and indices into buffer
-        mVertexBuffer = ByteBuffer.allocateDirect(trimmedVertices.size * FLOAT_SIZE).run {
+        return ByteBuffer.allocateDirect(trimmedVertices.size * FLOAT_SIZE).run {
             order(ByteOrder.nativeOrder())
             asFloatBuffer().apply {
                 put(trimmedVertices)
                 position(0)
             }
         }
+    }
 
-        mIndexBuffer = ByteBuffer.allocateDirect(trimmedIndices.size * SHORT_SIZE).run {
+    private fun calculateIndexBuffer(elements: Array<FractalType>): ShortBuffer {
+        val indices = indices4
+
+        val trimmedIndices = ShortArray(indices.size - 6 * findEmptyFractalCount(elements))
+        indices.copyInto(trimmedIndices, 0, 0, trimmedIndices.size)
+
+        return ByteBuffer.allocateDirect(trimmedIndices.size * SHORT_SIZE).run {
             order(ByteOrder.nativeOrder())
             asShortBuffer().apply {
                 put(trimmedIndices)
@@ -65,33 +79,43 @@ class Cube(elements: Array<FractalType>, pos: FloatArray): Entity(pos, floatArra
 
 
 
-    private fun initModels(): Array<FloatArray> {
-        val models: Array<FloatArray> = arrayOf(FloatArray(16), FloatArray(16), FloatArray(16), FloatArray(16), FloatArray(16), FloatArray(16))
-        for(array in models) {
-            Matrix.setIdentityM(array, 0)
+    //make axes of rotation set for each surface for now - can add more options later
+    private fun getRotationMatrix(surface: Surface, angle: Float): FloatArray {
+        val rMatrix = FloatArray(16)
+        Matrix.setIdentityM(rMatrix, 0)
+        when(surface) {
+            Surface.Front -> {
+                //do nothing for now - keeping front face as anchor point for animation at the moment
+            }
+            Surface.Back -> { //note: top transformation needs to be applied to the back surface AFTER this one is applied
+                Matrix.translateM(rMatrix, 0, 0f, 2f, 2f)
+                Matrix.rotateM(rMatrix, 0, angle, -1f, 0f, 0f) //assign axis of rotation such that a positive angle means opening
+                Matrix.translateM(rMatrix, 0, 0f, -2f, -2f)
+            }
+            Surface.Left -> {
+                Matrix.translateM(rMatrix, 0, -2f, 0f, -2f)
+                Matrix.rotateM(rMatrix, 0, angle, 0f, -1f, 0f)
+                Matrix.translateM(rMatrix, 0, 2f, 0f, 2f)
+            }
+            Surface.Right -> {
+                Matrix.translateM(rMatrix, 0, 2f, 0f, -2f)
+                Matrix.rotateM(rMatrix, 0, angle, 0f, 1f, 0f)
+                Matrix.translateM(rMatrix, 0, -2f, 0f, 2f)
+            }
+            Surface.Top -> {
+                Matrix.translateM(rMatrix, 0, 0f, 2f, -2f)
+                Matrix.rotateM(rMatrix, 0, angle, -1f, 0f, 0f)
+                Matrix.translateM(rMatrix, 0, 0f, -2f, 2f)
+            }
+            Surface.Bottom -> {
+                Matrix.translateM(rMatrix, 0, 0f, -2f, -2f)
+                Matrix.rotateM(rMatrix, 0, angle, 1f, 0f, 0f)
+                Matrix.translateM(rMatrix, 0, 0f, 2f, 2f)
+            }
         }
 
-        Matrix.translateM(models[0], 0, 0f, 0f, 2f)
-
-        Matrix.translateM(models[1], 0, 0f, 0f, -2f)
-        Matrix.rotateM(models[1], 0, 180f, 0f, 1f, 0f)
-
-        Matrix.translateM(models[2], 0, -2f, 0f, 0f)
-        Matrix.rotateM(models[2], 0, 270f, 0f, 1f, 0f)
-
-        Matrix.translateM(models[3], 0, 2f, 0f, 0f)
-        Matrix.rotateM(models[3], 0, 90f, 0f, 1f, 0f)
-
-        //bottom
-        Matrix.translateM(models[4], 0, 0f, -2f, 0f)
-        Matrix.rotateM(models[4], 0, 90f, 1f, 0f, 0f)
-
-        //top
-        Matrix.translateM(models[5], 0, 0f, 2f, 0f)
-        Matrix.rotateM(models[5], 0, 270f, 1f, 0f, 0f)
-        return models
+        return rMatrix
     }
-
 
     override fun draw(vpMatrix: FloatArray) {
         val scaleM = FloatArray(16)
@@ -117,26 +141,45 @@ class Cube(elements: Array<FractalType>, pos: FloatArray): Entity(pos, floatArra
 
         val posAttrib = GLES20.glGetAttribLocation(mProgram, "aPosition")
         GLES20.glEnableVertexAttribArray(posAttrib)
-        mVertexBuffer.position(0)
-        GLES20.glVertexAttribPointer(posAttrib, 3, GLES20.GL_FLOAT, false, 5 * FLOAT_SIZE, mVertexBuffer)
-
         val texCoordAttrib = GLES20.glGetAttribLocation(mProgram, "aTexCoord")
         GLES20.glEnableVertexAttribArray(texCoordAttrib)
-        mVertexBuffer.position(3)
-        GLES20.glVertexAttribPointer(texCoordAttrib, 2, GLES20.GL_FLOAT, false, 5 * FLOAT_SIZE, mVertexBuffer)
+        val texUniformID = GLES20.glGetUniformLocation(mProgram, "uTexture")
+        val modelUniformID = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix")
 
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, SquaresRenderer.mTextureHandle)
 
-        GLES20.glGetUniformLocation(mProgram, "uTexture").also {
-            GLES20.glUniform1i(it, 0)
+        //rotate all the panes
+        val rotatedModels = Array(6){FloatArray(16)}
+        rotatedModels[Surface.Front.value] = surfaceModels[Surface.Front.value]
+        Matrix.multiplyMM(rotatedModels[Surface.Top.value], 0, getRotationMatrix(Surface.Top, 90f * mParameter), 0, surfaceModels[Surface.Top.value], 0)
+        Matrix.multiplyMM(rotatedModels[Surface.Bottom.value], 0, getRotationMatrix(Surface.Bottom, 90f * mParameter), 0, surfaceModels[Surface.Bottom.value], 0)
+        Matrix.multiplyMM(rotatedModels[Surface.Left.value], 0, getRotationMatrix(Surface.Left,  90f * mParameter), 0, surfaceModels[Surface.Left.value], 0)
+        Matrix.multiplyMM(rotatedModels[Surface.Right.value], 0, getRotationMatrix(Surface.Right, 90f * mParameter), 0, surfaceModels[Surface.Right.value], 0)
+
+        //back needs to be multiplied by model matrix of top rotation matrix too (after its own rotation on the surface model)
+        Matrix.multiplyMM(rotatedModels[Surface.Back.value], 0, getRotationMatrix(Surface.Back, 90f * mParameter), 0, surfaceModels[Surface.Back.value], 0)
+        Matrix.multiplyMM(rotatedModels[Surface.Back.value], 0, getRotationMatrix(Surface.Top, 90f * mParameter), 0, rotatedModels[Surface.Back.value], 0)
+
+        val finalMatrix = FloatArray(16) //this will be the matrix uniform
+
+        for(i in 0 until 6) {
+            mVertexBuffer[i].position(0)
+            GLES20.glVertexAttribPointer(posAttrib, 3, GLES20.GL_FLOAT, false, 5 * FLOAT_SIZE, mVertexBuffer[i])
+
+            mVertexBuffer[i].position(3)
+            GLES20.glVertexAttribPointer(texCoordAttrib, 2, GLES20.GL_FLOAT, false, 5 * FLOAT_SIZE, mVertexBuffer[i])
+
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, SquaresRenderer.mTextureHandle)
+
+            GLES20.glUniform1i(texUniformID, 0)
+
+            Matrix.multiplyMM(finalMatrix, 0, mvpMatrix, 0, rotatedModels[i], 0)
+
+            GLES20.glUniformMatrix4fv(modelUniformID, 1, false, finalMatrix, 0)
+
+            mIndexBuffer[i].position(0)
+            GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexBuffer[i].capacity(), GLES20.GL_UNSIGNED_SHORT, mIndexBuffer[i])
         }
-
-        GLES20.glGetUniformLocation(mProgram, "uMVPMatrix").also {
-            GLES20.glUniformMatrix4fv(it, 1, false, mvpMatrix, 0)
-        }
-
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexCount, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
 
         GLES20.glDisableVertexAttribArray(posAttrib)
         GLES20.glDisableVertexAttribArray(texCoordAttrib)

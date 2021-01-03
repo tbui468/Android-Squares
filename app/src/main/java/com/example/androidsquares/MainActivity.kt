@@ -1,5 +1,9 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
+    //complete function in cube::rotateSurfaceTo(...)
+        //rotation should occur from the four wings first, and work their way inwards
+        //for now, each axis of rotation is set based on closed cube
+
     //make a function to unfold cube
         //need to pass shader 6 different model matrices (the model matrices can be multiplied cpu side and then the vp matrix multiplied on gpu side)
         //cube needs to track angle of each face
