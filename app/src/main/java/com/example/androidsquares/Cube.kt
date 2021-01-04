@@ -9,8 +9,13 @@ import java.nio.ByteOrder
 
 //we need to stagger rotations around axis for the bloom effect
 
-class Cube(elements: Array<Array<FractalType>>, pos: FloatArray): Entity(pos, floatArrayOf(.075f, .075f, .075f), floatArrayOf(4f * .075f, 4f * .075f)), Transformable {
-    var mParameter = 0f
+class Cube(elements: Array<Array<FractalType>>, pos: FloatArray): Entity(pos, floatArrayOf(.075f, .075f, .075f), floatArrayOf(4f, 4f)), Transformable {
+    private var mSurfaceAngle = 0f
+    private var mToSurfaceAngle = 0f
+    private var mFromSurfaceAngle = 0f
+    private var mMargin = 0f
+    private var mToMargin = 0f
+    private var mFromMargin = 0f
     private var mVertexBuffer: Array<FloatBuffer>
     private var mIndexBuffer: Array<ShortBuffer>
     private val mModelMatrix = FloatArray(16) //cube model
@@ -77,40 +82,67 @@ class Cube(elements: Array<Array<FractalType>>, pos: FloatArray): Entity(pos, fl
         }
     }
 
+    override fun onUpdate(t: Float) {
+        mSurfaceAngle = mFromSurfaceAngle + (mToSurfaceAngle - mFromSurfaceAngle) * t
+        mMargin = mFromMargin + (mToMargin - mFromMargin) * t
+    }
 
+    override fun onAnimationEnd() {
+        super.onAnimationEnd()
+        mSurfaceAngle = mToSurfaceAngle
+        mMargin = mToMargin
+    }
+
+    fun isOpen(): Boolean {
+        return mSurfaceAngle > 80f
+    }
+
+    fun open() {
+        mToMargin = 1f
+        mFromMargin = mMargin
+        mFromSurfaceAngle = mSurfaceAngle
+        mToSurfaceAngle = 90f
+    }
+
+    fun close() {
+        mFromSurfaceAngle = mSurfaceAngle
+        mToSurfaceAngle = 0f
+        mFromMargin = mMargin
+        mToMargin = 0f
+    }
 
     //make axes of rotation set for each surface for now - can add more options later
-    private fun getRotationMatrix(surface: Surface, angle: Float): FloatArray {
+    private fun getRotationMatrix(surface: Surface, angle: Float, margin: Float): FloatArray {
         val rMatrix = FloatArray(16)
         Matrix.setIdentityM(rMatrix, 0)
         when(surface) {
             Surface.Front -> {
-                //do nothing for now - keeping front face as anchor point for animation at the moment
+                Matrix.translateM(rMatrix, 0, 0f, -.5f * margin, 0f)
             }
             Surface.Back -> { //note: top transformation needs to be applied to the back surface AFTER this one is applied
-                Matrix.translateM(rMatrix, 0, 0f, 2f, 2f)
-                Matrix.rotateM(rMatrix, 0, angle, -1f, 0f, 0f) //assign axis of rotation such that a positive angle means opening
-                Matrix.translateM(rMatrix, 0, 0f, -2f, -2f)
-            }
-            Surface.Left -> {
-                Matrix.translateM(rMatrix, 0, -2f, 0f, -2f)
-                Matrix.rotateM(rMatrix, 0, angle, 0f, -1f, 0f)
-                Matrix.translateM(rMatrix, 0, 2f, 0f, 2f)
-            }
-            Surface.Right -> {
-                Matrix.translateM(rMatrix, 0, 2f, 0f, -2f)
-                Matrix.rotateM(rMatrix, 0, angle, 0f, 1f, 0f)
-                Matrix.translateM(rMatrix, 0, -2f, 0f, 2f)
-            }
-            Surface.Top -> {
-                Matrix.translateM(rMatrix, 0, 0f, 2f, -2f)
-                Matrix.rotateM(rMatrix, 0, angle, -1f, 0f, 0f)
+                Matrix.translateM(rMatrix, 0, 0f, 2f, -2f - margin)
+                Matrix.rotateM(rMatrix, 0, angle, 1f, 0f, 0f) //assign axis of rotation such that a positive angle means opening
                 Matrix.translateM(rMatrix, 0, 0f, -2f, 2f)
             }
-            Surface.Bottom -> {
-                Matrix.translateM(rMatrix, 0, 0f, -2f, -2f)
+            Surface.Left -> {
+                Matrix.translateM(rMatrix, 0, -2f - margin, 2f, 0f)
+                Matrix.rotateM(rMatrix, 0, angle, 0f, 0f, -1f)
+                Matrix.translateM(rMatrix, 0, 2f, -2f, 0f)
+            }
+            Surface.Right -> {
+                Matrix.translateM(rMatrix, 0, 2f + margin, -.5f* margin, 2f)
+                Matrix.rotateM(rMatrix, 0, angle, 0f, -1f, 0f)
+                Matrix.translateM(rMatrix, 0, -2f, 0f, -2f)
+            }
+            Surface.Top -> {
+                Matrix.translateM(rMatrix, 0, 0f, 2f + .5f * margin, 2f)
                 Matrix.rotateM(rMatrix, 0, angle, 1f, 0f, 0f)
-                Matrix.translateM(rMatrix, 0, 0f, 2f, 2f)
+                Matrix.translateM(rMatrix, 0, 0f, -2f, -2f)
+            }
+            Surface.Bottom -> {
+                Matrix.translateM(rMatrix, 0, 0f, -2f - margin * 1.5f, 2f)
+                Matrix.rotateM(rMatrix, 0, angle, -1f, 0f, 0f)
+                Matrix.translateM(rMatrix, 0, 0f, 2f, -2f)
             }
         }
 
@@ -149,15 +181,17 @@ class Cube(elements: Array<Array<FractalType>>, pos: FloatArray): Entity(pos, fl
 
         //rotate all the panes
         val rotatedModels = Array(6){FloatArray(16)}
-        rotatedModels[Surface.Front.value] = surfaceModels[Surface.Front.value]
-        Matrix.multiplyMM(rotatedModels[Surface.Top.value], 0, getRotationMatrix(Surface.Top, 90f * mParameter), 0, surfaceModels[Surface.Top.value], 0)
-        Matrix.multiplyMM(rotatedModels[Surface.Bottom.value], 0, getRotationMatrix(Surface.Bottom, 90f * mParameter), 0, surfaceModels[Surface.Bottom.value], 0)
-        Matrix.multiplyMM(rotatedModels[Surface.Left.value], 0, getRotationMatrix(Surface.Left,  90f * mParameter), 0, surfaceModels[Surface.Left.value], 0)
-        Matrix.multiplyMM(rotatedModels[Surface.Right.value], 0, getRotationMatrix(Surface.Right, 90f * mParameter), 0, surfaceModels[Surface.Right.value], 0)
+        Matrix.multiplyMM(rotatedModels[Surface.Front.value], 0, getRotationMatrix(Surface.Front, mSurfaceAngle, mMargin), 0, surfaceModels[Surface.Front.value], 0)
+        Matrix.multiplyMM(rotatedModels[Surface.Top.value], 0, getRotationMatrix(Surface.Top, mSurfaceAngle, mMargin), 0, surfaceModels[Surface.Top.value], 0)
+        Matrix.multiplyMM(rotatedModels[Surface.Bottom.value], 0, getRotationMatrix(Surface.Bottom, mSurfaceAngle, mMargin), 0, surfaceModels[Surface.Bottom.value], 0)
+        Matrix.multiplyMM(rotatedModels[Surface.Right.value], 0, getRotationMatrix(Surface.Right, mSurfaceAngle, mMargin), 0, surfaceModels[Surface.Right.value], 0)
 
         //back needs to be multiplied by model matrix of top rotation matrix too (after its own rotation on the surface model)
-        Matrix.multiplyMM(rotatedModels[Surface.Back.value], 0, getRotationMatrix(Surface.Back, 90f * mParameter), 0, surfaceModels[Surface.Back.value], 0)
-        Matrix.multiplyMM(rotatedModels[Surface.Back.value], 0, getRotationMatrix(Surface.Top, 90f * mParameter), 0, rotatedModels[Surface.Back.value], 0)
+        Matrix.multiplyMM(rotatedModels[Surface.Left.value], 0, getRotationMatrix(Surface.Left,  mSurfaceAngle, mMargin), 0, surfaceModels[Surface.Left.value], 0)
+        Matrix.multiplyMM(rotatedModels[Surface.Left.value], 0, getRotationMatrix(Surface.Top, mSurfaceAngle, mMargin), 0, rotatedModels[Surface.Left.value], 0)
+
+        Matrix.multiplyMM(rotatedModels[Surface.Back.value], 0, getRotationMatrix(Surface.Back, mSurfaceAngle, mMargin), 0, surfaceModels[Surface.Back.value], 0)
+        Matrix.multiplyMM(rotatedModels[Surface.Back.value], 0, getRotationMatrix(Surface.Top, mSurfaceAngle, mMargin), 0, rotatedModels[Surface.Back.value], 0)
 
         val finalMatrix = FloatArray(16) //this will be the matrix uniform
 

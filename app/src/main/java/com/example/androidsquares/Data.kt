@@ -181,19 +181,20 @@ val indices4 = shortArrayOf(0, 1, 2, 0, 2, 3,
 val surfaceModels = Array(6){FloatArray(16)}.also {
     it[Surface.Front.value] = FloatArray(16).also { matrix ->
         Matrix.setIdentityM(matrix, 0)
-        Matrix.translateM(matrix, 0, 0f, 0f, -2f)
-        Matrix.rotateM(matrix, 0, 180f, 0f, 1f, 0f)
+        Matrix.translateM(matrix, 0, 0f, 0f, 2f)
     }
 
     it[Surface.Back.value] = FloatArray(16).also { matrix ->
         Matrix.setIdentityM(matrix, 0)
-        Matrix.translateM(matrix, 0, 0f, 0f, 2f)
+        Matrix.translateM(matrix, 0, 0f, 0f, -2f)
+        Matrix.rotateM(matrix, 0, 180f, 1f, 0f, 0f)
     }
 
     it[Surface.Left.value] = FloatArray(16).also { matrix ->
         Matrix.setIdentityM(matrix, 0)
         Matrix.translateM(matrix, 0, -2f, 0f, 0f)
-        Matrix.rotateM(matrix, 0, 270f, 0f, 1f, 0f)
+        Matrix.rotateM(matrix, 0, -90f, 1f, 0f, 0f)
+        Matrix.rotateM(matrix, 0, -90f, 0f, 1f, 0f)
     }
 
     it[Surface.Right.value] = FloatArray(16).also { matrix ->
@@ -211,7 +212,7 @@ val surfaceModels = Array(6){FloatArray(16)}.also {
     it[Surface.Top.value] = FloatArray(16).also { matrix ->
         Matrix.setIdentityM(matrix, 0)
         Matrix.translateM(matrix, 0, 0f, 2f, 0f)
-        Matrix.rotateM(matrix, 0, 270f, 1f, 0f, 0f)
+        Matrix.rotateM(matrix, 0, -90f, 1f, 0f, 0f)
     }
 }
 

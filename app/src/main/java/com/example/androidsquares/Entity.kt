@@ -65,44 +65,47 @@ interface Transformable {
     }
 }
 
-open class Entity(var pos: FloatArray, scale: FloatArray, var collisionBox: FloatArray) {
-    private var animationT = 0f
-    private var fromPos = floatArrayOf(0f, 0f, 0f)
-    private var toPos = floatArrayOf(0f, 0f, 0f)
+open class Entity(var pos: FloatArray, scale: FloatArray, var objectSize: FloatArray) {
+    private var fromPos = pos
+    private var toPos = pos
+
+    var collisionBox = floatArrayOf(scale[0] * objectSize[0] * 1.4f, scale[1] * objectSize[1] * 1.4f)
 
     var scale = scale
         set(newScale) {
             field = newScale
-            collisionBox[0] *= (newScale[0] * 1.4f)
-            collisionBox[1] *= (newScale[1] * 1.4f)
+            collisionBox = floatArrayOf(newScale[0] * objectSize[0] * 1.4f, newScale[1] * objectSize[1] * 1.4f)
         }
 
-    private var fromScale = floatArrayOf(1f, 1f, 1f)
-    private var toScale = floatArrayOf(1f, 1f, 1f)
+
+    private var fromScale = scale
+    private var toScale = scale
 
     var angle = floatArrayOf(0f, 0f, 0f)
     private var fromAngle = floatArrayOf(0f, 0f, 0f)
     private var toAngle = floatArrayOf(0f, 0f, 0f)
 
-    open fun onUpdate() {
-        if(animationT < 1f) {
-            animationT += 0.01f
-            if(animationT < 1f) {
-                pos[0] = fromPos[0] + (toPos[0] - fromPos[0]) * animationT
-                pos[1] = fromPos[1] + (toPos[1] - fromPos[1]) * animationT
-                pos[2] = fromPos[2] + (toPos[2] - fromPos[2]) * animationT
-            }
-        }
+    open fun onUpdate(t: Float) {
+        pos = floatArrayOf(fromPos[0] + (toPos[0] - fromPos[0]) * t, fromPos[1] + (toPos[1] - fromPos[1]) * t, fromPos[2] + (toPos[2] - fromPos[2]) * t)
+    }
+
+    open fun onAnimationEnd() {
+        pos = toPos
+        scale = toScale
+        angle = toAngle
     }
 
     open fun moveTo(newPos: FloatArray) {
         fromPos = pos
         toPos = newPos
-        animationT = 0f
     }
     fun scaleTo(newScale: FloatArray) {
+        fromScale = scale
+        toScale = newScale
     }
     fun rotateTo(newAngle: FloatArray) {
+        fromAngle = angle
+        toAngle = newAngle
     }
     fun pointCollision(mouseX: Float, mouseY: Float): Boolean {
         //project onto screen

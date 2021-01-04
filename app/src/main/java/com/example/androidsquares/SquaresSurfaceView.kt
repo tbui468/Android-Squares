@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.MotionEvent
 
 import android.opengl.GLSurfaceView
-import android.util.Log
 
 class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
     private val renderer: SquaresRenderer
@@ -22,15 +21,28 @@ class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
             MotionEvent.ACTION_DOWN -> {
                 for(i in 0 until event.pointerCount) {
                     pair = screenToWorldCoords(event.getX(i), event.getY(i))
-                    if(renderer.mCubes[0].pointCollision(pair.x, pair.y)) {
-                        //renderer.cube0.rotating = !renderer.cube0.rotating
-                        renderer.mCamera.moveTo(floatArrayOf(renderer.mCubes[0].pos[0], renderer.mCubes[0].pos[1], -.5f))
-                    }else if(renderer.mCubes[1].pointCollision(pair.x, pair.y)) {
-                        //renderer.cube1.rotating = !renderer.cube1.rotating
-                        renderer.mCamera.moveTo(floatArrayOf(renderer.mCubes[1].pos[0], renderer.mCubes[1].pos[1], -.5f))
-                    }else {
-                        renderer.mCamera.moveTo(floatArrayOf(0f, 0f, -3f))
+
+                    //check cubes
+                    for(cube in renderer.mCubes) {
+                        if(cube.pointCollision(pair.x, pair.y)) {
+                            renderer.openCubePuzzle(cube)
+                            return true
+                        }
                     }
+
+                    //should only call this if square puzzle isn't open
+                    renderer.closeCubePuzzle()
+/*
+
+                    //check squares
+                    for (square in renderer.mSquares) {
+                        if (square.pointCollision(pair.x, pair.y)) {
+                            renderer.openSquarePuzzle(square)
+                            return true
+                        }
+                    }
+
+                    renderer.closeSquarePuzzle()*/
                 }
             }
         }

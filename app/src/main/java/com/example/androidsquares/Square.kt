@@ -8,7 +8,7 @@ import java.nio.ShortBuffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class Square(elements: Array<FractalType>, pos: FloatArray) : Entity(pos, floatArrayOf(.1f, .1f, .1f), floatArrayOf(4f * .1f, 4f * .1f)), Transformable {
+class Square(elements: Array<FractalType>, pos: FloatArray) : Entity(pos, floatArrayOf(.075f, .075f, .075f), floatArrayOf(4f, 4f)), Transformable {
     private val mIndexCount: Int
     private var mVertexBuffer: FloatBuffer
     private var mIndexBuffer: ShortBuffer
@@ -60,7 +60,6 @@ class Square(elements: Array<FractalType>, pos: FloatArray) : Entity(pos, floatA
             }
         }
     }
-
 
 
     override fun draw(vpMatrix: FloatArray) {
