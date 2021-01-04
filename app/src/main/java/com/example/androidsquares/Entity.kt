@@ -69,12 +69,12 @@ open class Entity(var pos: FloatArray, scale: FloatArray, var objectSize: FloatA
     private var fromPos = pos
     private var toPos = pos
 
-    var collisionBox = floatArrayOf(scale[0] * objectSize[0] * 1.4f, scale[1] * objectSize[1] * 1.4f)
+    var collisionBox = floatArrayOf(scale[0] * objectSize[0], scale[1] * objectSize[1])
 
     var scale = scale
         set(newScale) {
             field = newScale
-            collisionBox = floatArrayOf(newScale[0] * objectSize[0] * 1.4f, newScale[1] * objectSize[1] * 1.4f)
+            collisionBox = floatArrayOf(newScale[0] * objectSize[0], newScale[1] * objectSize[1])
         }
 
 

@@ -25,24 +25,30 @@ class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
                     //check cubes
                     for(cube in renderer.mCubes) {
                         if(cube.pointCollision(pair.x, pair.y)) {
-                            renderer.openCubePuzzle(cube)
+                            renderer.openCube(cube)
                             return true
                         }
                     }
-
-                    //should only call this if square puzzle isn't open
-                    renderer.closeCubePuzzle()
-/*
 
                     //check squares
                     for (square in renderer.mSquares) {
                         if (square.pointCollision(pair.x, pair.y)) {
-                            renderer.openSquarePuzzle(square)
+                            renderer.mOpenSquareFlag = true
+                            renderer.mOpenSquareIndex = square.mIndex
                             return true
                         }
                     }
 
-                    renderer.closeSquarePuzzle()*/
+                    if(renderer.mOpenSquareIndex != -1) {
+                        renderer.mCloseSquareFlag = true
+                        return true
+                    }
+
+                    if(renderer.mOpenCubeIndex != -1) {
+                        renderer.mCloseCubeFlag = true
+                        return true
+                    }
+
                 }
             }
         }

@@ -3,6 +3,7 @@ package com.example.androidsquares
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
+import android.os.SystemClock
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.Bitmap
@@ -12,14 +13,29 @@ import android.opengl.GLES20
 import android.opengl.Matrix
 import android.opengl.GLUtils
 
+import kotlin.math.exp
+
+//temp: move to Utility.kt
+fun sigmoid(t: Float): Float {
+    return 1f / (1f + exp(-15f * (t - .5f)))
+}
+
 class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
-    var mAnimationParameter = 0f //main animation timer
-    lateinit var mCubes: MutableList<Cube>
-    lateinit var mSquares: MutableList<Square>
+    var mAnimationParameter = 1f //main animation timer
+    var mCubes = mutableListOf<Cube>()
+    var mSquares = mutableListOf<Square>()
+    var mFractals = mutableListOf<Fractal>()
     lateinit var mCamera: Camera
     private val mProjectionMatrix = FloatArray(16)
     private val mViewMatrix = FloatArray(16)
+    private var mCurrentTime: Long = 0
+    private var mPreviousTime: Long = 0
     private val mContext = context
+    var mCloseCubeFlag = false //temp: should create command queue that surfaceview can add commands to
+    var mOpenSquareFlag = false
+    var mCloseSquareFlag = false
+    var mOpenCubeIndex: Int = -1
+    var mOpenSquareIndex: Int = -1
 
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
         GLES20.glClearColor(0.0f, 0.167f, .212f, 1f)
@@ -32,120 +48,152 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         mTextureHandle = loadTexture(mContext, R.drawable.fractal_colors)
 
-        val elementsSquare: Array<FractalType> = Array(16) {FractalType.Blue}
-        val elementsCube: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal}}
 
-        elementsCube[Surface.Front.value] = Array(16){FractalType.Normal}
-        elementsCube[Surface.Back.value] = Array(16){FractalType.Red}
-
-        for(i in 0 until 16) {
-            for(j in 2 until 6) {
-                if (i % 7 == 0) elementsCube[j][i] = FractalType.Blue
-                if (i % 11 == 0) elementsCube[j][i] = FractalType.Green
-                if (i % 5 == 0) elementsCube[j][i] = FractalType.Empty
-                if (i == 0) elementsCube[j][i] = FractalType.Red //mark top left red as reference
-            }
+        for(i in cubeLocations.indices) {
+            mCubes.add(Cube(cubeData0, i, false))
         }
-
-        mCubes = mutableListOf(Cube(elementsCube, floatArrayOf(0f, 1.5f, 0f)), Cube(elementsCube, floatArrayOf(1f, .5f, 0f)),
-                                Cube(elementsCube, floatArrayOf(0f, -1.5f, 0f)), Cube(elementsCube, floatArrayOf(-1f, 0f, 0f)),
-                                Cube(elementsCube, floatArrayOf(0f, 0f, 0f)))
-        mSquares = mutableListOf(Square(elementsSquare, floatArrayOf(0f, -1f, 0f)), Square(elementsSquare, floatArrayOf(1f, 0f, 0f)))
 
         mCamera = Camera(floatArrayOf(0f, 0f, 3f))
-        mCamera.moveTo(floatArrayOf(0f, 0f, 6f))
+        mCamera.moveTo(floatArrayOf(0f, 0f, 15f))
     }
 
-    fun openSquarePuzzle(square: Square) {
-        //destroy given square and replace with fractals at that location
-        //animate fractals moving to final location
-        mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 3.5f))
-        mAnimationParameter = 0f
-    }
 
-    fun closeSquarePuzzle() {
-        //merge all fractals
-        //destroy fractals on animation end and create square in its place
-        val cube = getOpenCube()
-        if(cube != null) openCubePuzzle(cube)
-        else closeCubePuzzle()
-        mAnimationParameter = 0f
-    }
-
-    fun getOpenCube(): Cube? {
-        for(cube in mCubes) {
-            if(cube.isOpen()) return cube
-        }
-        return null
-    }
-
-    fun openCubePuzzle(cube: Cube) {
+    fun openCube(cube: Cube) {
         mAnimationParameter = 0f
         for(c in mCubes) c.close()
         cube.open()
-        mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] * cube.objectSize[1] / 2f, 3.3f)) //center camera on unfolded front/top surface of cubes
+        mOpenCubeIndex = cube.mIndex
+        mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] * cube.objectSize[1] / 2f, 10f)) //center camera on unfolded front/top surface of cubes
     }
 
-    //end of cube opening animation - this needs to be queued
-    private fun onCubePuzzleOpened(cube: Cube) {
-        /*
-        mSquares.add(cube.spawnSquare(Surface.Top))
-        mSquares.add(cube.spawnSquare(Surface.Bottom))
-        mSquares.add(cube.spawnSquare(Surface.Left))
-        mSquares.add(cube.spawnSquare(Surface.Right))
-        mSquares.add(cube.spawnSquare(Surface.Front))
-        mSquares.add(cube.spawnSquare(Surface.Back))*/
-        mCubes.remove(cube)
+    private fun closeCube(cubeIndex: Int) {
         mAnimationParameter = 0f
-    }
-
-    fun closeCubePuzzle() {
         for(c in mCubes) {
             c.close()
         }
-        mCamera.moveTo(floatArrayOf(0f, 0f, 6f))
-        mAnimationParameter = 0f
+        mSquares.clear()
+
+        val newCube = Cube(cubeData0, cubeIndex, true)
+        newCube.close()
+        mCubes.add(newCube)
+
+        mCamera.moveTo(floatArrayOf(0f, 0f, 15f))
     }
+
+    private fun openSquare(squareIndex: Int) {
+        mAnimationParameter = 0f
+        var openSquare: Square? = null
+        for(square in mSquares) {
+            if(square.mIndex == squareIndex) openSquare = square
+        }
+        if(openSquare != null) {
+            mCamera.moveTo(floatArrayOf(openSquare.pos[0], openSquare.pos[1], 5f))
+            mFractals = openSquare.spawnFractals(cubeData0[squareIndex])
+            mSquares.remove(openSquare)
+        }
+        //animate fractals to final location
+        //do any fancy camera stuff necessary
+    }
+
+    private fun closeSquare(squareIndex: Int) {
+        mAnimationParameter = 0f
+        //animate all fractals inward
+        //in onAnimationEnd(), destroy all fractals and create Square in its place
+        //do any fancy camera stuff necessary
+    }
+
 
     private fun onAnimationEnd() {
         for(square in mSquares) {
             square.onAnimationEnd()
         }
 
+        var openCube: Cube? = null
         for(cube in mCubes) {
-            if(cube.isOpen()) {
-                //spawn 6 squares at correct locations
-                //destroy self from mCubes lists
+            if(cube.mIndex == mOpenCubeIndex) {
+                mSquares = cube.spawnSquares(cubeData0) //temp: should look up cube index and find proper data with given index
+                openCube = cube
             }else {
                 cube.onAnimationEnd()
             }
         }
+
+        if(openCube != null)
+            mCubes.remove(openCube)
     }
 
     override fun onDrawFrame(unused: GL10) {
+
+        //temp: should use command queue for surfaceview to queue commands instead of boolean flags for all this stuff
+        if(mAnimationParameter >= 1f) {
+            if (mCloseCubeFlag) {
+                closeCube(mOpenCubeIndex)
+                mCloseCubeFlag = false
+                mOpenCubeIndex = -1
+            }
+
+            if(mOpenSquareFlag) {
+                openSquare(mOpenSquareIndex)
+                mOpenSquareFlag = false
+            }
+
+            if(mCloseSquareFlag) {
+                closeSquare(mOpenSquareIndex)
+                mCloseSquareFlag = false
+                mOpenSquareIndex = -1
+            }
+        }
+
+        ////////////////////////////setup///////////////////////////////////////////
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT)
 
+        //delta time
+        mPreviousTime = mCurrentTime
+        mCurrentTime = SystemClock.uptimeMillis()
+
         if(mAnimationParameter < 1f) {
-            mAnimationParameter += 0.025f //todo: scale by deltatime
+            mAnimationParameter += 0.001f * (mCurrentTime - mPreviousTime).toInt() //delta time
             if(mAnimationParameter >= 1f) {
                 onAnimationEnd()
             }
         }
 
-        mCamera.onUpdate(mAnimationParameter)
+
+
+        val sigmoid = sigmoid(mAnimationParameter)
+
+        ////////////////////////////////////////////update////////////////////////////////
+
+        mCamera.onUpdate(sigmoid)
+
+        for(fractal in mFractals) {
+            fractal.onUpdate(sigmoid)
+        }
+
+        for(square in mSquares) {
+            square.onUpdate(sigmoid)
+        }
+
+        for(cube in mCubes) {
+            cube.onUpdate(sigmoid)
+        }
+
+
 
         Matrix.setLookAtM(mViewMatrix, 0, mCamera.pos[0], mCamera.pos[1], mCamera.pos[2], mCamera.pos[0], mCamera.pos[1], 0f, 0f, 1f, 0f)
         Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0)
 
-/*
+        /////////////////////////////////////draw/////////////////////////////////////
+        for(fractal in mFractals) {
+            fractal.draw(mVPMatrix)
+        }
+
         for(square in mSquares) {
-            square.angle[2] += .5f
             square.draw(mVPMatrix)
-        }*/
+        }
 
         for(cube in mCubes) {
-            cube.onUpdate(mAnimationParameter)
             cube.draw(mVPMatrix)
         }
     }
@@ -156,7 +204,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val ratio = width.toFloat() / height
 
         //Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 7f) //allow depth up to 100f away from camera
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 7f) //allow depth up to 100f away from camera
+        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 23f) //allow depth up to 100f away from camera
     }
 
     private fun loadTexture(context: Context, resourceID: Int): Int {

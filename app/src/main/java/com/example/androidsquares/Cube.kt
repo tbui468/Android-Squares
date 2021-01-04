@@ -9,7 +9,7 @@ import java.nio.ByteOrder
 
 //we need to stagger rotations around axis for the bloom effect
 
-class Cube(elements: Array<Array<FractalType>>, pos: FloatArray): Entity(pos, floatArrayOf(.075f, .075f, .075f), floatArrayOf(4f, 4f)), Transformable {
+class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Entity(cubeLocations[index], floatArrayOf(.25f, .25f, .25f), floatArrayOf(4f, 4f)), Transformable {
     private var mSurfaceAngle = 0f
     private var mToSurfaceAngle = 0f
     private var mFromSurfaceAngle = 0f
@@ -20,9 +20,19 @@ class Cube(elements: Array<Array<FractalType>>, pos: FloatArray): Entity(pos, fl
     private var mIndexBuffer: Array<ShortBuffer>
     private val mModelMatrix = FloatArray(16) //cube model
     private val mSize: Int = 4
+    val mIndex = index
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
 
     init {
+
+        if(open) {
+            mSurfaceAngle = 90f
+            mToSurfaceAngle = 90f
+            mFromSurfaceAngle = 90f
+            mMargin = 1f
+            mToMargin = 1f
+            mFromMargin = 1f
+        }
 
         mVertexBuffer = arrayOf(calculateVertexBuffer(elements[0]),
                                 calculateVertexBuffer(elements[1]),
@@ -82,7 +92,23 @@ class Cube(elements: Array<Array<FractalType>>, pos: FloatArray): Entity(pos, fl
         }
     }
 
+    //these should correspond to final locations of surfaces on opened cubed
+    //just hard coding it for now
+    //margin should always be 1
+    fun spawnSquares(elements: Array<Array<FractalType>>): MutableList<Square>{
+        val cubeDim = scale[0] * objectSize[0]
+        val zPos = pos[2] + cubeDim / 2f
+        val margin = 1f
+        return mutableListOf(Square(elements[Surface.Front.value], floatArrayOf(pos[0], pos[1] - .5f * margin * scale[0], zPos), Surface.Front.value),
+                            Square(elements[Surface.Back.value], floatArrayOf(pos[0], pos[1] + 2 * cubeDim + 1.5f * margin * scale[0], zPos), Surface.Back.value),
+                            Square(elements[Surface.Left.value], floatArrayOf(pos[0] - cubeDim - margin * scale[0], pos[1] + cubeDim + .5f * margin * scale[0], zPos), Surface.Left.value),
+                            Square(elements[Surface.Right.value], floatArrayOf(pos[0] + cubeDim + margin * scale[0], pos[1] - .5f * margin * scale[0], zPos), Surface.Right.value),
+                            Square(elements[Surface.Top.value], floatArrayOf(pos[0], pos[1] + cubeDim + .5f * margin * scale[0], zPos), Surface.Top.value),
+                            Square(elements[Surface.Bottom.value], floatArrayOf(pos[0], pos[1] - cubeDim - 1.5f * margin * scale[0], zPos), Surface.Bottom.value))
+    }
+
     override fun onUpdate(t: Float) {
+        super.onUpdate(t)
         mSurfaceAngle = mFromSurfaceAngle + (mToSurfaceAngle - mFromSurfaceAngle) * t
         mMargin = mFromMargin + (mToMargin - mFromMargin) * t
     }
@@ -91,10 +117,6 @@ class Cube(elements: Array<Array<FractalType>>, pos: FloatArray): Entity(pos, fl
         super.onAnimationEnd()
         mSurfaceAngle = mToSurfaceAngle
         mMargin = mToMargin
-    }
-
-    fun isOpen(): Boolean {
-        return mSurfaceAngle > 80f
     }
 
     fun open() {

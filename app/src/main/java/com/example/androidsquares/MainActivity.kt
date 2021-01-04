@@ -1,11 +1,26 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //destroy an opened cube when opening animation is done, and create 6 squares in the correct place
+    //changed all scales from .075 to .25
+        //collision boxes are all messed up now
+
+    //need to animate fractals forming squares, and splitting from squares
+
+    //could set the alpha of the other objects (squares and cubes) to gradually fade to 0 based on zoom level to keep it clean
+        //only allow alpha of currently open/active square or cube to be fully at 1
+        //then disable collisions with Squares/Cubes when looking at Fractals, and disabling Cubes when looking at Squares
+
+    //need to transition from fractals back to Squares (currently it just goes straight back to cube screen)
 
     //player can then click on squares to open individual puzzles (the three animations happen concurrently)
         //camera zooms in further to center on 4x4 fractals
         //square is destroyed and up to 16 fractals are created in its place and animated to fixed margin
         //all other squares increase their margin so that they aren't visible
+
+    //bug with tapping a cube before animation is done
+    //one option is to disable commands until current command/onAnimationEnd is complete - related to commandQueue (see below)
+
+    //add a command queue for the SurfaceView to use instead of calling the Renderer functions directly (this is a source of concurrency problems)
+    //have the surfaceview queue commands and then Renderer can dispatch them at the beginning of onDrawFrame(..)
 
     //each element type can be associated with an array of texture coordinates
     //get Fractals, Faces, Cubes displayed and user able to transition between the three stages.  Get 8 cubes forming into Dali Cross/tesseract

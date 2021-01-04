@@ -12,16 +12,16 @@ import android.util.Log
 import android.opengl.Matrix
 import android.opengl.GLES20
 
+class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, pos: FloatArray):
+        Entity(floatArrayOf(pos[0] + .4f * (fractalIndex[0] - 2) + .2f, pos[1] + .4f * (fractalIndex[1] - 2) + .2f, pos[2]), floatArrayOf(.25f, .25f, .25f), floatArrayOf(size.toFloat(), size.toFloat())), Transformable {
 
-
-class Fractal(elements: Array<FractalType>, size: Int): Entity(floatArrayOf(0f, 0f, 0f), floatArrayOf(1f, 1f, 1f), floatArrayOf(size.toFloat(), size.toFloat())), Transformable {
-
-    val mIndexCount: Int
+    val mIndexCount: Int //for rendering
     private var mVertexBuffer: FloatBuffer
     private var mIndexBuffer: ShortBuffer
     private val mModelMatrix = FloatArray(16)
     private val mSize: Int = size
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
+    val mIndex = fractalIndex //top left index if the fractal size > 1
 
     init {
         val vertices: FloatArray

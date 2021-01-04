@@ -217,6 +217,25 @@ val surfaceModels = Array(6){FloatArray(16)}.also {
 }
 
 
+val cubeData0: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal}}.also {
+    it[Surface.Front.value] = Array(16){FractalType.Red}
+    it[Surface.Back.value] = Array(16){FractalType.Green}
+    it[Surface.Left.value] = Array(16){FractalType.Blue}
+    it[Surface.Right.value] = Array(16){FractalType.Normal}
+    it[Surface.Top.value] = Array(16){FractalType.Red}
+    it[Surface.Bottom.value] = Array(16){FractalType.Green}
+}
+
+val cubeLocations = arrayOf(floatArrayOf(-2f, 3f, 0f),
+                            floatArrayOf(-2f, 0f, 0f),
+                            floatArrayOf(-2f, -3f, 0f),
+                            floatArrayOf(0f, 1.5f, 0f),
+                            floatArrayOf(0f, -1.5f, 0f),
+                            floatArrayOf(2f, 3f, 0f),
+                            floatArrayOf(2f, 0f, 0f),
+                            floatArrayOf(2f, -3f, 0f))
+
+
 
 
 
