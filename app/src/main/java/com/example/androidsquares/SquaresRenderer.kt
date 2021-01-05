@@ -54,7 +54,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
 
         mCamera = Camera(floatArrayOf(0f, 0f, 3f))
-        mCamera.moveTo(floatArrayOf(0f, 0f, 15f))
+        mCamera.moveTo(floatArrayOf(0f, 0f, 24f))
     }
 
 
@@ -63,7 +63,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         for(c in mCubes) c.close()
         cube.open()
         mOpenCubeIndex = cube.mIndex
-        mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] * cube.objectSize[1] / 2f, 10f)) //center camera on unfolded front/top surface of cubes
+        mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] * cube.objectSize[1] / 2f, 12f)) //center camera on unfolded front/top surface of cubes
     }
 
     private fun closeCube(cubeIndex: Int) {
@@ -77,7 +77,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         newCube.close()
         mCubes.add(newCube)
 
-        mCamera.moveTo(floatArrayOf(0f, 0f, 15f))
+        mCamera.moveTo(floatArrayOf(0f, 0f, 24f))
     }
 
     private fun openSquare(squareIndex: Int) {
@@ -179,8 +179,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             cube.onUpdate(sigmoid)
         }
 
-
-
         Matrix.setLookAtM(mViewMatrix, 0, mCamera.pos[0], mCamera.pos[1], mCamera.pos[2], mCamera.pos[0], mCamera.pos[1], 0f, 0f, 1f, 0f)
         Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0)
 
@@ -204,7 +202,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val ratio = width.toFloat() / height
 
         //Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 7f) //allow depth up to 100f away from camera
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 23f) //allow depth up to 100f away from camera
+        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 33f) //allow depth up to 30 units away
     }
 
     private fun loadTexture(context: Context, resourceID: Int): Int {

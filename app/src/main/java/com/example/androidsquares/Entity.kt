@@ -1,7 +1,7 @@
 package com.example.androidsquares
 
 import android.opengl.Matrix
-import android.util.Log
+import kotlin.math.abs
 
 interface Transformable {
     fun draw(vpMatrix: FloatArray)
@@ -108,14 +108,21 @@ open class Entity(var pos: FloatArray, scale: FloatArray, var objectSize: FloatA
         toAngle = newAngle
     }
     fun pointCollision(mouseX: Float, mouseY: Float): Boolean {
-        //project onto screen
-        val viewProjCenter = floatArrayOf(0f, 0f, 0f, 0f)
-        Matrix.multiplyMV(viewProjCenter, 0, SquaresRenderer.mVPMatrix, 0, floatArrayOf(pos[0], pos[1], pos[2], 1f), 0)
+        //find distance bewteen transformed center of corner and use that as the box width
+        val center = floatArrayOf(0f, 0f, 0f, 0f)
+        Matrix.multiplyMV(center, 0, SquaresRenderer.mVPMatrix, 0, floatArrayOf(pos[0], pos[1], pos[2], 1f), 0)
 
-        if(mouseX < viewProjCenter[0]/viewProjCenter[3] - collisionBox[0] / 2) return false
-        if(mouseX > viewProjCenter[0]/viewProjCenter[3] + collisionBox[0] / 2) return false
-        if(mouseY < viewProjCenter[1]/viewProjCenter[3] - collisionBox[1] / 2) return false
-        if(mouseY > viewProjCenter[1]/viewProjCenter[3] + collisionBox[1] / 2) return false
+        //need to project collision boxes too????? - answer: Yes
+        //collision boxes are only 2 dimensions, so putting y dimension in for z as a placeholder for matrix/vector multiplication
+        val corner = FloatArray(4)
+        Matrix.multiplyMV(corner, 0, SquaresRenderer.mVPMatrix, 0, floatArrayOf(pos[0] + collisionBox[0]/2, pos[1], pos[2], 1f), 0)
+
+        val halfDis = abs(corner[0]/corner[3] - center[0]/center[3]) / 2f
+
+        if(mouseX < center[0]/center[3] - halfDis) return false
+        if(mouseX > center[0]/center[3] + halfDis) return false
+        if(mouseY < center[1]/center[3] - halfDis) return false
+        if(mouseY > center[1]/center[3] + halfDis) return false
         return true
     }
 }

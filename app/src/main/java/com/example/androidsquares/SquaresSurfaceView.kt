@@ -4,6 +4,8 @@ import android.content.Context
 import android.view.MotionEvent
 
 import android.opengl.GLSurfaceView
+import android.opengl.Matrix
+import android.util.Log
 
 class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
     private val renderer: SquaresRenderer
@@ -59,4 +61,5 @@ class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
     private fun screenToWorldCoords(screenX: Float, screenY: Float): CoordinatePair {
         return CoordinatePair(screenX * 2 / width - 1, -(screenY * 2 / height - 1))
     }
+
 }

@@ -16,6 +16,7 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
     private var mMargin = 0f
     private var mToMargin = 0f
     private var mFromMargin = 0f
+    private val MAX_MARGIN = 2.47f
     private var mVertexBuffer: Array<FloatBuffer>
     private var mIndexBuffer: Array<ShortBuffer>
     private val mModelMatrix = FloatArray(16) //cube model
@@ -23,15 +24,16 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
     val mIndex = index
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
 
+
     init {
 
         if(open) {
             mSurfaceAngle = 90f
             mToSurfaceAngle = 90f
             mFromSurfaceAngle = 90f
-            mMargin = 1f
-            mToMargin = 1f
-            mFromMargin = 1f
+            mMargin = MAX_MARGIN
+            mToMargin = MAX_MARGIN
+            mFromMargin = MAX_MARGIN
         }
 
         mVertexBuffer = arrayOf(calculateVertexBuffer(elements[0]),
@@ -98,13 +100,12 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
     fun spawnSquares(elements: Array<Array<FractalType>>): MutableList<Square>{
         val cubeDim = scale[0] * objectSize[0]
         val zPos = pos[2] + cubeDim / 2f
-        val margin = 1f
-        return mutableListOf(Square(elements[Surface.Front.value], floatArrayOf(pos[0], pos[1] - .5f * margin * scale[0], zPos), Surface.Front.value),
-                            Square(elements[Surface.Back.value], floatArrayOf(pos[0], pos[1] + 2 * cubeDim + 1.5f * margin * scale[0], zPos), Surface.Back.value),
-                            Square(elements[Surface.Left.value], floatArrayOf(pos[0] - cubeDim - margin * scale[0], pos[1] + cubeDim + .5f * margin * scale[0], zPos), Surface.Left.value),
-                            Square(elements[Surface.Right.value], floatArrayOf(pos[0] + cubeDim + margin * scale[0], pos[1] - .5f * margin * scale[0], zPos), Surface.Right.value),
-                            Square(elements[Surface.Top.value], floatArrayOf(pos[0], pos[1] + cubeDim + .5f * margin * scale[0], zPos), Surface.Top.value),
-                            Square(elements[Surface.Bottom.value], floatArrayOf(pos[0], pos[1] - cubeDim - 1.5f * margin * scale[0], zPos), Surface.Bottom.value))
+        return mutableListOf(Square(elements[Surface.Front.value], floatArrayOf(pos[0], pos[1] - .5f * MAX_MARGIN * scale[0], zPos), Surface.Front.value),
+                            Square(elements[Surface.Back.value], floatArrayOf(pos[0], pos[1] + 2 * cubeDim + 1.5f * MAX_MARGIN * scale[0], zPos), Surface.Back.value),
+                            Square(elements[Surface.Left.value], floatArrayOf(pos[0] - cubeDim - MAX_MARGIN * scale[0], pos[1] + cubeDim + .5f * MAX_MARGIN * scale[0], zPos), Surface.Left.value),
+                            Square(elements[Surface.Right.value], floatArrayOf(pos[0] + cubeDim + MAX_MARGIN * scale[0], pos[1] - .5f * MAX_MARGIN * scale[0], zPos), Surface.Right.value),
+                            Square(elements[Surface.Top.value], floatArrayOf(pos[0], pos[1] + cubeDim + .5f * MAX_MARGIN * scale[0], zPos), Surface.Top.value),
+                            Square(elements[Surface.Bottom.value], floatArrayOf(pos[0], pos[1] - cubeDim - 1.5f * MAX_MARGIN * scale[0], zPos), Surface.Bottom.value))
     }
 
     override fun onUpdate(t: Float) {
@@ -120,7 +121,7 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
     }
 
     fun open() {
-        mToMargin = 1f
+        mToMargin = MAX_MARGIN
         mFromMargin = mMargin
         mFromSurfaceAngle = mSurfaceAngle
         mToSurfaceAngle = 90f
