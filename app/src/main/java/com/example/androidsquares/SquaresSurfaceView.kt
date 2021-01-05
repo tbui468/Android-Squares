@@ -36,17 +36,17 @@ class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
                     for (square in renderer.mSquares) {
                         if (square.pointCollision(pair.x, pair.y)) {
                             renderer.mOpenSquareFlag = true
-                            renderer.mOpenSquareIndex = square.mIndex
+                            renderer.mOpenSquareSurface = square.mSurface
                             return true
                         }
                     }
 
-                    if(renderer.mOpenSquareIndex != -1) {
+                    if(renderer.mOpenSquareSurface != Surface.None) {
                         renderer.mCloseSquareFlag = true
                         return true
                     }
 
-                    if(renderer.mOpenSquareIndex == -1 && renderer.mOpenCubeIndex != -1) {
+                    if(renderer.mOpenSquareSurface == Surface.None && renderer.mOpenCubeIndex != -1) {
                         renderer.mCloseCubeFlag = true
                         return true
                     }

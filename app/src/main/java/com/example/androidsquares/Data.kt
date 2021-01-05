@@ -30,7 +30,7 @@ enum class FractalType {
 }
 
 enum class Surface(val value: Int) {
-    Front(0), Back(1), Left(2), Right(3), Top(4), Bottom(5)
+    Front(0), Back(1), Left(2), Right(3), Top(4), Bottom(5), None(6)
 }
 
 //quads start at top left.  Left to right.  Top to bottom
@@ -237,15 +237,16 @@ val cubeLocations = arrayOf(floatArrayOf(-3f, 4.5f, 0f),
 
 //location of surfaces with the front surface facing the user (when cube is unfolded)
 //need cube pos, max margin, cube scale and cube object size
-fun calculateSurfacePos(surface: Surface, cube: Cube): FloatArray {
-    val zPos = cube.pos[2] + cube.scale[0] * cube.size / 2f
+fun calculateSurfacePos(surface: Surface, cubePos: FloatArray, cubeMaxMargin: Float, cubeScale: FloatArray, cubeSize: Int): FloatArray {
+    val zPos = cubePos[2] + cubeScale[0] * cubeSize / 2f
     return when(surface) {
-        Surface.Front -> floatArrayOf(cube.pos[0], cube.pos[1] - .5f * cube.MAX_MARGIN * cube.scale[0], zPos)
-        Surface.Back -> floatArrayOf(cube.pos[0], cube.pos[1] + (1.5f * cube.MAX_MARGIN + 2 * cube.size) * cube.scale[0], zPos)
-        Surface.Left -> floatArrayOf(cube.pos[0] - (cube.MAX_MARGIN + cube.size) * cube.scale[0], cube.pos[1] + (.5f * cube.MAX_MARGIN + cube.size) * cube.scale[0], zPos)
-        Surface.Right -> floatArrayOf(cube.pos[0] + (cube.MAX_MARGIN + cube.size) * cube.scale[0], cube.pos[1] - (.5f * cube.MAX_MARGIN) * cube.scale[0], zPos)
-        Surface.Top -> floatArrayOf(cube.pos[0], cube.pos[1] + (.5f * cube.MAX_MARGIN + cube.size) * cube.scale[0], zPos)
-        Surface.Bottom -> floatArrayOf(cube.pos[0], cube.pos[1] - (1.5f * cube.MAX_MARGIN + cube.size) * cube.scale[0], zPos)
+        Surface.Front -> floatArrayOf(cubePos[0], cubePos[1] - .5f * cubeMaxMargin * cubeScale[0], zPos)
+        Surface.Back -> floatArrayOf(cubePos[0], cubePos[1] + (1.5f * cubeMaxMargin + 2 * cubeSize) * cubeScale[0], zPos)
+        Surface.Left -> floatArrayOf(cubePos[0] - (cubeMaxMargin + cubeSize) * cubeScale[0], cubePos[1] + (.5f * cubeMaxMargin + cubeSize) * cubeScale[0], zPos)
+        Surface.Right -> floatArrayOf(cubePos[0] + (cubeMaxMargin + cubeSize) * cubeScale[0], cubePos[1] - (.5f * cubeMaxMargin) * cubeScale[0], zPos)
+        Surface.Top -> floatArrayOf(cubePos[0], cubePos[1] + (.5f * cubeMaxMargin + cubeSize) * cubeScale[0], zPos)
+        Surface.Bottom -> floatArrayOf(cubePos[0], cubePos[1] - (1.5f * cubeMaxMargin + cubeSize) * cubeScale[0], zPos)
+        Surface.None -> floatArrayOf(0f, 0f, 0f) //temp: should be an assert or error
     }
 }
 

@@ -1,12 +1,11 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //crashes when user taps (starts new event) when a previous animation is still happening
+    //clean up code for next push (fractal transformations)
 
-    //problem: spawnSquare (the class function) is using the Bottom surface coordinates
-    //should hard code relative locations of squares (relative to the cube center) so that fractals know center of square
-
-    //fix (implement, really) transition from fractals back to Squares (currently it just goes straight back to cube screen)
-        //have fractals animate back to spacing == .25f and then destroy them/recreate square in OnAnimationEnd()
+    //allow users to swap fractals
+    //allow users to form fractals
+    //allow users to split fractals
+    //allow users to rotate/reflect fractals
 
     //could set the alpha of the other objects (squares and cubes) to gradually fade to 0 based on zoom level to keep it clean
             //only allow alpha of currently open/active square or cube to be fully at 1
@@ -14,6 +13,8 @@
 
     //bug with tapping a cube before animation is done
     //one option is to disable commands until current command/onAnimationEnd is complete - related to commandQueue (see below)
+
+
 
     //add a command queue for the SurfaceView to use instead of calling the Renderer functions directly (this is a source of concurrency problems)
     //have the surfaceview queue commands and then Renderer can dispatch them at the beginning of onDrawFrame(..)

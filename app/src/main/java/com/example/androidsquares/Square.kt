@@ -8,14 +8,14 @@ import java.nio.ShortBuffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class Square(elements: Array<FractalType>, pos: FloatArray, index: Int) : Entity(pos, floatArrayOf(.25f, .25f, .25f), 4), Transformable {
+class Square(elements: Array<FractalType>, pos: FloatArray, surface: Surface) : Entity(pos, floatArrayOf(.25f, .25f, .25f), 4), Transformable {
     private val mIndexCount: Int //indices for drawing
     private var mVertexBuffer: FloatBuffer
     private var mIndexBuffer: ShortBuffer
     private val mModelMatrix = FloatArray(16)
     private val mSize: Int = 4
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
-    val mIndex = index //index among the six puzzles
+    val mSurface = surface //index among the six puzzles
 
 
     init {

@@ -36,7 +36,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mCloseSquareFlag = false
     var mStupidFlag = false
     var mOpenCubeIndex: Int = -1
-    var mOpenSquareIndex: Int = -1
+    var mOpenSquareSurface: Surface = Surface.None
 
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
         GLES20.glClearColor(0.0f, 0.167f, .212f, 1f)
@@ -82,15 +82,15 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mCamera.moveTo(floatArrayOf(0f, 0f, 24f))
     }
 
-    private fun openSquare(squareIndex: Int) {
+    private fun openSquare(surface: Surface) {
         mAnimationParameter = 0f
         var openSquare: Square? = null
         for(square in mSquares) {
-            if(square.mIndex == squareIndex) openSquare = square
+            if(square.mSurface == surface) openSquare = square
         }
         if(openSquare != null) {
             mCamera.moveTo(floatArrayOf(openSquare.pos[0], openSquare.pos[1], 5f))
-            mFractals = openSquare.spawnFractals(cubeData0[squareIndex])
+            mFractals = openSquare.spawnFractals(cubeData0[surface.value])
             for(fractal in mFractals) {
                 fractal.moveTo(calculateFractalPos(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, openSquare.pos))
             }
@@ -99,7 +99,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     }
 
-    private fun closeSquare(squareIndex: Int) {
+    private fun closeSquare(surface: Surface) {
         mAnimationParameter = 0f
         val cubePos = cubeLocations[mOpenCubeIndex]
         mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1], 12f))
@@ -127,8 +127,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
 
         if(mStupidFlag) {
-            mSquares.add(Cube.spawnSquare(cubeData0[mOpenSquareIndex], mOpenSquareIndex, mOpenCubeIndex))
-            mOpenSquareIndex = -1
+            mSquares.add(Cube.spawnSquare(cubeData0[mOpenSquareSurface.value], mOpenSquareSurface, mOpenCubeIndex))
+            mOpenSquareSurface = Surface.None
             mStupidFlag = false
         }
 
@@ -147,12 +147,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             }
 
             if(mOpenSquareFlag) {
-                openSquare(mOpenSquareIndex)
+                openSquare(mOpenSquareSurface)
                 mOpenSquareFlag = false
             }
 
             if(mCloseSquareFlag) {
-                closeSquare(mOpenSquareIndex)
+                closeSquare(mOpenSquareSurface)
                 mCloseSquareFlag = false
 //                mOpenSquareIndex = -1
                 mStupidFlag = true

@@ -25,10 +25,8 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
 
     companion object {
-        fun spawnSquare(elements: Array<FractalType>, index: Int, cubeIndex: Int): Square {
-            val cubeDim = 1f
-            val zPos = cubeLocations[cubeIndex][2] + cubeDim / 2f
-                return Square(elements, floatArrayOf(cubeLocations[cubeIndex][0], cubeLocations[cubeIndex][1] - cubeDim - 1.5f * 2.47f * .25f, zPos), index)
+        fun spawnSquare(elements: Array<FractalType>, surface: Surface, cubeIndex: Int): Square {
+            return Square(elements, calculateSurfacePos(surface, cubeLocations[cubeIndex], 2.47f, floatArrayOf(.25f, .25f, .25f), 4), surface)
         }
     }
 
@@ -103,12 +101,12 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
     }
 
    fun spawnSquares(elements: Array<Array<FractalType>>): MutableList<Square>{
-        return mutableListOf(Square(elements[Surface.Front.value], calculateSurfacePos(Surface.Front, this), Surface.Front.value),
-                            Square(elements[Surface.Back.value], calculateSurfacePos(Surface.Back, this), Surface.Back.value),
-                            Square(elements[Surface.Left.value], calculateSurfacePos(Surface.Left, this), Surface.Left.value),
-                            Square(elements[Surface.Right.value], calculateSurfacePos(Surface.Right, this), Surface.Right.value),
-                            Square(elements[Surface.Top.value], calculateSurfacePos(Surface.Top, this), Surface.Top.value),
-                            Square(elements[Surface.Bottom.value], calculateSurfacePos(Surface.Bottom, this), Surface.Bottom.value))
+        return mutableListOf(Square(elements[Surface.Front.value], calculateSurfacePos(Surface.Front, pos, MAX_MARGIN, scale, size), Surface.Front),
+                            Square(elements[Surface.Back.value], calculateSurfacePos(Surface.Back, pos, MAX_MARGIN, scale, size), Surface.Back),
+                            Square(elements[Surface.Left.value], calculateSurfacePos(Surface.Left, pos, MAX_MARGIN, scale, size ), Surface.Left),
+                            Square(elements[Surface.Right.value], calculateSurfacePos(Surface.Right, pos, MAX_MARGIN, scale, size ), Surface.Right),
+                            Square(elements[Surface.Top.value], calculateSurfacePos(Surface.Top, pos, MAX_MARGIN, scale, size ), Surface.Top),
+                            Square(elements[Surface.Bottom.value], calculateSurfacePos(Surface.Bottom, pos, MAX_MARGIN, scale, size ), Surface.Bottom))
    }
 
     override fun onUpdate(t: Float) {
