@@ -238,15 +238,14 @@ val cubeLocations = arrayOf(floatArrayOf(-3f, 4.5f, 0f),
 //location of surfaces with the front surface facing the user (when cube is unfolded)
 //need cube pos, max margin, cube scale and cube object size
 fun calculateSurfacePos(surface: Surface, cube: Cube): FloatArray {
-    val cubeDim = cube.scale[0] * cube.objectSize[0]
-    val zPos = cube.pos[2] + cubeDim / 2f
+    val zPos = cube.pos[2] + cube.scale[0] * cube.size / 2f
     return when(surface) {
         Surface.Front -> floatArrayOf(cube.pos[0], cube.pos[1] - .5f * cube.MAX_MARGIN * cube.scale[0], zPos)
-        Surface.Back -> floatArrayOf(cube.pos[0], cube.pos[1] + 2 * cubeDim + 1.5f * cube.MAX_MARGIN * cube.scale[0], zPos)
-        Surface.Left -> floatArrayOf(cube.pos[0] - cubeDim - cube.MAX_MARGIN * cube.scale[0], cube.pos[1] + cubeDim + .5f * cube.MAX_MARGIN * cube.scale[0], zPos)
-        Surface.Right -> floatArrayOf(cube.pos[0] + cubeDim + cube.MAX_MARGIN * cube.scale[0], cube.pos[1] - .5f * cube.MAX_MARGIN * cube.scale[0], zPos)
-        Surface.Top -> floatArrayOf(cube.pos[0], cube.pos[1] + cubeDim + .5f * cube.MAX_MARGIN * cube.scale[0], zPos)
-        Surface.Bottom -> floatArrayOf(cube.pos[0], cube.pos[1] - cubeDim - 1.5f * cube.MAX_MARGIN * cube.scale[0], zPos)
+        Surface.Back -> floatArrayOf(cube.pos[0], cube.pos[1] + (1.5f * cube.MAX_MARGIN + 2 * cube.size) * cube.scale[0], zPos)
+        Surface.Left -> floatArrayOf(cube.pos[0] - (cube.MAX_MARGIN + cube.size) * cube.scale[0], cube.pos[1] + (.5f * cube.MAX_MARGIN + cube.size) * cube.scale[0], zPos)
+        Surface.Right -> floatArrayOf(cube.pos[0] + (cube.MAX_MARGIN + cube.size) * cube.scale[0], cube.pos[1] - (.5f * cube.MAX_MARGIN) * cube.scale[0], zPos)
+        Surface.Top -> floatArrayOf(cube.pos[0], cube.pos[1] + (.5f * cube.MAX_MARGIN + cube.size) * cube.scale[0], zPos)
+        Surface.Bottom -> floatArrayOf(cube.pos[0], cube.pos[1] - (1.5f * cube.MAX_MARGIN + cube.size) * cube.scale[0], zPos)
     }
 }
 

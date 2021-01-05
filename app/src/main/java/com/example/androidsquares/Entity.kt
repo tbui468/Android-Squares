@@ -65,18 +65,9 @@ interface Transformable {
     }
 }
 
-open class Entity(var pos: FloatArray, scale: FloatArray, var objectSize: FloatArray) {
+open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
     private var fromPos = pos
     private var toPos = pos
-
-    var collisionBox = floatArrayOf(scale[0] * objectSize[0], scale[1] * objectSize[1])
-
-    var scale = scale
-        set(newScale) {
-            field = newScale
-            collisionBox = floatArrayOf(newScale[0] * objectSize[0], newScale[1] * objectSize[1])
-        }
-
 
     private var fromScale = scale
     private var toScale = scale
@@ -115,7 +106,7 @@ open class Entity(var pos: FloatArray, scale: FloatArray, var objectSize: FloatA
         //need to project collision boxes too????? - answer: Yes
         //collision boxes are only 2 dimensions, so putting y dimension in for z as a placeholder for matrix/vector multiplication
         val corner = FloatArray(4)
-        Matrix.multiplyMV(corner, 0, SquaresRenderer.mVPMatrix, 0, floatArrayOf(pos[0] + collisionBox[0]/2, pos[1], pos[2], 1f), 0)
+        Matrix.multiplyMV(corner, 0, SquaresRenderer.mVPMatrix, 0, floatArrayOf(pos[0] + size * scale[0]/2, pos[1], pos[2], 1f), 0)
 
         val halfDis = abs(corner[0]/corner[3] - center[0]/center[3]) / 2f
 

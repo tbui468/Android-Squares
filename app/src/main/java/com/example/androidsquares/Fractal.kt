@@ -13,7 +13,7 @@ import android.opengl.Matrix
 import android.opengl.GLES20
 
 class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, squarePos: FloatArray):
-        Entity(calculateFractalPos(fractalIndex, size, fractalIndex, 4, squarePos), floatArrayOf(.25f, .25f, .25f), floatArrayOf(size.toFloat(), size.toFloat())), Transformable {
+        Entity(calculateFractalPos(fractalIndex, size, fractalIndex, 4, squarePos), floatArrayOf(.25f, .25f, .25f), size), Transformable {
 
     val mIndexCount: Int //for rendering
     private var mVertexBuffer: FloatBuffer

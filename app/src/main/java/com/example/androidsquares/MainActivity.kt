@@ -2,9 +2,6 @@
 
     //crashes when user taps (starts new event) when a previous animation is still happening
 
-    //one easy change to simplify - make scale 1f and then set object size of everything to .25 of currently value
-        //then I can avoid using scale everywehre
-
     //problem: spawnSquare (the class function) is using the Bottom surface coordinates
     //should hard code relative locations of squares (relative to the cube center) so that fractals know center of square
 

@@ -9,7 +9,7 @@ import java.nio.ByteOrder
 
 //we need to stagger rotations around axis for the bloom effect
 
-class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Entity(cubeLocations[index], floatArrayOf(.25f, .25f, .25f), floatArrayOf(4f, 4f)), Transformable {
+class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Entity(cubeLocations[index], floatArrayOf(.25f, .25f, .25f), 4), Transformable {
     private var mSurfaceAngle = 0f
     private var mToSurfaceAngle = 0f
     private var mFromSurfaceAngle = 0f

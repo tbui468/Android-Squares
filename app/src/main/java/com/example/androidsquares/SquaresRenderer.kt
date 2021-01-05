@@ -64,7 +64,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         for(c in mCubes) c.close()
         cube.open()
         mOpenCubeIndex = cube.mIndex
-        mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] * cube.objectSize[1] / 2f, 12f)) //center camera on unfolded front/top surface of cubes
+        mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] / 2f, 12f)) //center camera on unfolded front/top surface of cubes
     }
 
     private fun closeCube(cubeIndex: Int) {
