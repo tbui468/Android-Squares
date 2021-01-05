@@ -34,6 +34,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mCloseCubeFlag = false //temp: should create command queue that surfaceview can add commands to
     var mOpenSquareFlag = false
     var mCloseSquareFlag = false
+    var mStupidFlag = false
     var mOpenCubeIndex: Int = -1
     var mOpenSquareIndex: Int = -1
 
@@ -72,6 +73,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             c.close()
         }
         mSquares.clear()
+        mFractals.clear()
 
         val newCube = Cube(cubeData0, cubeIndex, true)
         newCube.close()
@@ -89,17 +91,22 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         if(openSquare != null) {
             mCamera.moveTo(floatArrayOf(openSquare.pos[0], openSquare.pos[1], 5f))
             mFractals = openSquare.spawnFractals(cubeData0[squareIndex])
+            for(fractal in mFractals) {
+                fractal.moveTo(calculateFractalPos(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, openSquare.pos))
+            }
             mSquares.remove(openSquare)
         }
-        //animate fractals to final location
-        //do any fancy camera stuff necessary
+
     }
 
     private fun closeSquare(squareIndex: Int) {
         mAnimationParameter = 0f
-        //animate all fractals inward
-        //in onAnimationEnd(), destroy all fractals and create Square in its place
-        //do any fancy camera stuff necessary
+        val cubePos = cubeLocations[mOpenCubeIndex]
+        mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1], 12f))
+        for (fractal in mFractals) {
+            //temp: need square location - not camera and then adding half of cube width (bc it will get messy if I decide to change anything)
+            fractal.moveTo(calculateFractalPos(fractal.mIndex, fractal.mSize, fractal.mIndex, 4, floatArrayOf(mCamera.pos[0], mCamera.pos[1], .5f)))
+        }
     }
 
 
@@ -116,6 +123,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             }else {
                 cube.onAnimationEnd()
             }
+        }
+
+
+        if(mStupidFlag) {
+            mSquares.add(Cube.spawnSquare(cubeData0[mOpenSquareIndex], mOpenSquareIndex, mOpenCubeIndex))
+            mOpenSquareIndex = -1
+            mStupidFlag = false
         }
 
         if(openCube != null)
@@ -140,7 +154,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             if(mCloseSquareFlag) {
                 closeSquare(mOpenSquareIndex)
                 mCloseSquareFlag = false
-                mOpenSquareIndex = -1
+//                mOpenSquareIndex = -1
+                mStupidFlag = true
             }
         }
 

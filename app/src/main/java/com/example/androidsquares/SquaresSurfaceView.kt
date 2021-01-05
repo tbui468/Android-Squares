@@ -46,7 +46,7 @@ class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
                         return true
                     }
 
-                    if(renderer.mOpenCubeIndex != -1) {
+                    if(renderer.mOpenSquareIndex == -1 && renderer.mOpenCubeIndex != -1) {
                         renderer.mCloseCubeFlag = true
                         return true
                     }

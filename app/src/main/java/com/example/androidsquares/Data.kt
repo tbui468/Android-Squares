@@ -235,6 +235,29 @@ val cubeLocations = arrayOf(floatArrayOf(-3f, 4.5f, 0f),
                             floatArrayOf(3f, 0f, 0f),
                             floatArrayOf(3f, -4.5f, 0f))
 
+//location of surfaces with the front surface facing the user (when cube is unfolded)
+//need cube pos, max margin, cube scale and cube object size
+fun calculateSurfacePos(surface: Surface, cube: Cube): FloatArray {
+    val cubeDim = cube.scale[0] * cube.objectSize[0]
+    val zPos = cube.pos[2] + cubeDim / 2f
+    return when(surface) {
+        Surface.Front -> floatArrayOf(cube.pos[0], cube.pos[1] - .5f * cube.MAX_MARGIN * cube.scale[0], zPos)
+        Surface.Back -> floatArrayOf(cube.pos[0], cube.pos[1] + 2 * cubeDim + 1.5f * cube.MAX_MARGIN * cube.scale[0], zPos)
+        Surface.Left -> floatArrayOf(cube.pos[0] - cubeDim - cube.MAX_MARGIN * cube.scale[0], cube.pos[1] + cubeDim + .5f * cube.MAX_MARGIN * cube.scale[0], zPos)
+        Surface.Right -> floatArrayOf(cube.pos[0] + cubeDim + cube.MAX_MARGIN * cube.scale[0], cube.pos[1] - .5f * cube.MAX_MARGIN * cube.scale[0], zPos)
+        Surface.Top -> floatArrayOf(cube.pos[0], cube.pos[1] + cubeDim + .5f * cube.MAX_MARGIN * cube.scale[0], zPos)
+        Surface.Bottom -> floatArrayOf(cube.pos[0], cube.pos[1] - cubeDim - 1.5f * cube.MAX_MARGIN * cube.scale[0], zPos)
+    }
+}
+
+fun calculateFractalPos(index: IntArray, size: Int, targetIndex: IntArray, targetSize: Int, center: FloatArray): FloatArray {
+    val spacing = if(targetSize == 4) {
+        .25f //size of fractal (1x1)
+    }else { //==1
+        .4f //size of above times golden ratio
+    }
+    return floatArrayOf(center[0] + spacing * (index[0] - 2) + spacing/2, center[1] + spacing * (index[1] - 2) + spacing/2, center[2])
+}
 
 
 

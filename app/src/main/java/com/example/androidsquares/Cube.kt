@@ -16,13 +16,21 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
     private var mMargin = 0f
     private var mToMargin = 0f
     private var mFromMargin = 0f
-    private val MAX_MARGIN = 2.47f
+    val MAX_MARGIN = 2.47f
     private var mVertexBuffer: Array<FloatBuffer>
     private var mIndexBuffer: Array<ShortBuffer>
     private val mModelMatrix = FloatArray(16) //cube model
     private val mSize: Int = 4
     val mIndex = index
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
+
+    companion object {
+        fun spawnSquare(elements: Array<FractalType>, index: Int, cubeIndex: Int): Square {
+            val cubeDim = 1f
+            val zPos = cubeLocations[cubeIndex][2] + cubeDim / 2f
+                return Square(elements, floatArrayOf(cubeLocations[cubeIndex][0], cubeLocations[cubeIndex][1] - cubeDim - 1.5f * 2.47f * .25f, zPos), index)
+        }
+    }
 
 
     init {
@@ -94,19 +102,14 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
         }
     }
 
-    //these should correspond to final locations of surfaces on opened cubed
-    //just hard coding it for now
-    //margin should always be 1
-    fun spawnSquares(elements: Array<Array<FractalType>>): MutableList<Square>{
-        val cubeDim = scale[0] * objectSize[0]
-        val zPos = pos[2] + cubeDim / 2f
-        return mutableListOf(Square(elements[Surface.Front.value], floatArrayOf(pos[0], pos[1] - .5f * MAX_MARGIN * scale[0], zPos), Surface.Front.value),
-                            Square(elements[Surface.Back.value], floatArrayOf(pos[0], pos[1] + 2 * cubeDim + 1.5f * MAX_MARGIN * scale[0], zPos), Surface.Back.value),
-                            Square(elements[Surface.Left.value], floatArrayOf(pos[0] - cubeDim - MAX_MARGIN * scale[0], pos[1] + cubeDim + .5f * MAX_MARGIN * scale[0], zPos), Surface.Left.value),
-                            Square(elements[Surface.Right.value], floatArrayOf(pos[0] + cubeDim + MAX_MARGIN * scale[0], pos[1] - .5f * MAX_MARGIN * scale[0], zPos), Surface.Right.value),
-                            Square(elements[Surface.Top.value], floatArrayOf(pos[0], pos[1] + cubeDim + .5f * MAX_MARGIN * scale[0], zPos), Surface.Top.value),
-                            Square(elements[Surface.Bottom.value], floatArrayOf(pos[0], pos[1] - cubeDim - 1.5f * MAX_MARGIN * scale[0], zPos), Surface.Bottom.value))
-    }
+   fun spawnSquares(elements: Array<Array<FractalType>>): MutableList<Square>{
+        return mutableListOf(Square(elements[Surface.Front.value], calculateSurfacePos(Surface.Front, this), Surface.Front.value),
+                            Square(elements[Surface.Back.value], calculateSurfacePos(Surface.Back, this), Surface.Back.value),
+                            Square(elements[Surface.Left.value], calculateSurfacePos(Surface.Left, this), Surface.Left.value),
+                            Square(elements[Surface.Right.value], calculateSurfacePos(Surface.Right, this), Surface.Right.value),
+                            Square(elements[Surface.Top.value], calculateSurfacePos(Surface.Top, this), Surface.Top.value),
+                            Square(elements[Surface.Bottom.value], calculateSurfacePos(Surface.Bottom, this), Surface.Bottom.value))
+   }
 
     override fun onUpdate(t: Float) {
         super.onUpdate(t)

@@ -1,17 +1,19 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //need to animate fractals forming squares, and splitting from squares
+    //crashes when user taps (starts new event) when a previous animation is still happening
 
-    //need to transition from fractals back to Squares (currently it just goes straight back to cube screen)
+    //one easy change to simplify - make scale 1f and then set object size of everything to .25 of currently value
+        //then I can avoid using scale everywehre
+
+    //problem: spawnSquare (the class function) is using the Bottom surface coordinates
+    //should hard code relative locations of squares (relative to the cube center) so that fractals know center of square
+
+    //fix (implement, really) transition from fractals back to Squares (currently it just goes straight back to cube screen)
+        //have fractals animate back to spacing == .25f and then destroy them/recreate square in OnAnimationEnd()
 
     //could set the alpha of the other objects (squares and cubes) to gradually fade to 0 based on zoom level to keep it clean
             //only allow alpha of currently open/active square or cube to be fully at 1
             //then disable collisions with Squares/Cubes when looking at Fractals, and disabling Cubes when looking at Squares
-
-    //player can then click on squares to open individual puzzles (the three animations happen concurrently)
-        //camera zooms in further to center on 4x4 fractals
-        //square is destroyed and up to 16 fractals are created in its place and animated to fixed margin
-        //all other squares increase their margin so that they aren't visible
 
     //bug with tapping a cube before animation is done
     //one option is to disable commands until current command/onAnimationEnd is complete - related to commandQueue (see below)
