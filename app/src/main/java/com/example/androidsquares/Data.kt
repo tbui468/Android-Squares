@@ -1,8 +1,11 @@
 package com.example.androidsquares
 
 import android.opengl.Matrix
+import kotlin.math.exp
 
 data class CoordinatePair(val x: Float, val y: Float)
+
+data class InputData(val touchType: TouchType, val x: Float, val y: Float, var life: Float)
 
 
 const val vertexShaderCode = "attribute vec4 aPosition;" +
@@ -24,6 +27,10 @@ const val fragmentShaderCode = "precision mediump float;" +
 const val FLOAT_SIZE = 4
 const val SHORT_SIZE = 2
 const val FLOATS_PER_QUAD = 4 * 5 //four vertices, and 5 floats per vertex
+
+enum class TouchType {
+    Tap, PinchIn, PinchOut, FlickLeft, FlickRight, FlickDown, FlickUp
+}
 
 enum class FractalType {
     Red, Blue, Green, Normal, Empty
@@ -260,6 +267,8 @@ fun calculateFractalPos(index: IntArray, size: Int, targetIndex: IntArray, targe
 }
 
 
-
-
+//temp: move to Utility.kt
+fun sigmoid(t: Float): Float {
+    return 1f / (1f + exp(-15f * (t - .5f)))
+}
 

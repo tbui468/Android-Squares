@@ -4,8 +4,6 @@ import android.content.Context
 import android.view.MotionEvent
 
 import android.opengl.GLSurfaceView
-import android.opengl.Matrix
-import android.util.Log
 
 class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
     private val renderer: SquaresRenderer
@@ -22,35 +20,8 @@ class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
         when(event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 for(i in 0 until event.pointerCount) {
-                    pair = screenToWorldCoords(event.getX(i), event.getY(i))
-
-                    //check cubes
-                    for(cube in renderer.mCubes) {
-                        if(cube.pointCollision(pair.x, pair.y)) {
-                            renderer.openCube(cube)
-                            return true
-                        }
-                    }
-
-                    //check squares
-                    for (square in renderer.mSquares) {
-                        if (square.pointCollision(pair.x, pair.y)) {
-                            renderer.mOpenSquareFlag = true
-                            renderer.mOpenSquareSurface = square.mSurface
-                            return true
-                        }
-                    }
-
-                    if(renderer.mOpenSquareSurface != Surface.None) {
-                        renderer.mCloseSquareFlag = true
-                        return true
-                    }
-
-                    if(renderer.mOpenSquareSurface == Surface.None && renderer.mOpenCubeIndex != -1) {
-                        renderer.mCloseCubeFlag = true
-                        return true
-                    }
-
+                    pair = screenToNormalizedCoords(event.getX(i), event.getY(i))
+                    renderer.mInputQueue.add(InputData(TouchType.Tap, pair.x, pair.y, .5f))
                 }
             }
         }
@@ -58,7 +29,7 @@ class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
     }
 
     //normalize to -1 to 1 in both dimensions
-    private fun screenToWorldCoords(screenX: Float, screenY: Float): CoordinatePair {
+    private fun screenToNormalizedCoords(screenX: Float, screenY: Float): CoordinatePair {
         return CoordinatePair(screenX * 2 / width - 1, -(screenY * 2 / height - 1))
     }
 

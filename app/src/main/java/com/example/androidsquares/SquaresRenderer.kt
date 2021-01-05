@@ -13,15 +13,12 @@ import android.opengl.GLES20
 import android.opengl.Matrix
 import android.opengl.GLUtils
 
-import kotlin.math.exp
+import android.util.Log
 
-//temp: move to Utility.kt
-fun sigmoid(t: Float): Float {
-    return 1f / (1f + exp(-15f * (t - .5f)))
-}
+
 
 class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
-    var mAnimationParameter = 1f //main animation timer
+    var mAnimationParameter = 0f //main animation timer
     var mCubes = mutableListOf<Cube>()
     var mSquares = mutableListOf<Square>()
     var mFractals = mutableListOf<Fractal>()
@@ -37,6 +34,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mStupidFlag = false
     var mOpenCubeIndex: Int = -1
     var mOpenSquareSurface: Surface = Surface.None
+    var mInputQueue = InputQueue()
 
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
         GLES20.glClearColor(0.0f, 0.167f, .212f, 1f)
@@ -64,7 +62,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         for(c in mCubes) c.close()
         cube.open()
         mOpenCubeIndex = cube.mIndex
-        mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] / 2f, 12f)) //center camera on unfolded front/top surface of cubes
+        mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] * cube.size / 2f, 12f)) //center camera on unfolded front/top surface of cubes
     }
 
     private fun closeCube(cubeIndex: Int) {
@@ -102,11 +100,42 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun closeSquare(surface: Surface) {
         mAnimationParameter = 0f
         val cubePos = cubeLocations[mOpenCubeIndex]
-        mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1], 12f))
+        mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1] + .25f * 4f / 2f, 12f))
         for (fractal in mFractals) {
             //temp: need square location - not camera and then adding half of cube width (bc it will get messy if I decide to change anything)
             fractal.moveTo(calculateFractalPos(fractal.mIndex, fractal.mSize, fractal.mIndex, 4, floatArrayOf(mCamera.pos[0], mCamera.pos[1], .5f)))
         }
+    }
+
+    private fun dispatchCommand(touchType: TouchType, x: Float, y: Float): Boolean {
+        //check cubes
+        for(cube in mCubes) {
+            if(cube.pointCollision(x, y)) {
+                openCube(cube)
+                return true
+            }
+        }
+
+        //check squares
+        for (square in mSquares) {
+            if (square.pointCollision(x, y)) {
+                mOpenSquareFlag = true
+                mOpenSquareSurface = square.mSurface
+                return true
+            }
+        }
+
+        if(mOpenSquareSurface != Surface.None) {
+            mCloseSquareFlag = true
+            return true
+        }
+
+        if(mOpenSquareSurface == Surface.None && mOpenCubeIndex != -1) {
+            mCloseCubeFlag = true
+            return true
+        }
+
+        return false
     }
 
 
@@ -166,19 +195,28 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         //delta time
         mPreviousTime = mCurrentTime
         mCurrentTime = SystemClock.uptimeMillis()
+        val deltaTime = 0.001f * (mCurrentTime - mPreviousTime).toInt()
 
         if(mAnimationParameter < 1f) {
-            mAnimationParameter += 0.001f * (mCurrentTime - mPreviousTime).toInt() //delta time
+            mAnimationParameter += deltaTime
             if(mAnimationParameter >= 1f) {
                 onAnimationEnd()
             }
         }
 
-
+        if(mAnimationParameter >= 1f) {
+            var touchRegistered = false
+            while (!mInputQueue.isEmpty() && !touchRegistered) {
+                val data = mInputQueue.getNextInput()
+                touchRegistered = dispatchCommand(data.touchType, data.x, data.y)
+            }
+            if(touchRegistered) mAnimationParameter = 0f
+        }
 
         val sigmoid = sigmoid(mAnimationParameter)
 
         ////////////////////////////////////////////update////////////////////////////////
+        mInputQueue.onUpdate(deltaTime)
 
         mCamera.onUpdate(sigmoid)
 

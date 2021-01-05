@@ -1,33 +1,18 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //clean up code for next push (fractal transformations)
+    //InputQueue is there, but the order of dispatched commands/animationParameter are all messed up
+        //clean up the stuff from before (all those flags) and simplify
+        //dispatchCommand should only call a handful of functions in the renderer, and animationTimers should really only change if those calls are successful
 
     //allow users to swap fractals
     //allow users to form fractals
     //allow users to split fractals
     //allow users to rotate/reflect fractals
 
-    //could set the alpha of the other objects (squares and cubes) to gradually fade to 0 based on zoom level to keep it clean
-            //only allow alpha of currently open/active square or cube to be fully at 1
-            //then disable collisions with Squares/Cubes when looking at Fractals, and disabling Cubes when looking at Squares
+    //add more flexability to cube unfolding to allow 8 different unfolded patterns
 
     //bug with tapping a cube before animation is done
     //one option is to disable commands until current command/onAnimationEnd is complete - related to commandQueue (see below)
-
-
-
-    //add a command queue for the SurfaceView to use instead of calling the Renderer functions directly (this is a source of concurrency problems)
-    //have the surfaceview queue commands and then Renderer can dispatch them at the beginning of onDrawFrame(..)
-
-    //each element type can be associated with an array of texture coordinates
-    //get Fractals, Faces, Cubes displayed and user able to transition between the three stages.  Get 8 cubes forming into Dali Cross/tesseract
-
-    //3 transformations with forming and splitting (all the coordinate values can be hard coded - only about 25 with a 4x4 with fractal sizes 1, 2 4)
-    //all animations transitioning from 3d cube to unwrapped 6 square faces, to splitting to (up to) 16 fractals
-    //GUI: go back button (going down into the fractal involves tapping a square face???)
-        //could i use pinch in / pinch out to zoom in and out on fractals????
-
-    //implement asserts in my own way (the debug enabled one is too wordy)
 
 package com.example.androidsquares
 
