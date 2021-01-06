@@ -118,7 +118,9 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
     override fun onAnimationEnd() {
         super.onAnimationEnd()
         mSurfaceAngle = mToSurfaceAngle
+        mFromSurfaceAngle = mToSurfaceAngle
         mMargin = mToMargin
+        mFromMargin = mToMargin
     }
 
     fun open() {

@@ -13,9 +13,6 @@ import android.opengl.GLES20
 import android.opengl.Matrix
 import android.opengl.GLUtils
 
-import android.util.Log
-
-
 
 class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mAnimationParameter = 0f //main animation timer
@@ -28,13 +25,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private var mCurrentTime: Long = 0
     private var mPreviousTime: Long = 0
     private val mContext = context
-    var mCloseCubeFlag = false //temp: should create command queue that surfaceview can add commands to
-    var mOpenSquareFlag = false
-    var mCloseSquareFlag = false
-    var mStupidFlag = false
-    var mOpenCubeIndex: Int = -1
-    var mOpenSquareSurface: Surface = Surface.None
     var mInputQueue = InputQueue()
+    private var mOpeningCube: Cube? = null
+    private var mClosingSquare = Surface.None
 
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
         GLES20.glClearColor(0.0f, 0.167f, .212f, 1f)
@@ -58,81 +51,120 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
 
     fun openCube(cube: Cube) {
-        mAnimationParameter = 0f
-        for(c in mCubes) c.close()
         cube.open()
-        mOpenCubeIndex = cube.mIndex
+        mOpeningCube = cube
         mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] * cube.size / 2f, 12f)) //center camera on unfolded front/top surface of cubes
     }
 
     private fun closeCube(cubeIndex: Int) {
-        mAnimationParameter = 0f
-        for(c in mCubes) {
-            c.close()
-        }
         mSquares.clear()
-        mFractals.clear()
 
-        val newCube = Cube(cubeData0, cubeIndex, true)
-        newCube.close()
-        mCubes.add(newCube)
+        Cube(cubeData0, cubeIndex, true).also {
+            it.close()
+            mCubes.add(it)
+        }
 
         mCamera.moveTo(floatArrayOf(0f, 0f, 24f))
     }
 
-    private fun openSquare(surface: Surface) {
-        mAnimationParameter = 0f
-        var openSquare: Square? = null
-        for(square in mSquares) {
-            if(square.mSurface == surface) openSquare = square
+    private fun openSquare(square: Square) {
+        mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 5f))
+        mFractals = square.spawnFractals(cubeData0[square.mSurface.value])
+        for(fractal in mFractals) {
+            fractal.moveTo(calculateFractalPos(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos))
         }
-        if(openSquare != null) {
-            mCamera.moveTo(floatArrayOf(openSquare.pos[0], openSquare.pos[1], 5f))
-            mFractals = openSquare.spawnFractals(cubeData0[surface.value])
-            for(fractal in mFractals) {
-                fractal.moveTo(calculateFractalPos(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, openSquare.pos))
-            }
-            mSquares.remove(openSquare)
-        }
-
+        mSquares.remove(square)
     }
 
     private fun closeSquare(surface: Surface) {
-        mAnimationParameter = 0f
-        val cubePos = cubeLocations[mOpenCubeIndex]
-        mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1] + .25f * 4f / 2f, 12f))
+        mClosingSquare = surface
+        val cubePos = cubeLocations[getOpenCubeIndex()]
         for (fractal in mFractals) {
             //temp: need square location - not camera and then adding half of cube width (bc it will get messy if I decide to change anything)
             fractal.moveTo(calculateFractalPos(fractal.mIndex, fractal.mSize, fractal.mIndex, 4, floatArrayOf(mCamera.pos[0], mCamera.pos[1], .5f)))
         }
+        mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1] + .25f * 4f / 2f, 12f))
+    }
+
+    private fun getScreenState(): Screen {
+        if(mFractals.size > 0) return Screen.Fractal
+        if(mSquares.size > 0) return Screen.Square
+        return Screen.Cube
+    }
+
+    //open cubes are destroyed when animation is over, so just need to iterate over mCubes list and find out which index (0-7) is missing
+    //returns -1 if no cubes open
+    private fun getOpenCubeIndex(): Int {
+        val found = BooleanArray(8){false}
+        for(cube in mCubes) {
+            found[cube.mIndex] = true
+        }
+
+        found.forEachIndexed { index, f ->
+            if(!f) return index
+        }
+
+        return -1
+    }
+
+
+    //open square is destroyed when animation is over, so just need to iterate over mSquares and find index that is missing
+    private fun getOpenSquare(): Surface {
+        val found = BooleanArray(6){false}
+        for(square in mSquares) {
+            found[square.mSurface.value] = true
+        }
+
+        found.forEachIndexed { index, f ->
+            if(!f) {
+                return when(index) {
+                    0 -> Surface.Front
+                    1 -> Surface.Back
+                    2 -> Surface.Left
+                    3 -> Surface.Right
+                    4 -> Surface.Top
+                    5 -> Surface.Bottom
+                    else -> Surface.None
+                }
+            }
+        }
+
+        return Surface.None
     }
 
     private fun dispatchCommand(touchType: TouchType, x: Float, y: Float): Boolean {
-        //check cubes
-        for(cube in mCubes) {
-            if(cube.pointCollision(x, y)) {
-                openCube(cube)
+        when(getScreenState()) {
+            Screen.Cube -> {
+                for(cube in mCubes) {
+                    if(cube.pointCollision(x, y)) {
+                        openCube(cube)
+                        return true
+                    }
+                }
+            }
+            Screen.Square -> {
+                for (square in mSquares) {
+                    if (square.pointCollision(x, y)) {
+                        openSquare(square)
+                        return true
+                    }
+                }
+
+                //need to specify type of input I want register as going a screen back (such as pinch out)
+                closeCube(getOpenCubeIndex())
                 return true
             }
-        }
+            Screen.Fractal -> {
+                for(fractal in mFractals) {
+                    if(fractal.pointCollision(x, y)) {
+                        //do stuff
+                    }
+                }
 
-        //check squares
-        for (square in mSquares) {
-            if (square.pointCollision(x, y)) {
-                mOpenSquareFlag = true
-                mOpenSquareSurface = square.mSurface
+                //need to specify type of input I want register as going a screen back (such as pinch out)
+                closeSquare(getOpenSquare())
                 return true
             }
-        }
-
-        if(mOpenSquareSurface != Surface.None) {
-            mCloseSquareFlag = true
-            return true
-        }
-
-        if(mOpenSquareSurface == Surface.None && mOpenCubeIndex != -1) {
-            mCloseCubeFlag = true
-            return true
         }
 
         return false
@@ -140,53 +172,32 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
 
     private fun onAnimationEnd() {
+        for(cube in mCubes) {
+            cube.onAnimationEnd()
+        }
         for(square in mSquares) {
             square.onAnimationEnd()
         }
-
-        var openCube: Cube? = null
-        for(cube in mCubes) {
-            if(cube.mIndex == mOpenCubeIndex) {
-                mSquares = cube.spawnSquares(cubeData0) //temp: should look up cube index and find proper data with given index
-                openCube = cube
-            }else {
-                cube.onAnimationEnd()
-            }
+        for(fractal in mFractals) {
+            fractal.onAnimationEnd()
         }
 
 
-        if(mStupidFlag) {
-            mSquares.add(Cube.spawnSquare(cubeData0[mOpenSquareSurface.value], mOpenSquareSurface, mOpenCubeIndex))
-            mOpenSquareSurface = Surface.None
-            mStupidFlag = false
+        if(mOpeningCube != null) {
+            mSquares = mOpeningCube!!.spawnSquares(cubeData0)
+            mCubes.remove(mOpeningCube)
+            mOpeningCube = null
         }
 
-        if(openCube != null)
-            mCubes.remove(openCube)
+
+        if(mClosingSquare != Surface.None  && getOpenCubeIndex() != -1) {
+            mFractals.clear()
+            mSquares.add(Cube.spawnSquare(cubeData0[mClosingSquare.value], mClosingSquare, getOpenCubeIndex()))
+            mClosingSquare = Surface.None
+        }
     }
 
     override fun onDrawFrame(unused: GL10) {
-
-        //temp: should use command queue for surfaceview to queue commands instead of boolean flags for all this stuff
-        if(mAnimationParameter >= 1f) {
-            if (mCloseCubeFlag) {
-                closeCube(mOpenCubeIndex)
-                mCloseCubeFlag = false
-                mOpenCubeIndex = -1
-            }
-
-            if(mOpenSquareFlag) {
-                openSquare(mOpenSquareSurface)
-                mOpenSquareFlag = false
-            }
-
-            if(mCloseSquareFlag) {
-                closeSquare(mOpenSquareSurface)
-                mCloseSquareFlag = false
-//                mOpenSquareIndex = -1
-                mStupidFlag = true
-            }
-        }
 
         ////////////////////////////setup///////////////////////////////////////////
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
@@ -197,6 +208,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mCurrentTime = SystemClock.uptimeMillis()
         val deltaTime = 0.001f * (mCurrentTime - mPreviousTime).toInt()
 
+
+        //only want to call onAnimationEnd() once per animation
         if(mAnimationParameter < 1f) {
             mAnimationParameter += deltaTime
             if(mAnimationParameter >= 1f) {
@@ -210,8 +223,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 val data = mInputQueue.getNextInput()
                 touchRegistered = dispatchCommand(data.touchType, data.x, data.y)
             }
-            if(touchRegistered) mAnimationParameter = 0f
+            if (touchRegistered) mAnimationParameter = 0f
         }
+
 
         val sigmoid = sigmoid(mAnimationParameter)
 

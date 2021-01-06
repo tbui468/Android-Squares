@@ -21,7 +21,7 @@ class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, s
     private val mModelMatrix = FloatArray(16)
     val mSize: Int = size
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
-    val mIndex = fractalIndex //top left index if the fractal size > 1
+    val mIndex = fractalIndex //fractal index - unrelated to rendering
 
     init {
         val vertices: FloatArray

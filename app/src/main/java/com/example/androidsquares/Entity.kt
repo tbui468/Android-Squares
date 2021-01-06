@@ -83,8 +83,11 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
 
     open fun onAnimationEnd() {
         pos = toPos
+        fromPos = toPos
         scale = toScale
+        fromScale = toScale
         angle = toAngle
+        fromAngle = toAngle
     }
 
     open fun moveTo(newPos: FloatArray) {

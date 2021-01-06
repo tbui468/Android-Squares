@@ -28,6 +28,10 @@ const val FLOAT_SIZE = 4
 const val SHORT_SIZE = 2
 const val FLOATS_PER_QUAD = 4 * 5 //four vertices, and 5 floats per vertex
 
+enum class Screen {
+    Cube, Square, Fractal
+}
+
 enum class TouchType {
     Tap, PinchIn, PinchOut, FlickLeft, FlickRight, FlickDown, FlickUp
 }
