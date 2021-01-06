@@ -32,7 +32,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
         GLES20.glClearColor(0.0f, 0.167f, .212f, 1f)
         GLES20.glEnable(GLES20.GL_BLEND)
-        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+//        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA) //SRC was from the texture (in my case)
+        GLES20.glBlendFunc(GLES20.GL_CONSTANT_ALPHA, GLES20.GL_ONE_MINUS_CONSTANT_ALPHA)
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)
         GLES20.glDepthFunc(GLES20.GL_LESS)
 //        GLES20.glEnable(GLES20.GL_CULL_FACE)
@@ -51,6 +52,11 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
 
     fun openCube(cube: Cube) {
+        for(c in mCubes) {
+            if(c != cube) {
+                c.fadeTo(0f)
+            }
+        }
         cube.open()
         mOpeningCube = cube
         mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] * cube.size / 2f, 12f)) //center camera on unfolded front/top surface of cubes
@@ -58,6 +64,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun closeCube(cubeIndex: Int) {
         mSquares.clear()
+
+        for(c in mCubes) {
+            c.fadeTo(1f)
+        }
 
         Cube(cubeData0, cubeIndex, true).also {
             it.close()
@@ -74,6 +84,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             fractal.moveTo(calculateFractalPos(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos))
         }
         mSquares.remove(square)
+
+        for(s in mSquares) {
+            s.fadeTo(0f)
+        }
     }
 
     private fun closeSquare(surface: Surface) {
@@ -84,6 +98,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             fractal.moveTo(calculateFractalPos(fractal.mIndex, fractal.mSize, fractal.mIndex, 4, floatArrayOf(mCamera.pos[0], mCamera.pos[1], .5f)))
         }
         mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1] + .25f * 4f / 2f, 12f))
+
+        for(s in mSquares) {
+            s.fadeTo(1f)
+        }
     }
 
     private fun getScreenState(): Screen {
@@ -135,35 +153,41 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun dispatchCommand(touchType: TouchType, x: Float, y: Float): Boolean {
         when(getScreenState()) {
             Screen.Cube -> {
-                for(cube in mCubes) {
-                    if(cube.pointCollision(x, y)) {
-                        openCube(cube)
-                        return true
+                if(touchType == TouchType.Tap) {
+                    for (cube in mCubes) {
+                        if (cube.pointCollision(x, y)) {
+                            openCube(cube)
+                            return true
+                        }
                     }
                 }
             }
             Screen.Square -> {
-                for (square in mSquares) {
-                    if (square.pointCollision(x, y)) {
-                        openSquare(square)
-                        return true
+                if(touchType == TouchType.Tap) {
+                    for (square in mSquares) {
+                        if (square.pointCollision(x, y)) {
+                            openSquare(square)
+                            return true
+                        }
                     }
-                }
 
-                //need to specify type of input I want register as going a screen back (such as pinch out)
-                closeCube(getOpenCubeIndex())
-                return true
+                    //need to specify type of input I want register as going a screen back (such as pinch out)
+                    closeCube(getOpenCubeIndex())
+                    return true
+                }
             }
             Screen.Fractal -> {
-                for(fractal in mFractals) {
-                    if(fractal.pointCollision(x, y)) {
-                        //do stuff
+                if(touchType == TouchType.FlickDown) {
+                    for (fractal in mFractals) {
+                        if (fractal.pointCollision(x, y)) {
+                        }
                     }
                 }
 
-                //need to specify type of input I want register as going a screen back (such as pinch out)
-                closeSquare(getOpenSquare())
-                return true
+                if(touchType == TouchType.Tap) {
+                    closeSquare(getOpenSquare())
+                    return true
+                }
             }
         }
 

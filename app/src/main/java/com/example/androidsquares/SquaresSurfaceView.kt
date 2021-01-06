@@ -1,19 +1,19 @@
 package com.example.androidsquares
 
 import android.content.Context
-import android.view.MotionEvent
-
 import android.opengl.GLSurfaceView
 
+import android.view.MotionEvent
+
 class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
-    private val renderer: SquaresRenderer
+    val renderer: SquaresRenderer
 
     init {
         setEGLContextClientVersion(2)
         renderer = SquaresRenderer(context)
-        //set configurations here
         setRenderer(renderer)
     }
+
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         var pair: CoordinatePair
@@ -21,12 +21,13 @@ class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
             MotionEvent.ACTION_DOWN -> {
                 for(i in 0 until event.pointerCount) {
                     pair = screenToNormalizedCoords(event.getX(i), event.getY(i))
-                    renderer.mInputQueue.add(InputData(TouchType.Tap, pair.x, pair.y, .5f))
+                    renderer.mInputQueue.add(InputData(TouchType.Tap, pair.x, pair.y, 0.3f))
                 }
             }
         }
         return true
     }
+
 
     //normalize to -1 to 1 in both dimensions
     private fun screenToNormalizedCoords(screenX: Float, screenY: Float): CoordinatePair {

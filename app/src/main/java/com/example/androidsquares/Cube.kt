@@ -238,7 +238,9 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
             GLES20.glUniformMatrix4fv(modelUniformID, 1, false, finalMatrix, 0)
 
             mIndexBuffer[i].position(0)
+            GLES20.glBlendColor(1f, 1f, 1f, alpha)
             GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexBuffer[i].capacity(), GLES20.GL_UNSIGNED_SHORT, mIndexBuffer[i])
+            GLES20.glBlendColor(1f, 1f, 1f, 1f)
         }
 
         GLES20.glDisableVertexAttribArray(posAttrib)

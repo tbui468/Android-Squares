@@ -116,7 +116,9 @@ class Square(elements: Array<FractalType>, pos: FloatArray, surface: Surface) : 
             GLES20.glUniformMatrix4fv(it, 1, false, mvpMatrix, 0)
         }
 
+        GLES20.glBlendColor(1f, 1f, 1f, alpha)
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexCount, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
+        GLES20.glBlendColor(1f, 1f, 1f, 1f)
 
         GLES20.glDisableVertexAttribArray(posAttrib)
         GLES20.glDisableVertexAttribArray(texCoordAttrib)

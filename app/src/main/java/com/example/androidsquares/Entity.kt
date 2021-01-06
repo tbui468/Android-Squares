@@ -77,8 +77,13 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
     private var fromAngle = floatArrayOf(0f, 0f, 0f)
     private var toAngle = floatArrayOf(0f, 0f, 0f)
 
+    var alpha = 1f
+    private var fromAlpha = 1f
+    private var toAlpha = 1f
+
     open fun onUpdate(t: Float) {
         pos = floatArrayOf(fromPos[0] + (toPos[0] - fromPos[0]) * t, fromPos[1] + (toPos[1] - fromPos[1]) * t, fromPos[2] + (toPos[2] - fromPos[2]) * t)
+        alpha = fromAlpha + (toAlpha - fromAlpha) * t
     }
 
     open fun onAnimationEnd() {
@@ -88,6 +93,13 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
         fromScale = toScale
         angle = toAngle
         fromAngle = toAngle
+        alpha = toAlpha
+        fromAlpha = toAlpha
+    }
+
+    open fun fadeTo(newAlpha: Float) {
+        fromAlpha = alpha
+        toAlpha = newAlpha
     }
 
     open fun moveTo(newPos: FloatArray) {
