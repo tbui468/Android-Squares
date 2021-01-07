@@ -237,14 +237,14 @@ val cubeData0: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal
     it[Surface.Bottom.value] = Array(16){FractalType.Green}
 }
 
-val cubeLocations = arrayOf(floatArrayOf(-3f, 4.5f, 0f),
-                            floatArrayOf(-3f, 0f, 0f),
-                            floatArrayOf(-3f, -4.5f, 0f),
-                            floatArrayOf(0f, 2.25f, 0f),
-                            floatArrayOf(0f, -2.25f, 0f),
-                            floatArrayOf(3f, 4.5f, 0f),
-                            floatArrayOf(3f, 0f, 0f),
-                            floatArrayOf(3f, -4.5f, 0f))
+val cubeLocations = arrayOf(floatArrayOf(-2f, 3f, 0f),
+                            floatArrayOf(-2f, 0f, 0f),
+                            floatArrayOf(-2f, -3f, 0f),
+                            floatArrayOf(0f, 1.5f, 0f),
+                            floatArrayOf(0f, -1.5f, 0f),
+                            floatArrayOf(2f, 3f, 0f),
+                            floatArrayOf(2f, 0f, 0f),
+                            floatArrayOf(2f, -3f, 0f))
 
 //location of surfaces with the front surface facing the user (when cube is unfolded)
 //need cube pos, max margin, cube scale and cube object size

@@ -47,7 +47,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
 
         mCamera = Camera(floatArrayOf(0f, 0f, 3f))
-        mCamera.moveTo(floatArrayOf(0f, 0f, 24f))
+        mCamera.moveTo(floatArrayOf(0f, 0f, 16f))
     }
 
 
@@ -74,7 +74,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             mCubes.add(it)
         }
 
-        mCamera.moveTo(floatArrayOf(0f, 0f, 24f))
+        mCamera.moveTo(floatArrayOf(0f, 0f, 16f))
     }
 
     private fun openSquare(square: Square) {
@@ -285,6 +285,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         for(cube in mCubes) {
             cube.draw(mVPMatrix)
         }
+
     }
 
     override fun onSurfaceChanged(unused: GL10, width: Int, height: Int) {

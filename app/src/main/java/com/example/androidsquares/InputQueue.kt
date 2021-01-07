@@ -1,12 +1,10 @@
 package com.example.androidsquares
-import android.util.Log
 
 class InputQueue {
     var mInputData = mutableListOf<InputData>()
 
     fun add(data: InputData) {
         mInputData.add(data)
-        Log.d("touch", data.touchType.toString())
     }
 
     fun isEmpty(): Boolean {
