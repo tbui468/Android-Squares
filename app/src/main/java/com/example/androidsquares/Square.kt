@@ -66,7 +66,8 @@ class Square(elements: Array<FractalType>, pos: FloatArray, surface: Surface) : 
     fun spawnFractals(elements: Array<FractalType>): MutableList<Fractal> {
         val list = mutableListOf<Fractal>()
         for(i in elements.indices) {
-            list.add(Fractal(arrayOf(elements[i]), 1, intArrayOf(i % 4, i / 4), pos))
+            if(elements[i] != FractalType.Empty)
+                list.add(Fractal(arrayOf(elements[i]), 1, intArrayOf(i % 4, i / 4), pos))
         }
         return list
     }

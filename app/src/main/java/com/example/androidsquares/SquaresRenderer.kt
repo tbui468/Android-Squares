@@ -3,6 +3,8 @@ package com.example.androidsquares
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
+import android.util.Log
+
 import android.os.SystemClock
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -43,7 +45,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
 
         for(i in cubeLocations.indices) {
-            mCubes.add(Cube(cubeData0, i, false))
+            mCubes.add(Cube(puzzleData[i], i, false))
         }
 
         mCamera = Camera(floatArrayOf(0f, 0f, 3f))
@@ -69,7 +71,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             c.fadeTo(1f)
         }
 
-        Cube(cubeData0, cubeIndex, true).also {
+        Cube(puzzleData[cubeIndex], cubeIndex, true).also {
             it.close()
             mCubes.add(it)
         }
@@ -79,7 +81,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun openSquare(square: Square) {
         mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 5f))
-        mFractals = square.spawnFractals(cubeData0[square.mSurface.value])
+        mFractals = square.spawnFractals(puzzleData[getOpenCubeIndex()][square.mSurface.value])
         for(fractal in mFractals) {
             fractal.moveTo(calculateFractalPos(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos))
         }
@@ -150,6 +152,29 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return Surface.None
     }
 
+    //////////////helper functions for commands//////////////////////////////////////////
+    private fun getFractal(index: IntArray): Fractal? {
+        for(fractal in mFractals) {
+            if(fractal.mIndex[0] == index[0] && fractal.mIndex[1] == index[1]) return fractal
+        }
+
+        return null
+    }
+
+    private fun swap(fractal0: Fractal, fractal1: Fractal) {
+        //update data
+        val index0 = fractal0.mIndex[0] + 4 * fractal0.mIndex[1]
+        val index1 = fractal1.mIndex[0] + 4 * fractal1.mIndex[1]
+        puzzleData[getOpenCubeIndex()][getOpenSquare().value][index0] = puzzleData[getOpenCubeIndex()][getOpenSquare().value][index1].also {
+            puzzleData[getOpenCubeIndex()][getOpenSquare().value][index1] = puzzleData[getOpenCubeIndex()][getOpenSquare().value][index0]
+        }
+
+        //animate
+        fractal0.moveTo(fractal1.pos)
+        fractal1.moveTo(fractal0.pos)
+        fractal0.mIndex = fractal1.mIndex.also {fractal1.mIndex = fractal0.mIndex}
+    }
+
     private fun dispatchCommand(touchType: TouchType, x: Float, y: Float): Boolean {
         when(getScreenState()) {
             Screen.Cube -> {
@@ -177,9 +202,37 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 }
             }
             Screen.Fractal -> {
-                if(touchType == TouchType.FlickDown) {
-                    for (fractal in mFractals) {
-                        if (fractal.pointCollision(x, y)) {
+                for (fractal in mFractals) {
+                    if (fractal.pointCollision(x, y)) {
+                        when(touchType) {
+                            TouchType.FlickLeft -> {
+                                val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, fractal.mIndex[1]))
+                                if(swappedFractal != null) {
+                                    swap(fractal, swappedFractal)
+                                    return true
+                                }
+                            }
+                            TouchType.FlickRight -> {
+                                val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1]))
+                                if(swappedFractal != null) {
+                                    swap(fractal, swappedFractal)
+                                    return true
+                                }
+                            }
+                            TouchType.FlickUp -> {
+                                val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
+                                if(swappedFractal != null) {
+                                    swap(fractal, swappedFractal)
+                                    return true
+                                }
+                            }
+                            TouchType.FlickDown -> {
+                                val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize))
+                                if(swappedFractal != null) {
+                                    swap(fractal, swappedFractal)
+                                    return true
+                                }
+                            }
                         }
                     }
                 }
@@ -205,10 +258,15 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         for(fractal in mFractals) {
             fractal.onAnimationEnd()
         }
+        mCamera.onAnimationEnd()
 
 
+        //this stuff shouldn't be here - fire and forget commands will simplify everything
+        //so destroy cube on tap, creating squares and then animating them
+        //on closing a cube, destroy all squares and create an open cube and animate it closing
+        ///////////////////////////////////////////////////////////////////////////////////////
         if(mOpeningCube != null) {
-            mSquares = mOpeningCube!!.spawnSquares(cubeData0)
+            mSquares = mOpeningCube!!.spawnSquares(puzzleData[mOpeningCube!!.mIndex])
             mCubes.remove(mOpeningCube)
             mOpeningCube = null
         }
@@ -216,9 +274,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         if(mClosingSquare != Surface.None  && getOpenCubeIndex() != -1) {
             mFractals.clear()
-            mSquares.add(Cube.spawnSquare(cubeData0[mClosingSquare.value], mClosingSquare, getOpenCubeIndex()))
+            mSquares.add(Cube.spawnSquare(puzzleData[getOpenCubeIndex()][mClosingSquare.value], mClosingSquare, getOpenCubeIndex()))
             mClosingSquare = Surface.None
         }
+        //////////////////////////////////////////////////////////////////////////////////////////
     }
 
     override fun onDrawFrame(unused: GL10) {

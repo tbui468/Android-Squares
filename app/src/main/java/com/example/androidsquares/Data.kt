@@ -227,24 +227,48 @@ val surfaceModels = Array(6){FloatArray(16)}.also {
     }
 }
 
+val puzzle00 = arrayOf(
+        FractalType.Red, FractalType.Empty, FractalType.Green, FractalType.Empty,
+        FractalType.Normal, FractalType.Normal, FractalType.Normal, FractalType.Blue,
+        FractalType.Green, FractalType.Red, FractalType.Empty, FractalType.Normal,
+        FractalType.Blue, FractalType.Empty, FractalType.Green, FractalType.Blue)
+
+val puzzle01 = arrayOf(
+        FractalType.Empty, FractalType.Empty, FractalType.Green, FractalType.Empty,
+        FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.Blue,
+        FractalType.Empty, FractalType.Empty, FractalType.Blue, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty)
+
 
 val cubeData0: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal}}.also {
-    it[Surface.Front.value] = Array(16){FractalType.Red}
-    it[Surface.Back.value] = Array(16){FractalType.Green}
+    it[Surface.Front.value] = puzzle00
+    it[Surface.Back.value] = puzzle01
     it[Surface.Left.value] = Array(16){FractalType.Blue}
     it[Surface.Right.value] = Array(16){FractalType.Normal}
     it[Surface.Top.value] = Array(16){FractalType.Red}
     it[Surface.Bottom.value] = Array(16){FractalType.Green}
 }
 
+val cubeData1: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal}}.also {
+    it[Surface.Front.value] = Array(16){FractalType.Normal}
+    it[Surface.Back.value] = Array(16){FractalType.Blue}
+    it[Surface.Left.value] = Array(16){FractalType.Blue}
+    it[Surface.Right.value] = Array(16){FractalType.Blue}
+    it[Surface.Top.value] = Array(16){FractalType.Normal}
+    it[Surface.Bottom.value] = Array(16){FractalType.Normal}
+}
+
+val puzzleData = arrayOf(cubeData0, cubeData1)
+
 val cubeLocations = arrayOf(floatArrayOf(-2f, 3f, 0f),
-                            floatArrayOf(-2f, 0f, 0f),
+                            floatArrayOf(-2f, 0f, 0f))
+/*
                             floatArrayOf(-2f, -3f, 0f),
                             floatArrayOf(0f, 1.5f, 0f),
                             floatArrayOf(0f, -1.5f, 0f),
                             floatArrayOf(2f, 3f, 0f),
                             floatArrayOf(2f, 0f, 0f),
-                            floatArrayOf(2f, -3f, 0f))
+                            floatArrayOf(2f, -3f, 0f))*/
 
 //location of surfaces with the front surface facing the user (when cube is unfolded)
 //need cube pos, max margin, cube scale and cube object size
@@ -267,7 +291,7 @@ fun calculateFractalPos(index: IntArray, size: Int, targetIndex: IntArray, targe
     }else { //==1
         .4f //size of above times golden ratio
     }
-    return floatArrayOf(center[0] + spacing * (index[0] - 2) + spacing/2, center[1] + spacing * (index[1] - 2) + spacing/2, center[2])
+    return floatArrayOf(center[0] + spacing * (index[0] - 2) + spacing/2, center[1] - spacing * (index[1] - 2) - spacing/2, center[2])
 }
 
 
