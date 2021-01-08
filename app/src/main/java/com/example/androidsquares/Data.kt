@@ -300,10 +300,12 @@ fun calculateFractalPos(index: IntArray, size: Int, squareCenter: FloatArray): F
 }
 
 fun calculateFractalPosForTarget(index: IntArray, size: Int, targetIndex: IntArray, targetSize: Int, squareCenter: FloatArray): FloatArray {
+    val SPACING = .4f * size
     val targetCenter = calculateFractalPos(targetIndex, targetSize, squareCenter)
     val halfWidth = (targetSize - 1) * .25f / 2f
 
-    return floatArrayOf(targetCenter[0] - halfWidth + .25f * (index[0] - targetIndex[0]), targetCenter[1] + halfWidth - .25f * (index[1] - targetIndex[1]), squareCenter[2])
+    return floatArrayOf(targetCenter[0] - halfWidth + .25f * (index[0] - targetIndex[0]) + (size - 1) * .25f/2f,
+                        targetCenter[1] + halfWidth - .25f * (index[1] - targetIndex[1]) - (size -1) * .25f/2f, squareCenter[2])
 }
 
 

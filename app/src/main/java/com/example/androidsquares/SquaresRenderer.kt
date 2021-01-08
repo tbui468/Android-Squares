@@ -179,6 +179,46 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         fractal0.mIndex = fractal1.mIndex.also {fractal1.mIndex = fractal0.mIndex}
     }
 
+    private fun split(fractal: Fractal) {
+        val squarePos = calculateSurfacePos(getOpenSquareSurface(), cubeLocations[getOpenCubeIndex()])
+
+        val index = fractal.mIndex
+        val newSize = fractal.mSize / 2
+
+        val elements = Array(4){Array(newSize * newSize){FractalType.Normal}}
+
+        for(row in 0 until newSize) {
+            for(col in 0 until newSize) {
+                elements[0][col + row * newSize] = puzzleData[getOpenCubeIndex()][getOpenSquareSurface().value][index[0] + col + (index[1] + row) * 4]
+                elements[1][col + row * newSize] = puzzleData[getOpenCubeIndex()][getOpenSquareSurface().value][index[0] + newSize + col + (index[1] + row) * 4]
+                elements[2][col + row * newSize] = puzzleData[getOpenCubeIndex()][getOpenSquareSurface().value][index[0] + col + (index[1] + newSize + row) * 4]
+                elements[3][col + row * newSize] = puzzleData[getOpenCubeIndex()][getOpenSquareSurface().value][index[0] + newSize + col + (index[1] + newSize + row) * 4]
+            }
+        }
+
+
+        val topLeft = Fractal(elements[0], newSize, index,
+                                calculateFractalPosForTarget(index, newSize, fractal.mIndex, fractal.mSize, squarePos))
+        val topRight = Fractal(elements[1], newSize, intArrayOf(index[0] + newSize, index[1]),
+                                calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1]), newSize, fractal.mIndex, fractal.mSize, squarePos))
+        val bottomLeft = Fractal(elements[2], newSize, intArrayOf(index[0], index[1] + newSize),
+                                calculateFractalPosForTarget(intArrayOf(index[0], index[1] + newSize), newSize, fractal.mIndex, fractal.mSize, squarePos))
+        val bottomRight = Fractal(elements[3], newSize, intArrayOf(index[0] + newSize, index[1] + newSize),
+                                calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1] + newSize), newSize, fractal.mIndex, fractal.mSize, squarePos))
+
+
+        topLeft.moveTo(calculateFractalPos(topLeft.mIndex, topLeft.mSize, squarePos))
+        topRight.moveTo(calculateFractalPos(topRight.mIndex, topRight.mSize, squarePos))
+        bottomLeft.moveTo(calculateFractalPos(bottomLeft.mIndex, bottomLeft.mSize, squarePos))
+        bottomRight.moveTo(calculateFractalPos(bottomRight.mIndex, bottomRight.mSize, squarePos))
+
+        mFractals.add(topLeft)
+        mFractals.add(topRight)
+        mFractals.add(bottomLeft)
+        mFractals.add(bottomRight)
+
+        mFractals.remove(fractal)
+    }
 
     private fun startMerge(corners: Array<Fractal>) {
         var topLeftIndex = intArrayOf(100, 100)
@@ -323,35 +363,35 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                         when(touchType) {
                             TouchType.FlickLeft -> {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, fractal.mIndex[1]))
-                                if(swappedFractal != null) {
+                                if(swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
                                     swap(fractal, swappedFractal)
                                     return true
                                 }
                             }
                             TouchType.FlickRight -> {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1]))
-                                if(swappedFractal != null) {
+                                if(swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
                                     swap(fractal, swappedFractal)
                                     return true
                                 }
                             }
                             TouchType.FlickUp -> {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
-                                if(swappedFractal != null) {
+                                if(swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
                                     swap(fractal, swappedFractal)
                                     return true
                                 }
                             }
                             TouchType.FlickDown -> {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize))
-                                if(swappedFractal != null) {
+                                if(swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
                                     swap(fractal, swappedFractal)
                                     return true
                                 }
                             }
                             TouchType.PinchOut -> {
                                 if(fractal.mSize > 1) {
-                                    //split(fractal)
+                                    split(fractal)
                                     return true
                                 }
                             }
