@@ -1,16 +1,19 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //need to actually finish calculateFractalPos(....) it's mostly place holder for now
-
     //currently merging is using the top left four 1x1 fractals to merge - make it dependent on touch coords
         //eg implement getCornerFractals()
 
-    //allow users to form fractals - pinch in
-    //allow users to split fractals - pinch out
-    //allow users to rotate/reflect fractals
+    //implement splitting of fractals
+
+    //allow users to rotate/reflect fractals - include modifying game data
+
+    //allow users to swap/rotate/reflect squares
+        //instead of using surfaces, it might be easier to treat square surfaces the same as fractals with indices start from top left
 
     //load default data from Data.kt
     //save data to preferences (since this is so much easier than using a database)
+
+    //puzzle clearing conditions
 
     //order of drawing is out of order since call objects are at 0f in the z-axis
     //one option is to move active cube/square closer to camera (move in the positive z direction) so that there isn't any z fighting/undefined depth problems

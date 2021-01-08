@@ -84,7 +84,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 5f))
         mFractals = square.spawnFractals(puzzleData[getOpenCubeIndex()][square.mSurface.value])
         for(fractal in mFractals) {
-            fractal.moveTo(calculateFractalPos(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos))
+            fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos))
         }
         mSquares.remove(square)
 
@@ -96,9 +96,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun closeSquare(surface: Surface) {
         mClosingSquare = surface
         val cubePos = cubeLocations[getOpenCubeIndex()]
+        val squarePos = calculateSurfacePos(getOpenSquareSurface(), cubeLocations[getOpenCubeIndex()])
         for (fractal in mFractals) {
-            //temp: need square location - not camera and then adding half of cube width (bc it will get messy if I decide to change anything)
-            fractal.moveTo(calculateFractalPos(fractal.mIndex, fractal.mSize, fractal.mIndex, 4, floatArrayOf(mCamera.pos[0], mCamera.pos[1], .5f)))
+            fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, intArrayOf(0, 0), 4, squarePos))
         }
         mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1] + .25f * 4f / 2f, 12f))
 
@@ -156,6 +156,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     //////////////helper functions for commands//////////////////////////////////////////
     private fun getFractal(index: IntArray): Fractal? {
+        if(index[0] < 0 || index[0] >=4 || index[1] < 0 || index[1] >= 4) return null
+
         for(fractal in mFractals) {
             if(fractal.mIndex[0] == index[0] && fractal.mIndex[1] == index[1]) return fractal
         }
@@ -190,7 +192,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val squarePos = calculateSurfacePos(getOpenSquareSurface(), cubeLocations[getOpenCubeIndex()])
 
         for(c in corners) {
-            c.moveTo(calculateFractalPos(c.mIndex, c.mSize, topLeftIndex, c.mSize * 2, squarePos))
+            c.moveTo(calculateFractalPosForTarget(c.mIndex, c.mSize, topLeftIndex, c.mSize * 2, squarePos))
         }
     }
 
@@ -218,31 +220,72 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
 
         val squarePos = calculateSurfacePos(getOpenSquareSurface(), cubeLocations[getOpenCubeIndex()])
-        return Fractal(elements, newSize, topLeftIndex, squarePos)
+        return Fractal(elements, newSize, topLeftIndex, calculateFractalPos(topLeftIndex, newSize, squarePos))
+    }
+
+    private fun getClosestFractal(x: Float, y: Float): Fractal {
+        var closestFractal = mFractals[0]
+        var fractalScreenCoords = closestFractal.getScreenCoords()
+        var minDis = pointDistance(x, y, fractalScreenCoords[0], fractalScreenCoords[1])
+        var thisDis: Float
+
+        for(fractal in mFractals) {
+            fractalScreenCoords = fractal.getScreenCoords()
+            thisDis = pointDistance(x, y, fractalScreenCoords[0], fractalScreenCoords[1])
+            if(thisDis < minDis) {
+                closestFractal = fractal
+                minDis = thisDis
+            }
+        }
+
+        return closestFractal
     }
 
     private fun getCornerFractals(x: Float, y: Float): Array<Fractal>? {
+
+        val closestFractal = getClosestFractal(x, y)
+        val index = closestFractal.mIndex
+        val size = closestFractal.mSize
+
         var topLeft: Fractal? = null
         var topRight: Fractal? = null
         var bottomLeft: Fractal? = null
         var bottomRight: Fractal? = null
-        for(fractal in mFractals) {
-            if(fractal.mIndex[0] == 0 && fractal.mIndex[1] == 0 && fractal.mSize == 1) {
-                topLeft = fractal
+
+        //determine which corner it's in
+        val screenCoords = closestFractal.getScreenCoords()
+        val fractalCoords = floatArrayOf((screenCoords[0] + screenCoords[2]) / 2f, (screenCoords[1] + screenCoords[3])/2f)
+
+        if(x < fractalCoords[0]) {
+            if(y < fractalCoords[1]) { //fractal is top right
+                topLeft = getFractal(intArrayOf(index[0] - size, index[1]))
+                topRight = closestFractal
+                bottomLeft = getFractal(intArrayOf(index[0] - size, index[1] + size))
+                bottomRight = getFractal(intArrayOf(index[0], index[1] + size))
+            }else { //fractal is bottom right
+                topLeft = getFractal(intArrayOf(index[0] - size, index[1] - size))
+                topRight = getFractal(intArrayOf(index[0], index[1] - size))
+                bottomLeft = getFractal(intArrayOf(index[0] - size, index[1]))
+                bottomRight = closestFractal
             }
-            if(fractal.mIndex[0] == 1 && fractal.mIndex[1] == 0 && fractal.mSize == 1) {
-                topRight = fractal
-            }
-            if(fractal.mIndex[0] == 0 && fractal.mIndex[1] == 1 && fractal.mSize == 1) {
-                bottomLeft = fractal
-            }
-            if(fractal.mIndex[0] == 1 && fractal.mIndex[1] == 1 && fractal.mSize == 1) {
-                bottomRight = fractal
+        }else {
+            if(y < fractalCoords[1]) { //fractal is top left
+                topLeft = closestFractal
+                topRight = getFractal(intArrayOf(index[0] + size, index[1]))
+                bottomLeft = getFractal(intArrayOf(index[0], index[1] + size))
+                bottomRight = getFractal(intArrayOf(index[0] + size, index[1] + size))
+            }else { //fractal is bottom left
+                topLeft = getFractal(intArrayOf(index[0], index[1] - size))
+                topRight = getFractal(intArrayOf(index[0] + size, index[1] - size))
+                bottomLeft = closestFractal
+                bottomRight = getFractal(intArrayOf(index[0] + size, index[1]))
             }
         }
 
         if(topLeft == null || topRight == null || bottomLeft == null || bottomRight == null)
             return null
+
+        if(topLeft.mSize != size || topRight.mSize != size || bottomRight.mSize != size || bottomLeft.mSize != size) return null
 
         return arrayOf(topLeft, topRight, bottomLeft, bottomRight)
 

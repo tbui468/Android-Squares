@@ -114,7 +114,9 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
         fromAngle = angle
         toAngle = newAngle
     }
-    fun pointCollision(mouseX: Float, mouseY: Float): Boolean {
+
+    //returns lower left, and upper right corners of projected collision box on screen
+    fun getScreenCoords(): FloatArray {
         //find distance bewteen transformed center of corner and use that as the box width
         val center = floatArrayOf(0f, 0f, 0f, 0f)
         Matrix.multiplyMV(center, 0, SquaresRenderer.mVPMatrix, 0, floatArrayOf(pos[0], pos[1], pos[2], 1f), 0)
@@ -126,10 +128,16 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
 
         val halfDis = abs(corner[0]/corner[3] - center[0]/center[3])
 
-        if(mouseX < center[0]/center[3] - halfDis) return false
-        if(mouseX > center[0]/center[3] + halfDis) return false
-        if(mouseY < center[1]/center[3] - halfDis) return false
-        if(mouseY > center[1]/center[3] + halfDis) return false
+        return floatArrayOf(center[0]/center[3] - halfDis, center[1]/center[3] - halfDis, center[0]/center[3] + halfDis, center[1]/center[3] + halfDis)
+    }
+
+    fun pointCollision(mouseX: Float, mouseY: Float): Boolean {
+        val projBox = getScreenCoords()
+
+        if(mouseX < projBox[0]) return false
+        if(mouseX > projBox[2]) return false
+        if(mouseY < projBox[1]) return false
+        if(mouseY > projBox[3]) return false
         return true
     }
 }

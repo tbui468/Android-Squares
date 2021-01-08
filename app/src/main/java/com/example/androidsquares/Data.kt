@@ -2,6 +2,8 @@ package com.example.androidsquares
 
 import android.opengl.Matrix
 import kotlin.math.exp
+import kotlin.math.sqrt
+import kotlin.math.pow
 
 data class CoordinatePair(val x: Float, val y: Float)
 
@@ -261,7 +263,7 @@ val cubeData1: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal
 val puzzleData = arrayOf(cubeData0, cubeData1)
 
 val cubeLocations = arrayOf(floatArrayOf(-2f, 3f, 0f),
-                            floatArrayOf(-2f, 0f, 0f))
+                            floatArrayOf(0f, 0f, 0f))
 /*
                             floatArrayOf(-2f, -3f, 0f),
                             floatArrayOf(0f, 1.5f, 0f),
@@ -288,18 +290,20 @@ fun calculateSurfacePos(surface: Surface, cubePos: FloatArray): FloatArray {
     }
 }
 
-fun calculateFractalPos(index: IntArray, size: Int, targetIndex: IntArray, targetSize: Int, squareCenter: FloatArray): FloatArray {
-    var spacing = if(targetSize == 4) {
-        .25f //size of fractal (1x1)
-    }else { //==1
-        .4f //size of above times golden ratio
-    }
+//gets center of fractal of given size/index
+fun calculateFractalPos(index: IntArray, size: Int, squareCenter: FloatArray): FloatArray {
+    val SPACING = .4f
+    val topLeftX = squareCenter[0] - SPACING * (3)/2f + SPACING * index[0]
+    val topLeftY = squareCenter[1] + SPACING * (3)/2f - SPACING * index[1]
+    val halfWidth = (size - 1) * SPACING / 2f
+    return floatArrayOf(topLeftX + halfWidth, topLeftY - halfWidth, squareCenter[2])
+}
 
-    if(size == 1 && targetSize == 2) {
-        spacing = .25f
-    }
+fun calculateFractalPosForTarget(index: IntArray, size: Int, targetIndex: IntArray, targetSize: Int, squareCenter: FloatArray): FloatArray {
+    val targetCenter = calculateFractalPos(targetIndex, targetSize, squareCenter)
+    val halfWidth = (targetSize - 1) * .25f / 2f
 
-    return floatArrayOf(squareCenter[0] + spacing * (index[0] - 2) + spacing/2, squareCenter[1] - spacing * (index[1] - 2) - spacing/2, squareCenter[2])
+    return floatArrayOf(targetCenter[0] - halfWidth + .25f * (index[0] - targetIndex[0]), targetCenter[1] + halfWidth - .25f * (index[1] - targetIndex[1]), squareCenter[2])
 }
 
 
@@ -308,3 +312,6 @@ fun sigmoid(t: Float): Float {
     return 1f / (1f + exp(-15f * (t - .5f)))
 }
 
+fun pointDistance(x1: Float, y1: Float, x2: Float, y2: Float): Float {
+    return sqrt((x1 - x2).pow(2) + (y1 - y2).pow(2))
+}
