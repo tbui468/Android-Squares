@@ -30,6 +30,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mInputQueue = InputQueue()
     private var mOpeningCube: Cube? = null
     private var mClosingSquare = Surface.None
+    private var mMergeFractals: Array<Fractal>? = null
 
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
         GLES20.glClearColor(0.0f, 0.167f, .212f, 1f)
@@ -129,7 +130,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
 
     //open square is destroyed when animation is over, so just need to iterate over mSquares and find index that is missing
-    private fun getOpenSquare(): Surface {
+    //this should really be getOpenSquareSurface
+    private fun getOpenSquareSurface(): Surface {
         val found = BooleanArray(6){false}
         for(square in mSquares) {
             found[square.mSurface.value] = true
@@ -165,14 +167,85 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         //update data
         val index0 = fractal0.mIndex[0] + 4 * fractal0.mIndex[1]
         val index1 = fractal1.mIndex[0] + 4 * fractal1.mIndex[1]
-        puzzleData[getOpenCubeIndex()][getOpenSquare().value][index0] = puzzleData[getOpenCubeIndex()][getOpenSquare().value][index1].also {
-            puzzleData[getOpenCubeIndex()][getOpenSquare().value][index1] = puzzleData[getOpenCubeIndex()][getOpenSquare().value][index0]
+        puzzleData[getOpenCubeIndex()][getOpenSquareSurface().value][index0] = puzzleData[getOpenCubeIndex()][getOpenSquareSurface().value][index1].also {
+            puzzleData[getOpenCubeIndex()][getOpenSquareSurface().value][index1] = puzzleData[getOpenCubeIndex()][getOpenSquareSurface().value][index0]
         }
 
         //animate
         fractal0.moveTo(fractal1.pos)
         fractal1.moveTo(fractal0.pos)
         fractal0.mIndex = fractal1.mIndex.also {fractal1.mIndex = fractal0.mIndex}
+    }
+
+
+    private fun startMerge(corners: Array<Fractal>) {
+        var topLeftIndex = intArrayOf(100, 100)
+        for(c in corners) {
+            //update finding top left index
+            if((c.mIndex[0] + c.mIndex[1]) < (topLeftIndex[0] + topLeftIndex[1]))
+                topLeftIndex = c.mIndex
+        }
+
+        //animate based on top left fractal index and larger size
+        val squarePos = calculateSurfacePos(getOpenSquareSurface(), cubeLocations[getOpenCubeIndex()])
+
+        for(c in corners) {
+            c.moveTo(calculateFractalPos(c.mIndex, c.mSize, topLeftIndex, c.mSize * 2, squarePos))
+        }
+    }
+
+    private fun merge(corners: Array<Fractal>): Fractal {
+        val newSize = corners[0].mSize * 2
+
+        val elements = Array(newSize * newSize){FractalType.Red}
+
+        var topLeftIndex = intArrayOf(100, 100)
+        for(c in corners) {
+            //update finding top left index
+            if((c.mIndex[0] + c.mIndex[1]) < (topLeftIndex[0] + topLeftIndex[1]))
+                topLeftIndex = c.mIndex
+        }
+
+        for(c in corners) {
+            //fill in elements
+            for (row in 0 until c.mSize) {
+                for (col in 0 until c.mSize) {
+                    val newCol = col + c.mIndex[0] - topLeftIndex[0]
+                    val newRow = row + c.mIndex[1] - topLeftIndex[1]
+                    elements[newCol + newRow * newSize] = puzzleData[getOpenCubeIndex()][getOpenSquareSurface().value][c.mIndex[0] + col + 4 * (c.mIndex[1] + row)]
+                }
+            }
+        }
+
+        val squarePos = calculateSurfacePos(getOpenSquareSurface(), cubeLocations[getOpenCubeIndex()])
+        return Fractal(elements, newSize, topLeftIndex, squarePos)
+    }
+
+    private fun getCornerFractals(x: Float, y: Float): Array<Fractal>? {
+        var topLeft: Fractal? = null
+        var topRight: Fractal? = null
+        var bottomLeft: Fractal? = null
+        var bottomRight: Fractal? = null
+        for(fractal in mFractals) {
+            if(fractal.mIndex[0] == 0 && fractal.mIndex[1] == 0 && fractal.mSize == 1) {
+                topLeft = fractal
+            }
+            if(fractal.mIndex[0] == 1 && fractal.mIndex[1] == 0 && fractal.mSize == 1) {
+                topRight = fractal
+            }
+            if(fractal.mIndex[0] == 0 && fractal.mIndex[1] == 1 && fractal.mSize == 1) {
+                bottomLeft = fractal
+            }
+            if(fractal.mIndex[0] == 1 && fractal.mIndex[1] == 1 && fractal.mSize == 1) {
+                bottomRight = fractal
+            }
+        }
+
+        if(topLeft == null || topRight == null || bottomLeft == null || bottomRight == null)
+            return null
+
+        return arrayOf(topLeft, topRight, bottomLeft, bottomRight)
+
     }
 
     private fun dispatchCommand(touchType: TouchType, x: Float, y: Float): Boolean {
@@ -233,12 +306,30 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                     return true
                                 }
                             }
+                            TouchType.PinchOut -> {
+                                if(fractal.mSize > 1) {
+                                    //split(fractal)
+                                    return true
+                                }
+                            }
                         }
                     }
                 }
 
+                if(touchType == TouchType.PinchIn) {
+                    Log.d("kouch", "in pinch")
+                    val cornerFractals = getCornerFractals(x, y)
+                    if(cornerFractals != null) {
+                        Log.d("kouch", "before start merge")
+                        startMerge(cornerFractals)
+                        Log.d("kouch", "after start merge")
+                        mMergeFractals = cornerFractals
+                        return true
+                    }
+                }
+
                 if(touchType == TouchType.Tap) {
-                    closeSquare(getOpenSquare())
+                    closeSquare(getOpenSquareSurface())
                     return true
                 }
             }
@@ -276,6 +367,14 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             mFractals.clear()
             mSquares.add(Cube.spawnSquare(puzzleData[getOpenCubeIndex()][mClosingSquare.value], mClosingSquare, getOpenCubeIndex()))
             mClosingSquare = Surface.None
+        }
+
+        if(mMergeFractals != null) {
+            mFractals.add(merge(mMergeFractals!!))
+            for(fractal in mMergeFractals!!) {
+                mFractals.remove(fractal)
+            }
+            mMergeFractals = null
         }
         //////////////////////////////////////////////////////////////////////////////////////////
     }

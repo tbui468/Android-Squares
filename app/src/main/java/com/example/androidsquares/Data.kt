@@ -228,8 +228,8 @@ val surfaceModels = Array(6){FloatArray(16)}.also {
 }
 
 val puzzle00 = arrayOf(
-        FractalType.Red, FractalType.Empty, FractalType.Green, FractalType.Empty,
-        FractalType.Normal, FractalType.Normal, FractalType.Normal, FractalType.Blue,
+        FractalType.Red, FractalType.Green, FractalType.Green, FractalType.Empty,
+        FractalType.Blue, FractalType.Normal, FractalType.Normal, FractalType.Blue,
         FractalType.Green, FractalType.Red, FractalType.Empty, FractalType.Normal,
         FractalType.Blue, FractalType.Empty, FractalType.Green, FractalType.Blue)
 
@@ -272,7 +272,10 @@ val cubeLocations = arrayOf(floatArrayOf(-2f, 3f, 0f),
 
 //location of surfaces with the front surface facing the user (when cube is unfolded)
 //need cube pos, max margin, cube scale and cube object size
-fun calculateSurfacePos(surface: Surface, cubePos: FloatArray, cubeMaxMargin: Float, cubeScale: FloatArray, cubeSize: Int): FloatArray {
+fun calculateSurfacePos(surface: Surface, cubePos: FloatArray): FloatArray {
+    val cubeMaxMargin = 2.47f
+    val cubeScale = floatArrayOf(.25f, .25f, .25f)
+    val cubeSize = 4
     val zPos = cubePos[2] + cubeScale[0] * cubeSize / 2f
     return when(surface) {
         Surface.Front -> floatArrayOf(cubePos[0], cubePos[1] - .5f * cubeMaxMargin * cubeScale[0], zPos)
@@ -285,13 +288,18 @@ fun calculateSurfacePos(surface: Surface, cubePos: FloatArray, cubeMaxMargin: Fl
     }
 }
 
-fun calculateFractalPos(index: IntArray, size: Int, targetIndex: IntArray, targetSize: Int, center: FloatArray): FloatArray {
-    val spacing = if(targetSize == 4) {
+fun calculateFractalPos(index: IntArray, size: Int, targetIndex: IntArray, targetSize: Int, squareCenter: FloatArray): FloatArray {
+    var spacing = if(targetSize == 4) {
         .25f //size of fractal (1x1)
     }else { //==1
         .4f //size of above times golden ratio
     }
-    return floatArrayOf(center[0] + spacing * (index[0] - 2) + spacing/2, center[1] - spacing * (index[1] - 2) - spacing/2, center[2])
+
+    if(size == 1 && targetSize == 2) {
+        spacing = .25f
+    }
+
+    return floatArrayOf(squareCenter[0] + spacing * (index[0] - 2) + spacing/2, squareCenter[1] - spacing * (index[1] - 2) - spacing/2, squareCenter[2])
 }
 
 

@@ -1,5 +1,10 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
+    //need to actually finish calculateFractalPos(....) it's mostly place holder for now
+
+    //currently merging is using the top left four 1x1 fractals to merge - make it dependent on touch coords
+        //eg implement getCornerFractals()
+
     //allow users to form fractals - pinch in
     //allow users to split fractals - pinch out
     //allow users to rotate/reflect fractals

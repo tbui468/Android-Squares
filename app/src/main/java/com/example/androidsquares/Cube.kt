@@ -26,7 +26,7 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
 
     companion object {
         fun spawnSquare(elements: Array<FractalType>, surface: Surface, cubeIndex: Int): Square {
-            return Square(elements, calculateSurfacePos(surface, cubeLocations[cubeIndex], 2.47f, floatArrayOf(.25f, .25f, .25f), 4), surface)
+            return Square(elements, calculateSurfacePos(surface, cubeLocations[cubeIndex]), surface)
         }
     }
 
@@ -101,12 +101,12 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
     }
 
    fun spawnSquares(elements: Array<Array<FractalType>>): MutableList<Square>{
-        return mutableListOf(Square(elements[Surface.Front.value], calculateSurfacePos(Surface.Front, pos, MAX_MARGIN, scale, size), Surface.Front),
-                            Square(elements[Surface.Back.value], calculateSurfacePos(Surface.Back, pos, MAX_MARGIN, scale, size), Surface.Back),
-                            Square(elements[Surface.Left.value], calculateSurfacePos(Surface.Left, pos, MAX_MARGIN, scale, size ), Surface.Left),
-                            Square(elements[Surface.Right.value], calculateSurfacePos(Surface.Right, pos, MAX_MARGIN, scale, size ), Surface.Right),
-                            Square(elements[Surface.Top.value], calculateSurfacePos(Surface.Top, pos, MAX_MARGIN, scale, size ), Surface.Top),
-                            Square(elements[Surface.Bottom.value], calculateSurfacePos(Surface.Bottom, pos, MAX_MARGIN, scale, size ), Surface.Bottom))
+        return mutableListOf(Square(elements[Surface.Front.value], calculateSurfacePos(Surface.Front, pos), Surface.Front),
+                            Square(elements[Surface.Back.value], calculateSurfacePos(Surface.Back, pos), Surface.Back),
+                            Square(elements[Surface.Left.value], calculateSurfacePos(Surface.Left, pos), Surface.Left),
+                            Square(elements[Surface.Right.value], calculateSurfacePos(Surface.Right, pos), Surface.Right),
+                            Square(elements[Surface.Top.value], calculateSurfacePos(Surface.Top, pos), Surface.Top),
+                            Square(elements[Surface.Bottom.value], calculateSurfacePos(Surface.Bottom, pos), Surface.Bottom))
    }
 
     override fun onUpdate(t: Float) {

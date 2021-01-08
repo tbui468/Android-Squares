@@ -62,7 +62,7 @@ class Square(elements: Array<FractalType>, pos: FloatArray, surface: Surface) : 
         }
     }
 
-
+    //all of size 1 - used when opening square for the first time
     fun spawnFractals(elements: Array<FractalType>): MutableList<Fractal> {
         val list = mutableListOf<Fractal>()
         for(i in elements.indices) {
@@ -71,7 +71,6 @@ class Square(elements: Array<FractalType>, pos: FloatArray, surface: Surface) : 
         }
         return list
     }
-
 
     override fun draw(vpMatrix: FloatArray) {
         val scaleM = FloatArray(16)
