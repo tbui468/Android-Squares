@@ -1,6 +1,6 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //allow users to rotate/reflect fractals - include modifying game data
+    //implement CollisionBox return types in Entity
 
     //allow users to swap/rotate/reflect squares
         //instead of using surfaces, it might be easier to treat square surfaces the same as fractals with indices start from top left

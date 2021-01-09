@@ -66,16 +66,17 @@ interface Transformable {
 }
 
 open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
-    private var COLLISION_PADDING = 1.5f //collisions boxes are 50% bigger than size
+    private var COLLISION_PADDING = 1.0f //collisions boxes are 50% bigger than size
     private var fromPos = pos
     private var toPos = pos
 
     private var fromScale = scale
     private var toScale = scale
 
-    var angle = floatArrayOf(0f, 0f, 0f)
-    private var fromAngle = floatArrayOf(0f, 0f, 0f)
-    private var toAngle = floatArrayOf(0f, 0f, 0f)
+    var angle = 0f
+    private var fromAngle = 0f
+    private var toAngle = 0f
+    var rotationAxis = floatArrayOf(0f, 0f, 1f)
 
     var alpha = 1f
     private var fromAlpha = 1f
@@ -83,6 +84,7 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
 
     open fun onUpdate(t: Float) {
         pos = floatArrayOf(fromPos[0] + (toPos[0] - fromPos[0]) * t, fromPos[1] + (toPos[1] - fromPos[1]) * t, fromPos[2] + (toPos[2] - fromPos[2]) * t)
+        angle = fromAngle + (toAngle - fromAngle) * t
         alpha = fromAlpha + (toAlpha - fromAlpha) * t
     }
 
@@ -110,9 +112,10 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
         fromScale = scale
         toScale = newScale
     }
-    fun rotateTo(newAngle: FloatArray) {
+    fun rotateTo(newAngle: Float, axis: FloatArray) {
         fromAngle = angle
         toAngle = newAngle
+        rotationAxis = axis
     }
 
     //returns lower left, and upper right corners of projected collision box on screen
@@ -131,13 +134,13 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
         return floatArrayOf(center[0]/center[3] - halfDis, center[1]/center[3] - halfDis, center[0]/center[3] + halfDis, center[1]/center[3] + halfDis)
     }
 
-    fun pointCollision(mouseX: Float, mouseY: Float): Boolean {
+    fun pointCollision(mouseX: Float, mouseY: Float): CollisionBox {
         val projBox = getScreenCoords()
 
-        if(mouseX < projBox[0]) return false
-        if(mouseX > projBox[2]) return false
-        if(mouseY < projBox[1]) return false
-        if(mouseY > projBox[3]) return false
-        return true
+        if(mouseX < projBox[0]) return CollisionBox.None
+        if(mouseX > projBox[2]) return CollisionBox.None
+        if(mouseY < projBox[1]) return CollisionBox.None
+        if(mouseY > projBox[3]) return CollisionBox.None
+        return CollisionBox.Center
     }
 }

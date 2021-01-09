@@ -81,7 +81,7 @@ class Square(elements: Array<FractalType>, pos: FloatArray, surface: Surface) : 
 
         val rotateM = FloatArray(16)
         Matrix.setIdentityM(rotateM, 0)
-        Matrix.rotateM(rotateM, 0, angle[2], 0f, 1f, 2f)
+        Matrix.rotateM(rotateM, 0, angle, rotationAxis[0], rotationAxis[1], rotationAxis[2])
 
         val translationM = FloatArray(16)
         Matrix.setIdentityM(translationM, 0)

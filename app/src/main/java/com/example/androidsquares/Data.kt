@@ -30,6 +30,19 @@ const val FLOAT_SIZE = 4
 const val SHORT_SIZE = 2
 const val FLOATS_PER_QUAD = 4 * 5 //four vertices, and 5 floats per vertex
 
+enum class CollisionBox {
+    None,
+    Center,
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
+    Top,
+    Left,
+    Right,
+    Bottom
+}
+
 enum class Screen {
     Cube, Square, Fractal
 }
@@ -230,10 +243,10 @@ val surfaceModels = Array(6){FloatArray(16)}.also {
 }
 
 val puzzle00 = arrayOf(
-        FractalType.Red, FractalType.Green, FractalType.Green, FractalType.Empty,
+        FractalType.Red, FractalType.Green, FractalType.Green, FractalType.Red,
         FractalType.Blue, FractalType.Normal, FractalType.Normal, FractalType.Blue,
-        FractalType.Green, FractalType.Red, FractalType.Empty, FractalType.Normal,
-        FractalType.Blue, FractalType.Empty, FractalType.Green, FractalType.Blue)
+        FractalType.Green, FractalType.Red, FractalType.Normal, FractalType.Normal,
+        FractalType.Blue, FractalType.Red, FractalType.Green, FractalType.Blue)
 
 val puzzle01 = arrayOf(
         FractalType.Empty, FractalType.Empty, FractalType.Green, FractalType.Empty,

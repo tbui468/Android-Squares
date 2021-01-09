@@ -12,7 +12,6 @@ import android.util.Log
 import android.opengl.Matrix
 import android.opengl.GLES20
 
-//class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, squarePos: FloatArray):
 class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, pos: FloatArray): Entity(pos, floatArrayOf(.25f, .25f, .25f), size), Transformable {
 
     val mIndexCount: Int //for rendering
@@ -102,7 +101,7 @@ class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, p
 
         val rotateM = FloatArray(16)
         Matrix.setIdentityM(rotateM, 0)
-        Matrix.rotateM(rotateM, 0, angle[2], 0f, 1f, 2f)
+        Matrix.rotateM(rotateM, 0, angle, rotationAxis[0], rotationAxis[1], rotationAxis[2])
 
         val translationM = FloatArray(16)
         Matrix.setIdentityM(translationM, 0)
