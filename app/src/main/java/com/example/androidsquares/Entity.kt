@@ -66,7 +66,7 @@ interface Transformable {
 }
 
 open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
-    private var COLLISION_PADDING = 1.0f //collisions boxes are 50% bigger than size
+    private var COLLISION_PADDING = 1.3f //collisions boxes are 50% bigger than size
     private var fromPos = pos
     private var toPos = pos
 
@@ -127,20 +127,91 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
         //need to project collision boxes too????? - answer: Yes
         //collision boxes are only 2 dimensions, so putting y dimension in for z as a placeholder for matrix/vector multiplication
         val corner = FloatArray(4)
-        Matrix.multiplyMV(corner, 0, SquaresRenderer.mVPMatrix, 0, floatArrayOf(pos[0] + COLLISION_PADDING * size * scale[0]/2f, pos[1], pos[2], 1f), 0)
+        Matrix.multiplyMV(corner, 0, SquaresRenderer.mVPMatrix, 0,
+                floatArrayOf(pos[0] + COLLISION_PADDING * size * scale[0]/2f,
+                            pos[1] + COLLISION_PADDING * size * scale[1]/2f,
+                                pos[2], 1f), 0)
 
-        val halfDis = abs(corner[0]/corner[3] - center[0]/center[3])
+        val halfDisX = abs(corner[0]/corner[3] - center[0]/center[3])
+        val halfDisY = abs(corner[1]/corner[3] - center[1]/center[3])
 
-        return floatArrayOf(center[0]/center[3] - halfDis, center[1]/center[3] - halfDis, center[0]/center[3] + halfDis, center[1]/center[3] + halfDis)
+        return floatArrayOf(center[0]/center[3] - halfDisX, center[1]/center[3] - halfDisY, center[0]/center[3] + halfDisX, center[1]/center[3] + halfDisY)
+    }
+
+    fun leftCollision(x: Float, y: Float): Boolean {
+        val projBox = getScreenCoords()
+        val cornerDim = abs(projBox[0] - projBox[2])/3f
+
+        if(y < projBox[1] || y > projBox[3])
+            return false
+
+        if(x < projBox[0] + cornerDim && x > projBox[0])
+            return true
+
+        return false
+    }
+
+    fun rightCollision(x: Float, y: Float): Boolean {
+        val projBox = getScreenCoords()
+        val cornerDim = abs(projBox[0] - projBox[2])/3f
+
+        if(y < projBox[1] || y > projBox[3])
+            return false
+
+        if(x > projBox[2] - cornerDim && x < projBox[2])
+            return true
+
+        return false
+    }
+
+    fun topCollision(x: Float, y: Float): Boolean {
+        val projBox = getScreenCoords()
+        val cornerDim = abs(projBox[1] - projBox[3])/3f
+
+        if(x < projBox[0] || x > projBox[2])
+            return false
+
+        if(y > projBox[3] - cornerDim && y < projBox[3])
+            return true
+
+        return false
+    }
+
+    fun bottomCollision(x: Float, y: Float): Boolean {
+        val projBox = getScreenCoords()
+        val cornerDim = abs(projBox[1] - projBox[3])/3f
+
+        if(x < projBox[0] || x > projBox[2])
+            return false
+
+        if(y < projBox[1] + cornerDim && y > projBox[1])
+            return true
+
+        return false
+    }
+
+    //note: center collision will overlap with edge collisions (top, bottom, left, right), so check those first before calling pointCollision
+    fun centerCollision(x: Float, y: Float): Boolean {
+        val projBox = getScreenCoords()
+
+        //check if outside box
+        if(x < projBox[0]) return false
+        if(x > projBox[2]) return false
+        if(y < projBox[1]) return false
+        if(y > projBox[3]) return false
+
+        return true
     }
 
     fun pointCollision(mouseX: Float, mouseY: Float): CollisionBox {
         val projBox = getScreenCoords()
 
+        //check if outside box
         if(mouseX < projBox[0]) return CollisionBox.None
         if(mouseX > projBox[2]) return CollisionBox.None
         if(mouseY < projBox[1]) return CollisionBox.None
         if(mouseY > projBox[3]) return CollisionBox.None
+
         return CollisionBox.Center
     }
 }

@@ -1,14 +1,13 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //implement CollisionBox return types in Entity
 
     //allow users to swap/rotate/reflect squares
-        //instead of using surfaces, it might be easier to treat square surfaces the same as fractals with indices start from top left
+        //instead of using Surfaces enum, it might be easier to treat square surfaces the same as fractals with indices start from top left
 
     //load default data from Data.kt
     //save data to preferences (since this is so much easier than using a database)
 
-    //puzzle clearing conditions
+    //puzzle clearing conditions (connecting all colors will trigger a clear condition)
 
     //order of drawing is out of order since call objects are at 0f in the z-axis
     //one option is to move active cube/square closer to camera (move in the positive z direction) so that there isn't any z fighting/undefined depth problems
@@ -21,6 +20,8 @@
     //have all empty fractals crashes everything bc my removal of vertices belonging to empty fractals was messy
 
     //idea: have a shader that changes color theme inside each complete cube
+
+    //holding finger down highlights what part of the cube you are touch (center, edge or corner) so that user learns where to touch to transform
 
 package com.example.androidsquares
 

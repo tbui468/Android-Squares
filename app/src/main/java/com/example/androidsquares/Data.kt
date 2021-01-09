@@ -305,7 +305,7 @@ fun calculateSurfacePos(surface: Surface, cubePos: FloatArray): FloatArray {
 
 //gets center of fractal of given size/index
 fun calculateFractalPos(index: IntArray, size: Int, squareCenter: FloatArray): FloatArray {
-    val SPACING = .4f
+    val SPACING = .35f
     val topLeftX = squareCenter[0] - SPACING * (3)/2f + SPACING * index[0]
     val topLeftY = squareCenter[1] + SPACING * (3)/2f - SPACING * index[1]
     val halfWidth = (size - 1) * SPACING / 2f
@@ -313,7 +313,7 @@ fun calculateFractalPos(index: IntArray, size: Int, squareCenter: FloatArray): F
 }
 
 fun calculateFractalPosForTarget(index: IntArray, size: Int, targetIndex: IntArray, targetSize: Int, squareCenter: FloatArray): FloatArray {
-    val SPACING = .4f * size
+    val SPACING = .35f * size
     val targetCenter = calculateFractalPos(targetIndex, targetSize, squareCenter)
     val halfWidth = (targetSize - 1) * .25f / 2f
 

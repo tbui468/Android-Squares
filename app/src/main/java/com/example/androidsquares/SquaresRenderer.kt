@@ -82,7 +82,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun openSquare(square: Square) {
-        mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 5f))
+        mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4f))
         mFractals = square.spawnFractals(puzzleData[getOpenCubeIndex()][square.mSurface.value])
         for(fractal in mFractals) {
             fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos))
@@ -293,7 +293,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mRecreateFractal = fractal
     }
 
-    private fun reflectX(fractal: Fractal, leftPushed: Boolean) {
+    private fun reflectX(fractal: Fractal, topPushed: Boolean) {
         //update data
         val elements = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal.mIndex, fractal.mSize)
         val elemCopy = elements.copyOf()
@@ -304,12 +304,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         setElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal.mIndex, elements)
 
-        if(leftPushed) fractal.rotateTo(180f, floatArrayOf(1f, 0f, 0f))
-        else fractal.rotateTo(-180f, floatArrayOf(1f, 0f, 0f))
+        if(topPushed) fractal.rotateTo(-180f, floatArrayOf(1f, 0f, 0f))
+        else fractal.rotateTo(180f, floatArrayOf(1f, 0f, 0f))
         mRecreateFractal = fractal
     }
 
-    private fun reflectY(fractal: Fractal, topPushed: Boolean) {
+    private fun reflectY(fractal: Fractal, leftPushed: Boolean) {
         //update data
         val elements = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal.mIndex, fractal.mSize)
         val elemCopy = elements.copyOf()
@@ -320,8 +320,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         setElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal.mIndex, elements)
 
-        if(topPushed) fractal.rotateTo(180f, floatArrayOf(0f, 1f, 0f))
-        else fractal.rotateTo(-180f, floatArrayOf(0f, 1f, 0f))
+        if(leftPushed) fractal.rotateTo(-180f, floatArrayOf(0f, 1f, 0f))
+        else fractal.rotateTo(180f, floatArrayOf(0f, 1f, 0f))
         mRecreateFractal = fractal
     }
 
@@ -499,48 +499,84 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 for (fractal in mFractals) {
                     when(touchType) {
                         TouchType.FlickLeft -> {
-                            if (fractal.pointCollision(x, y) == CollisionBox.Center && false) { //temp disabling to test rotations
+                            if(fractal.topCollision(x, y) && fractal.mSize > 1) { //rotate ccw
+                                rotateCCW(fractal)
+                                return true
+                            }else if(fractal.bottomCollision(x, y) && fractal.mSize > 1) { //rotate cw
+                                rotateCW(fractal)
+                                return true
+                            }else if(fractal.centerCollision(x, y)) {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, fractal.mIndex[1]))
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
                                     swap(fractal, swappedFractal)
                                     return true
                                 }
-                            }else if(fractal.pointCollision(x, y) == CollisionBox.Center && fractal.mSize > 1) { //rotate ccw
-                                //rotateCCW(fractal)
-                                reflectX(fractal, true)
-                                return true
-                            }else if(fractal.pointCollision(x, y) == CollisionBox.BottomRight && fractal.mSize > 1) { //rotate cw
-                                rotateCW(fractal)
-                                return true
                             }
                         }
                         TouchType.FlickRight -> {
-                            val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1]))
-                            if(swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
-                                swap(fractal, swappedFractal)
+                            if(fractal.topCollision(x, y) && fractal.mSize > 1) { //rotate ccw
+                                rotateCW(fractal)
                                 return true
+                            }else if(fractal.bottomCollision(x, y) && fractal.mSize > 1) { //rotate cw
+                                rotateCCW(fractal)
+                                return true
+                            }else if(fractal.centerCollision(x, y)) {
+                                val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1]))
+                                if (swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
+                                    swap(fractal, swappedFractal)
+                                    return true
+                                }
                             }
                         }
                         TouchType.FlickUp -> {
-                            val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
-                            if(swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
-                                swap(fractal, swappedFractal)
+                            if(fractal.leftCollision(x, y) && fractal.mSize > 1) { //rotate ccw
+                                rotateCW(fractal)
                                 return true
+                            }else if(fractal.rightCollision(x, y) && fractal.mSize > 1) { //rotate cw
+                                rotateCCW(fractal)
+                                return true
+                            }else if(fractal.centerCollision(x, y)) {
+                                val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
+                                if (swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
+                                    swap(fractal, swappedFractal)
+                                    return true
+                                }
                             }
                         }
                         TouchType.FlickDown -> {
-                            val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize))
-                            if(swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
-                                swap(fractal, swappedFractal)
+                            if(fractal.leftCollision(x, y) && fractal.mSize > 1) { //rotate ccw
+                                rotateCCW(fractal)
                                 return true
+                            }else if(fractal.rightCollision(x, y) && fractal.mSize > 1) { //rotate cw
+                                rotateCW(fractal)
+                                return true
+                            }else if(fractal.centerCollision(x, y)) {
+                                val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize))
+                                if (swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
+                                    swap(fractal, swappedFractal)
+                                    return true
+                                }
                             }
                         }
                         TouchType.PinchOut -> {
-                            if (fractal.pointCollision(x, y) == CollisionBox.Center) {
-                                if (fractal.mSize > 1) {
-                                    split(fractal)
-                                    return true
-                                }
+                            if (fractal.centerCollision(x, y) && fractal.mSize > 1) {
+                                split(fractal)
+                                return true
+                            }
+                        }
+                        TouchType.Tap -> {
+                            if(fractal.leftCollision(x, y)) {
+                                reflectY(fractal, true)
+                                return true
+                            }else if(fractal.rightCollision(x, y)) {
+                                reflectY(fractal, false)
+                                return true
+                            }else if(fractal.topCollision(x, y)) {
+                                reflectX(fractal, true)
+                                return true
+                            }else if(fractal.bottomCollision(x, y)) {
+                                reflectX(fractal, false)
+                                return true
                             }
                         }
                     }
@@ -608,7 +644,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         if(mRecreateFractal != null) {
             mFractals.add(Fractal(getElements(getOpenCubeIndex(), getOpenSquareSurface().value, mRecreateFractal!!.mIndex, mRecreateFractal!!.mSize),
-                         mRecreateFractal!!.mSize, mRecreateFractal!!.mIndex, mRecreateFractal!!.pos))
+                    mRecreateFractal!!.mSize, mRecreateFractal!!.mIndex, mRecreateFractal!!.pos))
             mFractals.remove(mRecreateFractal!!)
             mRecreateFractal = null
         }
