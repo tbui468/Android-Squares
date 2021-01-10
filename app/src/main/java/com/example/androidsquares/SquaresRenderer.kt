@@ -63,7 +63,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         cube.open()
         mOpeningCube = cube
-        mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] * cube.size / 2f, 12f)) //center camera on unfolded front/top surface of cubes
+        mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] * cube.size / 2f, 10f)) //center camera on unfolded front/top surface of cubes
     }
 
     private fun closeCube(cubeIndex: Int) {
@@ -101,7 +101,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         for (fractal in mFractals) {
             fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, intArrayOf(0, 0), 4, squarePos))
         }
-        mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1] + .25f * 4f / 2f, 12f))
+        mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1] + .25f * 4f / 2f, 10f))
 
         for(s in mSquares) {
             s.fadeTo(1f)
@@ -565,16 +565,16 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                             }
                         }
                         TouchType.Tap -> {
-                            if(fractal.leftCollision(x, y)) {
+                            if(fractal.leftCollision(x, y) && fractal.mSize > 1) {
                                 reflectY(fractal, true)
                                 return true
-                            }else if(fractal.rightCollision(x, y)) {
+                            }else if(fractal.rightCollision(x, y) && fractal.mSize > 1) {
                                 reflectY(fractal, false)
                                 return true
-                            }else if(fractal.topCollision(x, y)) {
+                            }else if(fractal.topCollision(x, y) && fractal.mSize > 1) {
                                 reflectX(fractal, true)
                                 return true
-                            }else if(fractal.bottomCollision(x, y)) {
+                            }else if(fractal.bottomCollision(x, y) && fractal.mSize > 1) {
                                 reflectX(fractal, false)
                                 return true
                             }
@@ -660,7 +660,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         //delta time
         mPreviousTime = mCurrentTime
         mCurrentTime = SystemClock.uptimeMillis()
-        val deltaTime = 0.001f * (mCurrentTime - mPreviousTime).toInt()
+        val deltaTime = 0.0015f * (mCurrentTime - mPreviousTime).toInt()
 
 
         //only want to call onAnimationEnd() once per animation

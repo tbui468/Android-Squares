@@ -16,7 +16,7 @@ class Cube(elements: Array<Array<FractalType>>, index: Int, open: Boolean): Enti
     private var mMargin = 0f
     private var mToMargin = 0f
     private var mFromMargin = 0f
-    val MAX_MARGIN = 2.47f
+    val MAX_MARGIN = 1.16f
     private var mVertexBuffer: Array<FloatBuffer>
     private var mIndexBuffer: Array<ShortBuffer>
     private val mModelMatrix = FloatArray(16) //cube model

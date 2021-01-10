@@ -1,11 +1,16 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-
     //allow users to swap/rotate/reflect squares
         //instead of using Surfaces enum, it might be easier to treat square surfaces the same as fractals with indices start from top left
+        //use the same two value index for squares so that square positions can be calculated based in index (similar to fractals)
+        //will need make cube opening more flexible - here's a good change to get the final architecture in
+
+    //do the same thing with cubes??????
+        //will require transformation of cubes - how will I do this if the cubes are rotating???
 
     //load default data from Data.kt
     //save data to preferences (since this is so much easier than using a database)
+        //save puzzle data as single string per puzzle.  Can parse on load to get fractal types
 
     //puzzle clearing conditions (connecting all colors will trigger a clear condition)
 

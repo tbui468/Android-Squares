@@ -288,7 +288,7 @@ val cubeLocations = arrayOf(floatArrayOf(-2f, 3f, 0f),
 //location of surfaces with the front surface facing the user (when cube is unfolded)
 //need cube pos, max margin, cube scale and cube object size
 fun calculateSurfacePos(surface: Surface, cubePos: FloatArray): FloatArray {
-    val cubeMaxMargin = 2.47f
+    val cubeMaxMargin = 1.16f
     val cubeScale = floatArrayOf(.25f, .25f, .25f)
     val cubeSize = 4
     val zPos = cubePos[2] + cubeScale[0] * cubeSize / 2f
