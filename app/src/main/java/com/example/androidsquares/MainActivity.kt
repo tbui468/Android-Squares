@@ -1,5 +1,10 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
+    //problem - there isn't enough integration with current puzzles -
+        //it feels like a cluster of random colors (it should feel like I'm connection colors together into lines/trees
+        //could add more darks colors
+        //keep in mind that all the colors needs to connect on the surface of the cube
+
     //puzzle clearing conditions (connecting all colors will trigger a clear condition)
         //need non-moveable fractals (either within the 4x4 grid or hanging off the sides)
 

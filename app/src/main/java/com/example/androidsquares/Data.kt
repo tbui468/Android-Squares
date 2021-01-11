@@ -336,22 +336,83 @@ val cubeData1: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal
 
 
 val puzzle20 = arrayOf(
-        FractalType.Empty, FractalType.Blue, FractalType.Red, FractalType.Empty,
+        FractalType.Empty, FractalType.Blue, FractalType.Green, FractalType.Empty,
         FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.Empty,
         FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.Empty,
-        FractalType.Empty, FractalType.RedB, FractalType.BlueB, FractalType.Empty)
+        FractalType.Empty, FractalType.GreenB, FractalType.BlueB, FractalType.Empty)
+
+val puzzle21 = arrayOf(
+        FractalType.Empty, FractalType.Empty, FractalType.GreenB, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Blue, FractalType.Empty,
+        FractalType.Empty, FractalType.Green, FractalType.Normal, FractalType.Empty,
+        FractalType.BlueB, FractalType.Normal, FractalType.Blue, FractalType.BlueB)
+
+val puzzle22 = arrayOf(
+        FractalType.Empty, FractalType.Red, FractalType.Empty, FractalType.Empty,
+        FractalType.BlueB, FractalType.Normal, FractalType.Green, FractalType.GreenB,
+        FractalType.Empty, FractalType.Normal, FractalType.Blue, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.RedB, FractalType.Empty)
+
+val puzzle23 = arrayOf(
+        FractalType.Green, FractalType.Blue, FractalType.RedB, FractalType.Empty,
+        FractalType.Normal, FractalType.Normal, FractalType.GreenB, FractalType.BlueB,
+        FractalType.Normal, FractalType.Green, FractalType.Normal, FractalType.Red,
+        FractalType.Normal, FractalType.Normal, FractalType.Normal, FractalType.Green)
+
+val puzzle24 = arrayOf(
+        FractalType.Empty, FractalType.RedB, FractalType.Empty, FractalType.GreenB,
+        FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.Red,
+        FractalType.Blue, FractalType.Normal, FractalType.Normal, FractalType.Green,
+        FractalType.Empty, FractalType.Empty, FractalType.BlueB, FractalType.Empty)
+
+val puzzle25 = arrayOf(
+        FractalType.Empty, FractalType.Empty, FractalType.BlueB, FractalType.RedB,
+        FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.Normal,
+        FractalType.Blue, FractalType.Green, FractalType.Red, FractalType.Normal,
+        FractalType.Normal, FractalType.Normal, FractalType.GreenB, FractalType.Empty)
+
+
+val cubeData2: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal}}.also {
+    it[Surface.Front.value] = puzzle20
+    it[Surface.Back.value] = puzzle21
+    it[Surface.Left.value] = puzzle22
+    it[Surface.Right.value] = puzzle23
+    it[Surface.Top.value] = puzzle24
+    it[Surface.Bottom.value] = puzzle25
+}
+
+val puzzle30 = arrayOf(
+        FractalType.Empty, FractalType.Empty, FractalType.Normal, FractalType.RedB,
+        FractalType.Empty, FractalType.Red, FractalType.Normal, FractalType.Normal,
+        FractalType.Normal, FractalType.Normal, FractalType.Green, FractalType.Empty,
+        FractalType.GreenB, FractalType.Normal, FractalType.Empty, FractalType.Empty)
+
+val puzzle31 = arrayOf(
+        FractalType.Empty, FractalType.GreenB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Normal, FractalType.Blue, FractalType.Empty,
+        FractalType.Red, FractalType.Normal, FractalType.Normal, FractalType.Red,
+        FractalType.BlueB, FractalType.Green, FractalType.Empty, FractalType.Empty)
+
+val cubeData3: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal}}.also {
+    it[Surface.Front.value] = puzzle30
+    it[Surface.Back.value] = puzzle31
+    it[Surface.Left.value] = puzzle30
+    it[Surface.Right.value] = puzzle30
+    it[Surface.Top.value] = puzzle30
+    it[Surface.Bottom.value] = puzzle30
+}
 
 //three colors - 4 transformations
 //four colors - 4 transformations
 //four colors - 4 transformations
 
-val puzzleData = arrayOf(cubeData0, cubeData1)
+val puzzleData = arrayOf(cubeData0, cubeData1, cubeData2, cubeData3)
 
 val cubeLocations = arrayOf(floatArrayOf(-2f, 3f, 0f),
-                            floatArrayOf(0f, 0f, 0f))
-/*
+                            floatArrayOf(0f, 0f, 0f),
                             floatArrayOf(-2f, -3f, 0f),
-                            floatArrayOf(0f, 1.5f, 0f),
+                            floatArrayOf(2f, -3f, 0f))
+/*
                             floatArrayOf(0f, -1.5f, 0f),
                             floatArrayOf(2f, 3f, 0f),
                             floatArrayOf(2f, 0f, 0f),
