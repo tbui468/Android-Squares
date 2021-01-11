@@ -5,51 +5,93 @@ import kotlin.math.abs
 
 interface Transformable {
     fun draw(vpMatrix: FloatArray)
+
+    //note: texture coords start from top left corner, whereas vertex coords start from lower left (going ccw as index increases)
     fun setTexture(vertices: FloatArray, size: Int, col: Int, row: Int, type: FractalType) {
         val textureIndex = IntArray(4)
         for(i in 0 until 4) {
             textureIndex[i] = (row * size + col) * FLOATS_PER_QUAD + 3 + i * 5
         }
         when (type) {
-            FractalType.Red -> {
-                vertices[textureIndex[0]] = .5f
-                vertices[textureIndex[0] + 1] = .5f
-                vertices[textureIndex[1]] = 1f
-                vertices[textureIndex[1] + 1] = .5f
-                vertices[textureIndex[2]] = 1f
+            FractalType.Normal -> {
+                vertices[textureIndex[0]] = 0f
+                vertices[textureIndex[0] + 1] = .25f
+                vertices[textureIndex[1]] = .25f
+                vertices[textureIndex[1] + 1] = .25f
+                vertices[textureIndex[2]] = .25f
                 vertices[textureIndex[2] + 1] = 0f
-                vertices[textureIndex[3]] = .5f
+                vertices[textureIndex[3]] = 0f
+                vertices[textureIndex[3] + 1] = 0f
+            }
+            FractalType.Red -> {
+                vertices[textureIndex[0]] = .25f
+                vertices[textureIndex[0] + 1] = .25f
+                vertices[textureIndex[1]] = .5f
+                vertices[textureIndex[1] + 1] = .25f
+                vertices[textureIndex[2]] = .5f
+                vertices[textureIndex[2] + 1] = 0f
+                vertices[textureIndex[3]] = .25f
                 vertices[textureIndex[3] + 1] = 0f
             }
             FractalType.Green -> {
                 vertices[textureIndex[0]] = 0f
-                vertices[textureIndex[0] + 1] = 1f
-                vertices[textureIndex[1]] = .5f
-                vertices[textureIndex[1] + 1] = 1f
-                vertices[textureIndex[2]] = .5f
-                vertices[textureIndex[2] + 1] = .5f
+                vertices[textureIndex[0] + 1] = .5f
+                vertices[textureIndex[1]] = .25f
+                vertices[textureIndex[1] + 1] = .5f
+                vertices[textureIndex[2]] = .25f
+                vertices[textureIndex[2] + 1] = .25f
                 vertices[textureIndex[3]] = 0f
-                vertices[textureIndex[3] + 1] = .5f
+                vertices[textureIndex[3] + 1] = .25f
             }
             FractalType.Blue -> {
-                vertices[textureIndex[0]] = .5f
-                vertices[textureIndex[0] + 1] = 1f
-                vertices[textureIndex[1]] = 1f
-                vertices[textureIndex[1] + 1] = 1f
-                vertices[textureIndex[2]] = 1f
-                vertices[textureIndex[2] + 1] = .5f
-                vertices[textureIndex[3]] = .5f
-                vertices[textureIndex[3] + 1] = .5f
-            }
-            FractalType.Normal -> {
-                vertices[textureIndex[0]] = 0f
+                vertices[textureIndex[0]] = .25f
                 vertices[textureIndex[0] + 1] = .5f
                 vertices[textureIndex[1]] = .5f
                 vertices[textureIndex[1] + 1] = .5f
                 vertices[textureIndex[2]] = .5f
+                vertices[textureIndex[2] + 1] = .25f
+                vertices[textureIndex[3]] = .25f
+                vertices[textureIndex[3] + 1] = .25f
+            }
+            FractalType.NormalB -> {
+                vertices[textureIndex[0]] = .5f
+                vertices[textureIndex[0] + 1] = .25f
+                vertices[textureIndex[1]] = .75f
+                vertices[textureIndex[1] + 1] = .25f
+                vertices[textureIndex[2]] = .75f
                 vertices[textureIndex[2] + 1] = 0f
-                vertices[textureIndex[3]] = 0f
+                vertices[textureIndex[3]] = .5f
                 vertices[textureIndex[3] + 1] = 0f
+            }
+            FractalType.RedB -> {
+                vertices[textureIndex[0]] = .75f
+                vertices[textureIndex[0] + 1] = .25f
+                vertices[textureIndex[1]] = 1f
+                vertices[textureIndex[1] + 1] = .25f
+                vertices[textureIndex[2]] = 1f
+                vertices[textureIndex[2] + 1] = 0f
+                vertices[textureIndex[3]] = .75f
+                vertices[textureIndex[3] + 1] = 0f
+            }
+            FractalType.GreenB -> {
+                vertices[textureIndex[0]] = .5f
+                vertices[textureIndex[0] + 1] = .5f
+                vertices[textureIndex[1]] = .75f
+                vertices[textureIndex[1] + 1] = .5f
+                vertices[textureIndex[2]] = .75f
+                vertices[textureIndex[2] + 1] = .25f
+                vertices[textureIndex[3]] = .5f
+                vertices[textureIndex[3] + 1] = .25f
+            }
+            FractalType.BlueB -> {
+                vertices[textureIndex[0]] = .75f
+                vertices[textureIndex[0] + 1] = .5f
+                vertices[textureIndex[1]] = 1f
+                vertices[textureIndex[1] + 1] = .5f
+                vertices[textureIndex[2]] = 1f
+                vertices[textureIndex[2] + 1] = .25f
+                vertices[textureIndex[3]] = .75f
+                vertices[textureIndex[3] + 1] = .25f
             }
             FractalType.Empty -> {
                 //do nothing

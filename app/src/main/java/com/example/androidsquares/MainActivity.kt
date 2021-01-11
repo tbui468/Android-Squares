@@ -1,8 +1,9 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-
     //puzzle clearing conditions (connecting all colors will trigger a clear condition)
         //need non-moveable fractals (either within the 4x4 grid or hanging off the sides)
+
+        //IDEA: create the first 8 puzzles - for now stick to having ALL fractals inside the 4x4 grid, but stationary colored one
 
     //currently square index is hacked in (using lateinit)
             //will need to add index to Square constructor so that different cube nets can be used (check notebook for the 8 nets chosen)
@@ -21,6 +22,10 @@
 
     //if any puzzle dimensions are odd in either axis, then when zooming in on fractals (and splitting them), center it
         //better yet, just have the camera zoom in on the correct location such that the odd dimension(s) are centered
+
+    //draw lines between four outer corners of Square so that user has visual queue about where to touch/drag
+
+    //allows swapping with difference sizes, with the condition being that IF the swapped fractal were the correct size the swap would be valid
 
     //have all empty fractals crashes everything bc my removal of vertices belonging to empty fractals was messy
 

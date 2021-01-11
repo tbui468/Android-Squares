@@ -21,6 +21,7 @@ class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, p
     val mSize: Int = size
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
     var mIndex = fractalIndex //fractal index - unrelated to rendering
+    var mIsBlock = false
 
     init {
         val vertices: FloatArray
@@ -59,6 +60,12 @@ class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, p
             run {
                 col = index % mSize
                 row = index / mSize
+                when(element) {
+                    FractalType.RedB -> mIsBlock = true
+                    FractalType.GreenB -> mIsBlock = true
+                    FractalType.BlueB -> mIsBlock = true
+                    FractalType.NormalB -> mIsBlock = true
+                }
                 if (element != FractalType.Empty) {
                     setTexture(vertices, mSize, col, row, element)
                     vertices.copyInto(trimmedVertices, trimmedVerticesOffset, (row * mSize + col) * FLOATS_PER_QUAD, (row * mSize + col + 1) * FLOATS_PER_QUAD)

@@ -83,7 +83,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun openSquare(square: Square) {
-        mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4f))
+        mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4.5f))
         mFractals = square.spawnFractals(puzzleData[getOpenCubeIndex()][square.mSurface.value])
         for(fractal in mFractals) {
             fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos))
@@ -581,6 +581,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         if(topLeft.mSize != size || topRight.mSize != size || bottomRight.mSize != size || bottomLeft.mSize != size) return null
 
+        if(topLeft.mIsBlock || topRight.mIsBlock || bottomRight.mIsBlock || bottomLeft.mIsBlock) return null
+
         return arrayOf(topLeft, topRight, bottomLeft, bottomRight)
 
     }
@@ -699,9 +701,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                             }else if(fractal.bottomCollision(x, y) && fractal.mSize > 1) { //rotate cw
                                 rotateCW(fractal)
                                 return true
-                            }else if(fractal.centerCollision(x, y)) {
+                            }else if(fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, fractal.mIndex[1]))
-                                if (swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
+                                if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
                                     return true
                                 }
@@ -714,9 +716,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                             }else if(fractal.bottomCollision(x, y) && fractal.mSize > 1) { //rotate cw
                                 rotateCCW(fractal)
                                 return true
-                            }else if(fractal.centerCollision(x, y)) {
+                            }else if(fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1]))
-                                if (swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
+                                if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
                                     return true
                                 }
@@ -729,9 +731,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                             }else if(fractal.rightCollision(x, y) && fractal.mSize > 1) { //rotate cw
                                 rotateCCW(fractal)
                                 return true
-                            }else if(fractal.centerCollision(x, y)) {
+                            }else if(fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
-                                if (swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
+                                if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
                                     return true
                                 }
@@ -744,21 +746,21 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                             }else if(fractal.rightCollision(x, y) && fractal.mSize > 1) { //rotate cw
                                 rotateCW(fractal)
                                 return true
-                            }else if(fractal.centerCollision(x, y)) {
+                            }else if(fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize))
-                                if (swappedFractal != null && swappedFractal.mSize == fractal.mSize) {
+                                if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
                                     return true
                                 }
                             }
                         }
-                        TouchType.PinchOut -> {
+                        TouchType.PinchOut -> { //a block of size > 1 should never exist, so won't check for it
                             if (fractal.centerCollision(x, y) && fractal.mSize > 1) {
                                 split(fractal)
                                 return true
                             }
                         }
-                        TouchType.Tap -> {
+                        TouchType.Tap -> { //a block of size > 1 should never exists, so won't check for it
                             if(fractal.leftCollision(x, y) && fractal.mSize > 1) {
                                 reflectY(fractal, true)
                                 return true
@@ -777,12 +779,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 }
 
                 if(touchType == TouchType.PinchIn) {
-                    Log.d("kouch", "in pinch")
-                    val cornerFractals = getCornerFractals(x, y)
+                    val cornerFractals = getCornerFractals(x, y) //checks for blocks in this function and returns null if ANY fractal is a block
                     if(cornerFractals != null) {
-                        Log.d("kouch", "before start merge")
                         startMerge(cornerFractals)
-                        Log.d("kouch", "after start merge")
                         mMergeFractals = cornerFractals
                         return true
                     }
