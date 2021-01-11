@@ -1,9 +1,11 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //allow users to swap/rotate/reflect squares
-        //instead of using Surfaces enum, it might be easier to treat square surfaces the same as fractals with indices start from top left
-        //use the same two value index for squares so that square positions can be calculated based in index (similar to fractals)
-        //will need make cube opening more flexible - here's a good change to get the final architecture in
+
+    //puzzle clearing conditions (connecting all colors will trigger a clear condition)
+        //need non-moveable fractals (either within the 4x4 grid or hanging off the sides)
+
+    //currently square index is hacked in (using lateinit)
+            //will need to add index to Square constructor so that different cube nets can be used (check notebook for the 8 nets chosen)
 
     //do the same thing with cubes??????
         //will require transformation of cubes - how will I do this if the cubes are rotating???
@@ -11,8 +13,6 @@
     //load default data from Data.kt
     //save data to preferences (since this is so much easier than using a database)
         //save puzzle data as single string per puzzle.  Can parse on load to get fractal types
-
-    //puzzle clearing conditions (connecting all colors will trigger a clear condition)
 
     //order of drawing is out of order since call objects are at 0f in the z-axis
     //one option is to move active cube/square closer to camera (move in the positive z direction) so that there isn't any z fighting/undefined depth problems

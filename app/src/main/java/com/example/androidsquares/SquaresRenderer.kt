@@ -32,6 +32,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private var mClosingSquare = Surface.None
     private var mMergeFractals: Array<Fractal>? = null
     private var mRecreateFractal: Fractal? = null
+    private var mRecreateSquare: Square? = null
 
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
         GLES20.glClearColor(0.0f, 0.167f, .212f, 1f)
@@ -41,7 +42,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)
         GLES20.glDepthFunc(GLES20.GL_LESS)
 //        GLES20.glEnable(GLES20.GL_CULL_FACE)
- //       GLES20.glCullFace(GLES20.GL_BACK)
+        //       GLES20.glCullFace(GLES20.GL_BACK)
 
         mTextureHandle = loadTexture(mContext, R.drawable.fractal_colors)
 
@@ -166,6 +167,16 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return null
     }
 
+    private fun getSquare(index: IntArray): Square? {
+        if(index[0] < 0 || index[0] >= 3 || index[1] < 0 || index[1] >= 4) return null //only can fit 3 squares in horizontal direction (rather than 4)
+
+        for(square in mSquares) {
+            if(square.mIndex[0] == index[0] && square.mIndex[1] == index[1]) return square
+        }
+
+        return null
+    }
+
     private fun getElements(cubeIndex: Int, squareIndex: Int, index: IntArray, size: Int): Array<FractalType> {
         val elements = Array(size * size){FractalType.Normal}
         for(row in 0 until size) {
@@ -189,6 +200,111 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 puzzleData[cubeIndex][squareIndex][index[0] + col + (index[1] + row) * 4] = elements[col + row * size]
             }
         }
+    }
+
+
+    private fun swapSquares(square0: Square, square1: Square) {
+        //update data
+        puzzleData[getOpenCubeIndex()][square0.mSurface.value] = puzzleData[getOpenCubeIndex()][square1.mSurface.value].also {
+            puzzleData[getOpenCubeIndex()][square1.mSurface.value] = puzzleData[getOpenCubeIndex()][square0.mSurface.value]
+        }
+
+        //animate
+        square0.moveTo(square1.pos)
+        square1.moveTo(square0.pos)
+        square0.mIndex = square1.mIndex.also {square1.mIndex = square0.mIndex}
+        square0.mSurface = square1.mSurface.also {square1.mSurface = square0.mSurface}
+    }
+
+    private fun rotateSquareCW(square: Square) {
+
+        val elements = puzzleData[getOpenCubeIndex()][square.mSurface.value]
+        val elemCopy = elements.copyOf()
+
+        elements[0] = elemCopy[12]
+        elements[1] = elemCopy[8]
+        elements[2] = elemCopy[4]
+        elements[3] = elemCopy[0]
+
+        elements[4] = elemCopy[13]
+        elements[5] = elemCopy[9]
+        elements[6] = elemCopy[5]
+        elements[7] = elemCopy[1]
+
+        elements[8] = elemCopy[14]
+        elements[9] = elemCopy[10]
+        elements[10] = elemCopy[6]
+        elements[11] = elemCopy[2]
+
+        elements[12] = elemCopy[15]
+        elements[13] = elemCopy[11]
+        elements[14] = elemCopy[7]
+        elements[15] = elemCopy[3]
+
+        puzzleData[getOpenCubeIndex()][square.mSurface.value] = elements
+
+        square.rotateTo(-90f, floatArrayOf(0f, 0f, 1f))
+        mRecreateSquare = square
+    }
+
+    private fun rotateSquareCCW(square: Square) {
+        val elements = puzzleData[getOpenCubeIndex()][square.mSurface.value]
+        val elemCopy = elements.copyOf()
+
+        elements[0] = elemCopy[3]
+        elements[1] = elemCopy[7]
+        elements[2] = elemCopy[11]
+        elements[3] = elemCopy[15]
+
+        elements[4] = elemCopy[2]
+        elements[5] = elemCopy[6]
+        elements[6] = elemCopy[10]
+        elements[7] = elemCopy[14]
+
+        elements[8] = elemCopy[1]
+        elements[9] = elemCopy[5]
+        elements[10] = elemCopy[9]
+        elements[11] = elemCopy[13]
+
+        elements[12] = elemCopy[0]
+        elements[13] = elemCopy[4]
+        elements[14] = elemCopy[8]
+        elements[15] = elemCopy[12]
+
+        puzzleData[getOpenCubeIndex()][square.mSurface.value] = elements
+
+        square.rotateTo(90f, floatArrayOf(0f, 0f, 1f))
+        mRecreateSquare = square
+    }
+
+    private fun reflectSquareX(square: Square, topPushed: Boolean) {
+        val elements = puzzleData[getOpenCubeIndex()][square.mSurface.value]
+        val elemCopy = elements.copyOf()
+        for(row in 0 until 4) {
+            for(col in 0 until 4) {
+                elements[col + row * 4] = elemCopy[col + (4 - 1 - row) * 4]
+            }
+        }
+        puzzleData[getOpenCubeIndex()][square.mSurface.value] = elements
+
+        if(topPushed) square.rotateTo(-180f, floatArrayOf(1f, 0f, 0f))
+        else square.rotateTo(180f, floatArrayOf(1f, 0f, 0f))
+        mRecreateSquare = square
+    }
+
+    private fun reflectSquareY(square: Square, leftPushed: Boolean) {
+        val elements = puzzleData[getOpenCubeIndex()][square.mSurface.value]
+        val elemCopy = elements.copyOf()
+        for(row in 0 until 4) {
+            for(col in 0 until 4) {
+                elements[col + row * 4] = elemCopy[(4 - 1 - col) + row * 4]
+            }
+        }
+        puzzleData[getOpenCubeIndex()][square.mSurface.value] = elements
+
+        if(leftPushed) square.rotateTo(-180f, floatArrayOf(0f, 1f, 0f))
+        else square.rotateTo(180f, floatArrayOf(0f, 1f, 0f))
+        mRecreateSquare = square
     }
 
 
@@ -337,13 +453,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val elements3 = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, intArrayOf(index[0] + newSize, index[1] + newSize), newSize)
 
         val topLeft = Fractal(elements0, newSize, index,
-                                calculateFractalPosForTarget(index, newSize, fractal.mIndex, fractal.mSize, squarePos))
+                calculateFractalPosForTarget(index, newSize, fractal.mIndex, fractal.mSize, squarePos))
         val topRight = Fractal(elements1, newSize, intArrayOf(index[0] + newSize, index[1]),
-                                calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1]), newSize, fractal.mIndex, fractal.mSize, squarePos))
+                calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1]), newSize, fractal.mIndex, fractal.mSize, squarePos))
         val bottomLeft = Fractal(elements2, newSize, intArrayOf(index[0], index[1] + newSize),
-                                calculateFractalPosForTarget(intArrayOf(index[0], index[1] + newSize), newSize, fractal.mIndex, fractal.mSize, squarePos))
+                calculateFractalPosForTarget(intArrayOf(index[0], index[1] + newSize), newSize, fractal.mIndex, fractal.mSize, squarePos))
         val bottomRight = Fractal(elements3, newSize, intArrayOf(index[0] + newSize, index[1] + newSize),
-                                calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1] + newSize), newSize, fractal.mIndex, fractal.mSize, squarePos))
+                calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1] + newSize), newSize, fractal.mIndex, fractal.mSize, squarePos))
 
         topLeft.moveTo(calculateFractalPos(topLeft.mIndex, topLeft.mSize, squarePos))
         topRight.moveTo(calculateFractalPos(topRight.mIndex, topRight.mSize, squarePos))
@@ -482,15 +598,93 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 }
             }
             Screen.Square -> {
-                if(touchType == TouchType.Tap) {
-                    for (square in mSquares) {
-                        if (square.pointCollision(x, y) == CollisionBox.Center) {
-                            openSquare(square)
-                            return true
+                for (square in mSquares) {
+                    when(touchType) {
+                        TouchType.PinchOut -> {
+                            if (square.centerCollision(x, y)) {
+                                openSquare(square)
+                                return true
+                            }
+                        }
+                        TouchType.FlickLeft -> {
+                            if(square.topCollision(x, y)) {
+                                rotateSquareCCW(square)
+                                return true
+                            }else if(square.bottomCollision(x, y)) {
+                                rotateSquareCW(square)
+                                return true
+                            }else if(square.centerCollision(x, y)) {
+                                val swappedSquare: Square? = getSquare(intArrayOf(square.mIndex[0] - 1, square.mIndex[1]))
+                                if(swappedSquare != null) {
+                                    swapSquares(square, swappedSquare)
+                                    return true
+                                }
+                            }
+                        }
+                        TouchType.FlickRight -> {
+                            if(square.topCollision(x, y)) {
+                                rotateSquareCW(square)
+                                return true
+                            }else if(square.bottomCollision(x, y)) {
+                                rotateSquareCCW(square)
+                                return true
+                            }else if(square.centerCollision(x, y)) {
+                                val swappedSquare: Square? = getSquare(intArrayOf(square.mIndex[0] + 1, square.mIndex[1]))
+                                if(swappedSquare != null) {
+                                    swapSquares(square, swappedSquare)
+                                    return true
+                                }
+                            }
+                        }
+                        TouchType.FlickUp -> {
+                            if(square.leftCollision(x, y)) {
+                                rotateSquareCW(square)
+                                return true
+                            }else if(square.rightCollision(x,y)) {
+                                rotateSquareCCW(square)
+                                return true
+                            }else if(square.centerCollision(x, y)) {
+                                val swappedSquare: Square? = getSquare(intArrayOf(square.mIndex[0], square.mIndex[1] - 1))
+                                if(swappedSquare != null) {
+                                    swapSquares(square, swappedSquare)
+                                    return true
+                                }
+                            }
+                        }
+                        TouchType.FlickDown -> {
+                            if(square.leftCollision(x, y)) {
+                                rotateSquareCCW(square)
+                                return true
+                            }else if(square.rightCollision(x,y)) {
+                                rotateSquareCW(square)
+                                return true
+                            }else if(square.centerCollision(x, y)) {
+                                val swappedSquare: Square? = getSquare(intArrayOf(square.mIndex[0], square.mIndex[1] + 1))
+                                if(swappedSquare != null) {
+                                    swapSquares(square, swappedSquare)
+                                    return true
+                                }
+                            }
+                        }
+                        TouchType.Tap -> {
+                            if(square.leftCollision(x, y)) {
+                                reflectSquareY(square, true)
+                                return true
+                            }else if(square.rightCollision(x,y)) {
+                                reflectSquareY(square, false)
+                                return true
+                            }else if(square.topCollision(x, y)) {
+                                reflectSquareX(square, true)
+                                return true
+                            }else if(square.bottomCollision(x, y)) {
+                                reflectSquareX(square, false)
+                                return true
+                            }
                         }
                     }
+                }
 
-                    //need to specify type of input I want register as going a screen back (such as pinch out)
+                if(touchType == TouchType.PinchIn) {
                     closeCube(getOpenCubeIndex())
                     return true
                 }
@@ -647,6 +841,14 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     mRecreateFractal!!.mSize, mRecreateFractal!!.mIndex, mRecreateFractal!!.pos))
             mFractals.remove(mRecreateFractal!!)
             mRecreateFractal = null
+        }
+
+        if(mRecreateSquare != null) {
+            val cubePos = cubeLocations[getOpenCubeIndex()]
+            mSquares.add(Square(puzzleData[getOpenCubeIndex()][mRecreateSquare!!.mSurface.value],
+                    calculateSurfacePos(mRecreateSquare!!.mSurface, cubePos), mRecreateSquare!!.mSurface))
+            mSquares.remove(mRecreateSquare!!)
+            mRecreateSquare = null
         }
         //////////////////////////////////////////////////////////////////////////////////////////
     }

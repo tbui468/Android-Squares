@@ -15,10 +15,22 @@ class Square(elements: Array<FractalType>, pos: FloatArray, surface: Surface) : 
     private val mModelMatrix = FloatArray(16)
     private val mSize: Int = 4
     private val mProgram: Int = SquaresRenderer.compileShaders(vertexShaderCode, fragmentShaderCode)
-    val mSurface = surface //index among the six puzzles
+    var mSurface = surface //surface among the six cube faces - related to, but not the same, as index
+    lateinit var mIndex: IntArray
 
 
     init {
+        mIndex = when(mSurface) {
+            Surface.Left -> intArrayOf(0, 1)
+            Surface.Right -> intArrayOf(2, 2)
+            Surface.Front -> intArrayOf(1, 2)
+            Surface.Back -> intArrayOf(1, 0)
+            Surface.Top -> intArrayOf(1, 1)
+            Surface.Bottom -> intArrayOf(1, 3)
+            else -> intArrayOf(-1, -1)
+        }
+
+
         val vertices = vertices4
         val indices = indices4
         val emptyFractalCount = findEmptyFractalCount(elements)
