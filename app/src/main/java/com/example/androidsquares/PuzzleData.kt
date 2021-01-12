@@ -39,12 +39,12 @@ val puzzle05 = arrayOf(
 
 
 val cubeData0: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal}}.also {
-    it[Surface.Front.value] = puzzle00
-    it[Surface.Back.value] = puzzle01
-    it[Surface.Left.value] = puzzle02
-    it[Surface.Right.value] = puzzle03
-    it[Surface.Top.value] = puzzle04
-    it[Surface.Bottom.value] = puzzle05
+    it[0] = puzzle00
+    it[1] = puzzle01
+    it[2] = puzzle02
+    it[3] = puzzle03
+    it[4] = puzzle04
+    it[5] = puzzle05
 }
 
 val puzzle10 = arrayOf(
@@ -84,12 +84,12 @@ val puzzle15 = arrayOf(
         FractalType.Empty, FractalType.Empty, FractalType.BlueB, FractalType.Empty)
 
 val cubeData1: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal}}.also {
-    it[Surface.Front.value] = puzzle10
-    it[Surface.Back.value] = puzzle11
-    it[Surface.Left.value] = puzzle12
-    it[Surface.Right.value] = puzzle13
-    it[Surface.Top.value] = puzzle14
-    it[Surface.Bottom.value] = puzzle15
+    it[0] = puzzle10
+    it[1] = puzzle11
+    it[2] = puzzle12
+    it[3] = puzzle13
+    it[4] = puzzle14
+    it[5] = puzzle15
 }
 
 
@@ -131,12 +131,12 @@ val puzzle25 = arrayOf(
 
 
 val cubeData2: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal}}.also {
-    it[Surface.Front.value] = puzzle20
-    it[Surface.Back.value] = puzzle21
-    it[Surface.Left.value] = puzzle22
-    it[Surface.Right.value] = puzzle23
-    it[Surface.Top.value] = puzzle24
-    it[Surface.Bottom.value] = puzzle25
+    it[0] = puzzle20
+    it[1] = puzzle21
+    it[2] = puzzle22
+    it[3] = puzzle23
+    it[4] = puzzle24
+    it[5] = puzzle25
 }
 
 val puzzle30 = arrayOf(
@@ -152,12 +152,12 @@ val puzzle31 = arrayOf(
         FractalType.BlueB, FractalType.Green, FractalType.Empty, FractalType.Empty)
 
 val cubeData3: Array<Array<FractalType>> = Array(6){Array(16){FractalType.Normal}}.also {
-    it[Surface.Front.value] = puzzle30
-    it[Surface.Back.value] = puzzle31
-    it[Surface.Left.value] = puzzle30
-    it[Surface.Right.value] = puzzle30
-    it[Surface.Top.value] = puzzle30
-    it[Surface.Bottom.value] = puzzle30
+    it[0] = puzzle30
+    it[1] = puzzle31
+    it[2] = puzzle30
+    it[3] = puzzle30
+    it[4] = puzzle30
+    it[5] = puzzle30
 }
 
 

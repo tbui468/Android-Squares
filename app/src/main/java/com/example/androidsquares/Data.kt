@@ -4,27 +4,16 @@ import android.opengl.Matrix
 import kotlin.math.exp
 import kotlin.math.sqrt
 import kotlin.math.pow
+import java.nio.FloatBuffer
+import java.nio.ShortBuffer
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 data class CoordinatePair(val x: Float, val y: Float)
 
 data class InputData(val touchType: TouchType, val x: Float, val y: Float, var life: Float)
 
 
-const val vertexShaderCode = "attribute vec4 aPosition;" +
-        "attribute vec2 aTexCoord;" +
-        "uniform mat4 uMVPMatrix;" +
-        "varying vec2 vTexCoord;" +
-        "void main() {" +
-        "   vTexCoord = aTexCoord;" +
-        "   gl_Position = uMVPMatrix * aPosition;" +
-        "}"
-
-const val fragmentShaderCode = "precision mediump float;" +
-        "uniform sampler2D uTexture;" +
-        "varying vec2 vTexCoord;" +
-        "void main() {" +
-        "   gl_FragColor = texture2D(uTexture, vTexCoord);" +
-        "}"
 
 const val FLOAT_SIZE = 4
 const val SHORT_SIZE = 2
@@ -44,7 +33,7 @@ enum class CollisionBox {
 }
 
 enum class Screen {
-    Cube, Square, Fractal
+    Set, Square, Fractal
 }
 
 enum class TouchType {
@@ -56,16 +45,12 @@ enum class FractalType {
     Red, Blue, Green, Normal, Empty, RedB, BlueB, GreenB, NormalB
 }
 
-enum class Surface(val value: Int) {
-    Front(0), Back(1), Left(2), Right(3), Top(4), Bottom(5), None(6)
-}
-
 //quads start at top left.  Left to right.  Top to bottom
 //sizes 1x1, 2x2 and 4x4.  Cubes will consist of 6 4x4s that are transformed into correct position
 
-val vertices1 = floatArrayOf(-0.5f, -0.5f, 0.0f, 0f, .5f,
-                            0.5f, -0.5f, 0.0f, .5f, .5f,
-                            0.5f, 0.5f, 0.0f, .5f, 0f,
+val vertices1 = floatArrayOf(-0.5f, -0.5f, 0.0f, 0f, 1f,
+                            0.5f, -0.5f, 0.0f, 1f, 1f,
+                            0.5f, 0.5f, 0.0f, 1f, 0f,
                             -0.5f, 0.5f, 0.0f, 0f, 0f)
 
 val indices1 = shortArrayOf(0, 1, 2, 0, 2, 3)
@@ -205,43 +190,6 @@ val indices4 = shortArrayOf(0, 1, 2, 0, 2, 3,
                             60, 61, 62, 60, 62, 63)
 
 
-val surfaceModels = Array(6){FloatArray(16)}.also {
-    it[Surface.Front.value] = FloatArray(16).also { matrix ->
-        Matrix.setIdentityM(matrix, 0)
-        Matrix.translateM(matrix, 0, 0f, 0f, 2f)
-    }
-
-    it[Surface.Back.value] = FloatArray(16).also { matrix ->
-        Matrix.setIdentityM(matrix, 0)
-        Matrix.translateM(matrix, 0, 0f, 0f, -2f)
-        Matrix.rotateM(matrix, 0, 180f, 1f, 0f, 0f)
-    }
-
-    it[Surface.Left.value] = FloatArray(16).also { matrix ->
-        Matrix.setIdentityM(matrix, 0)
-        Matrix.translateM(matrix, 0, -2f, 0f, 0f)
-        Matrix.rotateM(matrix, 0, -90f, 1f, 0f, 0f)
-        Matrix.rotateM(matrix, 0, -90f, 0f, 1f, 0f)
-    }
-
-    it[Surface.Right.value] = FloatArray(16).also { matrix ->
-        Matrix.setIdentityM(matrix, 0)
-        Matrix.translateM(matrix, 0, 2f, 0f, 0f)
-        Matrix.rotateM(matrix, 0, 90f, 0f, 1f, 0f)
-    }
-
-    it[Surface.Bottom.value] = FloatArray(16).also { matrix ->
-        Matrix.setIdentityM(matrix, 0)
-        Matrix.translateM(matrix, 0, 0f, -2f, 0f)
-        Matrix.rotateM(matrix, 0, 90f, 1f, 0f, 0f)
-    }
-
-    it[Surface.Top.value] = FloatArray(16).also { matrix ->
-        Matrix.setIdentityM(matrix, 0)
-        Matrix.translateM(matrix, 0, 0f, 2f, 0f)
-        Matrix.rotateM(matrix, 0, -90f, 1f, 0f, 0f)
-    }
-}
 
 
 
@@ -255,22 +203,10 @@ val cubeLocations = arrayOf(floatArrayOf(0f, 3f, 0f),
                             floatArrayOf(0f, 2f, -3f),
                             floatArrayOf(0f, 2f, 3f))*/
 
-//location of surfaces with the front surface facing the user (when cube is unfolded)
-//need cube pos, max margin, cube scale and cube object size
-fun calculateSurfacePos(surface: Surface, cubePos: FloatArray): FloatArray {
-    val cubeMaxMargin = 1.16f
-    val cubeScale = floatArrayOf(.25f, .25f, .25f)
-    val cubeSize = 4
-    val zPos = cubePos[2] + cubeScale[0] * cubeSize / 2f
-    return when(surface) {
-        Surface.Front -> floatArrayOf(cubePos[0], cubePos[1] - .5f * cubeMaxMargin * cubeScale[0], zPos)
-        Surface.Back -> floatArrayOf(cubePos[0], cubePos[1] + (1.5f * cubeMaxMargin + 2 * cubeSize) * cubeScale[0], zPos)
-        Surface.Left -> floatArrayOf(cubePos[0] - (cubeMaxMargin + cubeSize) * cubeScale[0], cubePos[1] + (.5f * cubeMaxMargin + cubeSize) * cubeScale[0], zPos)
-        Surface.Right -> floatArrayOf(cubePos[0] + (cubeMaxMargin + cubeSize) * cubeScale[0], cubePos[1] - (.5f * cubeMaxMargin) * cubeScale[0], zPos)
-        Surface.Top -> floatArrayOf(cubePos[0], cubePos[1] + (.5f * cubeMaxMargin + cubeSize) * cubeScale[0], zPos)
-        Surface.Bottom -> floatArrayOf(cubePos[0], cubePos[1] - (1.5f * cubeMaxMargin + cubeSize) * cubeScale[0], zPos)
-        Surface.None -> floatArrayOf(0f, 0f, 0f) //temp: should be an assert or error
-    }
+
+
+fun calculateSquarePosition(setPos: FloatArray, squareIndex: Int): FloatArray {
+    return floatArrayOf(setPos[0] + 1f * squareIndex, setPos[1], setPos[2])
 }
 
 //gets center of fractal of given size/index
@@ -299,4 +235,24 @@ fun sigmoid(t: Float): Float {
 
 fun pointDistance(x1: Float, y1: Float, x2: Float, y2: Float): Float {
     return sqrt((x1 - x2).pow(2) + (y1 - y2).pow(2))
+}
+
+fun createFloatBuffer(floatArray: FloatArray): FloatBuffer {
+    return ByteBuffer.allocateDirect(floatArray.size * FLOAT_SIZE).run {
+        order(ByteOrder.nativeOrder())
+        asFloatBuffer().apply {
+            put(floatArray)
+            position(0)
+        }
+    }
+}
+
+fun createShortBuffer(shortArray: ShortArray): ShortBuffer {
+    return ByteBuffer.allocateDirect(shortArray.size * SHORT_SIZE).run {
+        order(ByteOrder.nativeOrder())
+        asShortBuffer().apply {
+            put(shortArray)
+            position(0)
+        }
+    }
 }

@@ -3,8 +3,6 @@ package com.example.androidsquares
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-import android.util.Log
-
 import android.os.SystemClock
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -18,7 +16,7 @@ import android.opengl.GLUtils
 
 class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mAnimationParameter = 0f //main animation timer
-    var mCubes = mutableListOf<Cube>()
+    var mSets = mutableListOf<Set>()
     var mSquares = mutableListOf<Square>()
     var mFractals = mutableListOf<Fractal>()
     lateinit var mCamera: Camera
@@ -28,11 +26,55 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private var mPreviousTime: Long = 0
     private val mContext = context
     var mInputQueue = InputQueue()
-    private var mOpeningCube: Cube? = null
-    private var mClosingSquare = Surface.None
     private var mMergeFractals: Array<Fractal>? = null
     private var mRecreateFractal: Fractal? = null
-    private var mRecreateSquare: Square? = null
+
+
+    companion object {
+        var mTextureHandle = -1
+        var mProgram = -1
+        val mVPMatrix = FloatArray(16)
+
+        var mPosAttrib = -1
+        var mTexCoordAttrib = -1
+        var mTexUniform = -1
+        var mModelUniform = -1
+    }
+
+    private fun compileShaders(): Int {
+
+        val vertexShaderCode = "attribute vec4 aPosition;" +
+                "attribute vec2 aTexCoord;" +
+                "uniform mat4 uMVPMatrix;" +
+                "varying vec2 vTexCoord;" +
+                "void main() {" +
+                "   vTexCoord = aTexCoord;" +
+                "   gl_Position = uMVPMatrix * aPosition;" +
+                "}"
+
+        val fragmentShaderCode = "precision mediump float;" +
+                "uniform sampler2D uTexture;" +
+                "varying vec2 vTexCoord;" +
+                "void main() {" +
+                "   gl_FragColor = texture2D(uTexture, vTexCoord);" +
+                "}"
+
+        val vertexShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER).also {
+            GLES20.glShaderSource(it, vertexShaderCode)
+            GLES20.glCompileShader(it)
+        }
+
+        val fragmentShader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER).also {
+            GLES20.glShaderSource(it, fragmentShaderCode)
+            GLES20.glCompileShader(it)
+        }
+
+        return GLES20.glCreateProgram().also {
+            GLES20.glAttachShader(it, vertexShader)
+            GLES20.glAttachShader(it, fragmentShader)
+            GLES20.glLinkProgram(it)
+        }
+    }
 
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
         GLES20.glClearColor(0.0f, 0.167f, .212f, 1f)
@@ -45,116 +87,90 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         //       GLES20.glCullFace(GLES20.GL_BACK)
 
         mTextureHandle = loadTexture(mContext, R.drawable.fractal_colors)
+        mProgram = compileShaders()
 
 
         for(i in cubeLocations.indices) {
-            mCubes.add(Cube(puzzleData[i], i, false))
+//            mCubes.add(Cube(puzzleData[i], i, false))
+            mSets.add(Set(cubeLocations[i], i))
         }
+
 
         mCamera = Camera(floatArrayOf(0f, 0f, 3f))
         mCamera.moveTo(floatArrayOf(0f, 0f, 16f))
+
     }
 
-
-    fun openCube(cube: Cube) {
-        for(c in mCubes) {
-            if(c != cube) {
-                c.fadeTo(0f)
-            }
+    private fun openSet(set: Set) {
+        for(s in mSets) {
+            s.fadeTo(0f)
         }
-        cube.open()
-        mOpeningCube = cube
-        mCamera.moveTo(floatArrayOf(cube.pos[0], cube.pos[1] + cube.scale[1] * cube.size / 2f, 10f)) //center camera on unfolded front/top surface of cubes
+        set.mIsOpen = true
+        mCamera.moveTo(floatArrayOf(set.pos[0], set.pos[1], 8f))
+        mSquares = set.spawnSquares()
     }
 
-    private fun closeCube(cubeIndex: Int) {
-        mSquares.clear()
-
-        for(c in mCubes) {
-            c.fadeTo(1f)
+    private fun closeSet(set: Set) {
+        for(s in mSets) {
+            s.fadeTo(1f)
         }
-
-        Cube(puzzleData[cubeIndex], cubeIndex, true).also {
-            it.close()
-            mCubes.add(it)
-        }
-
+        set.mIsOpen = false
         mCamera.moveTo(floatArrayOf(0f, 0f, 16f))
+        mSquares.clear()
     }
 
     private fun openSquare(square: Square) {
         mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4.5f))
-        mFractals = square.spawnFractals(puzzleData[getOpenCubeIndex()][square.mSurface.value])
+        mFractals = square.spawnFractals(puzzleData[getOpenSet()!!.mIndex][square.mIndex]) //temp: just grabbing first index
         for(fractal in mFractals) {
             fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos))
         }
-        mSquares.remove(square)
+
+        square.mIsOpen = true
 
         for(s in mSquares) {
             s.fadeTo(0f)
         }
     }
 
-    private fun closeSquare(surface: Surface) {
-        mClosingSquare = surface
-        val cubePos = cubeLocations[getOpenCubeIndex()]
-        val squarePos = calculateSurfacePos(getOpenSquareSurface(), cubeLocations[getOpenCubeIndex()])
+    private fun closeSquare(square: Square) {
+        val cubePos = cubeLocations[getOpenSet()!!.mIndex]
         for (fractal in mFractals) {
-            fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, intArrayOf(0, 0), 4, squarePos))
+            fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, intArrayOf(0, 0), 4, square.pos))
         }
         mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1] + .25f * 4f / 2f, 10f))
 
         for(s in mSquares) {
             s.fadeTo(1f)
         }
+
+        square.mIsOpen = false
+
+        mFractals.clear()
     }
 
     private fun getScreenState(): Screen {
         if(mFractals.size > 0) return Screen.Fractal
         if(mSquares.size > 0) return Screen.Square
-        return Screen.Cube
+        return Screen.Set
     }
 
-    //open cubes are destroyed when animation is over, so just need to iterate over mCubes list and find out which index (0-7) is missing
-    //returns -1 if no cubes open
-    private fun getOpenCubeIndex(): Int {
-        val found = BooleanArray(8){false}
-        for(cube in mCubes) {
-            found[cube.mIndex] = true
+    private fun getOpenSet(): Set? {
+        for(set in mSets) {
+            if(set.mIsOpen) return set
         }
-
-        found.forEachIndexed { index, f ->
-            if(!f) return index
-        }
-
-        return -1
+        return null
     }
 
 
-    //open square is destroyed when animation is over, so just need to iterate over mSquares and find index that is missing
-    //this should really be getOpenSquareSurface
-    private fun getOpenSquareSurface(): Surface {
-        val found = BooleanArray(6){false}
+    private fun getOpenSquare(): Square? {
         for(square in mSquares) {
-            found[square.mSurface.value] = true
+            if(square.mIsOpen) return square
         }
-
-        found.forEachIndexed { index, f ->
-            if(!f) {
-                return when(index) {
-                    0 -> Surface.Front
-                    1 -> Surface.Back
-                    2 -> Surface.Left
-                    3 -> Surface.Right
-                    4 -> Surface.Top
-                    5 -> Surface.Bottom
-                    else -> Surface.None
-                }
-            }
-        }
-
-        return Surface.None
+        return null
     }
+
+
 
     //////////////helper functions for commands//////////////////////////////////////////
     private fun getFractal(index: IntArray): Fractal? {
@@ -167,11 +183,11 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return null
     }
 
-    private fun getSquare(index: IntArray): Square? {
-        if(index[0] < 0 || index[0] >= 3 || index[1] < 0 || index[1] >= 4) return null //only can fit 3 squares in horizontal direction (rather than 4)
+    private fun getSquare(index: Int): Square? {
+        if(index >= 24) return null
 
         for(square in mSquares) {
-            if(square.mIndex[0] == index[0] && square.mIndex[1] == index[1]) return square
+            if(index == square.mIndex) return square
         }
 
         return null
@@ -205,115 +221,24 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun swapSquares(square0: Square, square1: Square) {
         //update data
-        puzzleData[getOpenCubeIndex()][square0.mSurface.value] = puzzleData[getOpenCubeIndex()][square1.mSurface.value].also {
-            puzzleData[getOpenCubeIndex()][square1.mSurface.value] = puzzleData[getOpenCubeIndex()][square0.mSurface.value]
+        puzzleData[getOpenSet()!!.mIndex][square0.mIndex] = puzzleData[getOpenSet()!!.mIndex][square1.mIndex].also {
+            puzzleData[getOpenSet()!!.mIndex][square1.mIndex] = puzzleData[getOpenSet()!!.mIndex][square0.mIndex]
         }
 
         //animate
         square0.moveTo(square1.pos)
         square1.moveTo(square0.pos)
         square0.mIndex = square1.mIndex.also {square1.mIndex = square0.mIndex}
-        square0.mSurface = square1.mSurface.also {square1.mSurface = square0.mSurface}
     }
 
-    private fun rotateSquareCW(square: Square) {
-
-        val elements = puzzleData[getOpenCubeIndex()][square.mSurface.value]
-        val elemCopy = elements.copyOf()
-
-        elements[0] = elemCopy[12]
-        elements[1] = elemCopy[8]
-        elements[2] = elemCopy[4]
-        elements[3] = elemCopy[0]
-
-        elements[4] = elemCopy[13]
-        elements[5] = elemCopy[9]
-        elements[6] = elemCopy[5]
-        elements[7] = elemCopy[1]
-
-        elements[8] = elemCopy[14]
-        elements[9] = elemCopy[10]
-        elements[10] = elemCopy[6]
-        elements[11] = elemCopy[2]
-
-        elements[12] = elemCopy[15]
-        elements[13] = elemCopy[11]
-        elements[14] = elemCopy[7]
-        elements[15] = elemCopy[3]
-
-        puzzleData[getOpenCubeIndex()][square.mSurface.value] = elements
-
-        square.rotateTo(-90f, floatArrayOf(0f, 0f, 1f))
-        mRecreateSquare = square
-    }
-
-    private fun rotateSquareCCW(square: Square) {
-        val elements = puzzleData[getOpenCubeIndex()][square.mSurface.value]
-        val elemCopy = elements.copyOf()
-
-        elements[0] = elemCopy[3]
-        elements[1] = elemCopy[7]
-        elements[2] = elemCopy[11]
-        elements[3] = elemCopy[15]
-
-        elements[4] = elemCopy[2]
-        elements[5] = elemCopy[6]
-        elements[6] = elemCopy[10]
-        elements[7] = elemCopy[14]
-
-        elements[8] = elemCopy[1]
-        elements[9] = elemCopy[5]
-        elements[10] = elemCopy[9]
-        elements[11] = elemCopy[13]
-
-        elements[12] = elemCopy[0]
-        elements[13] = elemCopy[4]
-        elements[14] = elemCopy[8]
-        elements[15] = elemCopy[12]
-
-        puzzleData[getOpenCubeIndex()][square.mSurface.value] = elements
-
-        square.rotateTo(90f, floatArrayOf(0f, 0f, 1f))
-        mRecreateSquare = square
-    }
-
-    private fun reflectSquareX(square: Square, topPushed: Boolean) {
-        val elements = puzzleData[getOpenCubeIndex()][square.mSurface.value]
-        val elemCopy = elements.copyOf()
-        for(row in 0 until 4) {
-            for(col in 0 until 4) {
-                elements[col + row * 4] = elemCopy[col + (4 - 1 - row) * 4]
-            }
-        }
-        puzzleData[getOpenCubeIndex()][square.mSurface.value] = elements
-
-        if(topPushed) square.rotateTo(-180f, floatArrayOf(1f, 0f, 0f))
-        else square.rotateTo(180f, floatArrayOf(1f, 0f, 0f))
-        mRecreateSquare = square
-    }
-
-    private fun reflectSquareY(square: Square, leftPushed: Boolean) {
-        val elements = puzzleData[getOpenCubeIndex()][square.mSurface.value]
-        val elemCopy = elements.copyOf()
-        for(row in 0 until 4) {
-            for(col in 0 until 4) {
-                elements[col + row * 4] = elemCopy[(4 - 1 - col) + row * 4]
-            }
-        }
-        puzzleData[getOpenCubeIndex()][square.mSurface.value] = elements
-
-        if(leftPushed) square.rotateTo(-180f, floatArrayOf(0f, 1f, 0f))
-        else square.rotateTo(180f, floatArrayOf(0f, 1f, 0f))
-        mRecreateSquare = square
-    }
 
 
     private fun swap(fractal0: Fractal, fractal1: Fractal) {
         //update data
-        val elements0 = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal0.mIndex, fractal0.mSize)
-        val elements1 = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal1.mIndex, fractal1.mSize)
-        setElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal0.mIndex, elements1)
-        setElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal1.mIndex, elements0)
+        val elements0 = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal0.mIndex, fractal0.mSize)
+        val elements1 = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal1.mIndex, fractal1.mSize)
+        setElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal0.mIndex, elements1)
+        setElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal1.mIndex, elements0)
 
         //animate
         fractal0.moveTo(fractal1.pos)
@@ -322,7 +247,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun rotateCW(fractal: Fractal) {
-        val elements = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal.mIndex, fractal.mSize)
+        val elements = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, fractal.mSize)
 
         //rotate elements clockwise
         when(fractal.mSize) {
@@ -360,13 +285,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             }
         }
 
-        setElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal.mIndex, elements)
+        setElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, elements)
         fractal.rotateTo(-90f, floatArrayOf(0f, 0f, 1f))
         mRecreateFractal = fractal
     }
 
     private fun rotateCCW(fractal: Fractal) {
-        val elements = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal.mIndex, fractal.mSize)
+        val elements = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, fractal.mSize)
 
         //rotate elements ccw
         when(fractal.mSize) {
@@ -404,21 +329,21 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             }
         }
 
-        setElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal.mIndex, elements)
+        setElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, elements)
         fractal.rotateTo(90f, floatArrayOf(0f, 0f, 1f)) //should recreate on animation end to keep things simple
         mRecreateFractal = fractal
     }
 
     private fun reflectX(fractal: Fractal, topPushed: Boolean) {
         //update data
-        val elements = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal.mIndex, fractal.mSize)
+        val elements = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, fractal.mSize)
         val elemCopy = elements.copyOf()
         for(row in 0 until fractal.mSize) {
             for(col in 0 until fractal.mSize) {
                 elements[col + row * fractal.mSize] = elemCopy[col + (fractal.mSize - 1 - row) * fractal.mSize]
             }
         }
-        setElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal.mIndex, elements)
+        setElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, elements)
 
         if(topPushed) fractal.rotateTo(-180f, floatArrayOf(1f, 0f, 0f))
         else fractal.rotateTo(180f, floatArrayOf(1f, 0f, 0f))
@@ -427,14 +352,14 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun reflectY(fractal: Fractal, leftPushed: Boolean) {
         //update data
-        val elements = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal.mIndex, fractal.mSize)
+        val elements = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, fractal.mSize)
         val elemCopy = elements.copyOf()
         for(row in 0 until fractal.mSize) {
             for(col in 0 until fractal.mSize) {
                 elements[col + row * fractal.mSize] = elemCopy[(fractal.mSize - 1 - col) + row * fractal.mSize]
             }
         }
-        setElements(getOpenCubeIndex(), getOpenSquareSurface().value, fractal.mIndex, elements)
+        setElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, elements)
 
         if(leftPushed) fractal.rotateTo(-180f, floatArrayOf(0f, 1f, 0f))
         else fractal.rotateTo(180f, floatArrayOf(0f, 1f, 0f))
@@ -442,15 +367,15 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun split(fractal: Fractal) {
-        val squarePos = calculateSurfacePos(getOpenSquareSurface(), cubeLocations[getOpenCubeIndex()])
+        val squarePos = getOpenSquare()!!.pos
 
         val index = fractal.mIndex
         val newSize = fractal.mSize / 2
 
-        val elements0 = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, index, newSize)
-        val elements1 = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, intArrayOf(index[0] + newSize, index[1]), newSize)
-        val elements2 = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, intArrayOf(index[0], index[1] + newSize), newSize)
-        val elements3 = getElements(getOpenCubeIndex(), getOpenSquareSurface().value, intArrayOf(index[0] + newSize, index[1] + newSize), newSize)
+        val elements0 = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, index, newSize)
+        val elements1 = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, intArrayOf(index[0] + newSize, index[1]), newSize)
+        val elements2 = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, intArrayOf(index[0], index[1] + newSize), newSize)
+        val elements3 = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, intArrayOf(index[0] + newSize, index[1] + newSize), newSize)
 
         val topLeft = Fractal(elements0, newSize, index,
                 calculateFractalPosForTarget(index, newSize, fractal.mIndex, fractal.mSize, squarePos))
@@ -482,11 +407,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 topLeftIndex = c.mIndex
         }
 
-        //animate based on top left fractal index and larger size
-        val squarePos = calculateSurfacePos(getOpenSquareSurface(), cubeLocations[getOpenCubeIndex()])
 
         for(c in corners) {
-            c.moveTo(calculateFractalPosForTarget(c.mIndex, c.mSize, topLeftIndex, c.mSize * 2, squarePos))
+            c.moveTo(calculateFractalPosForTarget(c.mIndex, c.mSize, topLeftIndex, c.mSize * 2, getOpenSquare()!!.pos))
         }
     }
 
@@ -508,13 +431,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 for (col in 0 until c.mSize) {
                     val newCol = col + c.mIndex[0] - topLeftIndex[0]
                     val newRow = row + c.mIndex[1] - topLeftIndex[1]
-                    elements[newCol + newRow * newSize] = puzzleData[getOpenCubeIndex()][getOpenSquareSurface().value][c.mIndex[0] + col + 4 * (c.mIndex[1] + row)]
+                    elements[newCol + newRow * newSize] = puzzleData[getOpenSet()!!.mIndex][getOpenSquare()!!.mIndex][c.mIndex[0] + col + 4 * (c.mIndex[1] + row)]
                 }
             }
         }
 
-        val squarePos = calculateSurfacePos(getOpenSquareSurface(), cubeLocations[getOpenCubeIndex()])
-        return Fractal(elements, newSize, topLeftIndex, calculateFractalPos(topLeftIndex, newSize, squarePos))
+        return Fractal(elements, newSize, topLeftIndex, calculateFractalPos(topLeftIndex, newSize, getOpenSquare()!!.pos))
     }
 
     private fun getClosestFractal(x: Float, y: Float): Fractal {
@@ -589,11 +511,11 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun dispatchCommand(touchType: TouchType, x: Float, y: Float): Boolean {
         when(getScreenState()) {
-            Screen.Cube -> {
+            Screen.Set -> {
                 if(touchType == TouchType.Tap) {
-                    for (cube in mCubes) {
-                        if (cube.pointCollision(x, y) == CollisionBox.Center) {
-                            openCube(cube)
+                    for (set in mSets) {
+                        if (set.pointCollision(x, y) == CollisionBox.Center) {
+                            openSet(set)
                             return true
                         }
                     }
@@ -601,93 +523,16 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             }
             Screen.Square -> {
                 for (square in mSquares) {
-                    when(touchType) {
-                        TouchType.PinchOut -> {
-                            if (square.centerCollision(x, y)) {
-                                openSquare(square)
-                                return true
-                            }
-                        }
-                        TouchType.FlickLeft -> {
-                            if(square.topCollision(x, y)) {
-                                rotateSquareCCW(square)
-                                return true
-                            }else if(square.bottomCollision(x, y)) {
-                                rotateSquareCW(square)
-                                return true
-                            }else if(square.centerCollision(x, y)) {
-                                val swappedSquare: Square? = getSquare(intArrayOf(square.mIndex[0] - 1, square.mIndex[1]))
-                                if(swappedSquare != null) {
-                                    swapSquares(square, swappedSquare)
-                                    return true
-                                }
-                            }
-                        }
-                        TouchType.FlickRight -> {
-                            if(square.topCollision(x, y)) {
-                                rotateSquareCW(square)
-                                return true
-                            }else if(square.bottomCollision(x, y)) {
-                                rotateSquareCCW(square)
-                                return true
-                            }else if(square.centerCollision(x, y)) {
-                                val swappedSquare: Square? = getSquare(intArrayOf(square.mIndex[0] + 1, square.mIndex[1]))
-                                if(swappedSquare != null) {
-                                    swapSquares(square, swappedSquare)
-                                    return true
-                                }
-                            }
-                        }
-                        TouchType.FlickUp -> {
-                            if(square.leftCollision(x, y)) {
-                                rotateSquareCW(square)
-                                return true
-                            }else if(square.rightCollision(x,y)) {
-                                rotateSquareCCW(square)
-                                return true
-                            }else if(square.centerCollision(x, y)) {
-                                val swappedSquare: Square? = getSquare(intArrayOf(square.mIndex[0], square.mIndex[1] - 1))
-                                if(swappedSquare != null) {
-                                    swapSquares(square, swappedSquare)
-                                    return true
-                                }
-                            }
-                        }
-                        TouchType.FlickDown -> {
-                            if(square.leftCollision(x, y)) {
-                                rotateSquareCCW(square)
-                                return true
-                            }else if(square.rightCollision(x,y)) {
-                                rotateSquareCW(square)
-                                return true
-                            }else if(square.centerCollision(x, y)) {
-                                val swappedSquare: Square? = getSquare(intArrayOf(square.mIndex[0], square.mIndex[1] + 1))
-                                if(swappedSquare != null) {
-                                    swapSquares(square, swappedSquare)
-                                    return true
-                                }
-                            }
-                        }
-                        TouchType.Tap -> {
-                            if(square.leftCollision(x, y)) {
-                                reflectSquareY(square, true)
-                                return true
-                            }else if(square.rightCollision(x,y)) {
-                                reflectSquareY(square, false)
-                                return true
-                            }else if(square.topCollision(x, y)) {
-                                reflectSquareX(square, true)
-                                return true
-                            }else if(square.bottomCollision(x, y)) {
-                                reflectSquareX(square, false)
-                                return true
-                            }
-                        }
+                    if(touchType == TouchType.PinchOut && square.centerCollision(x, y)) {
+                        openSquare(square)
+                        return true
                     }
                 }
 
                 if(touchType == TouchType.PinchIn) {
-                    closeCube(getOpenCubeIndex())
+                    val openSet = getOpenSet()
+                    if(openSet != null)
+                        closeSet(openSet)
                     return true
                 }
             }
@@ -788,7 +633,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 }
 
                 if(touchType == TouchType.Tap) {
-                    closeSquare(getOpenSquareSurface())
+                    val openSquare = getOpenSquare()
+                    if(openSquare != null)
+                        closeSquare(openSquare)
                     return true
                 }
             }
@@ -799,8 +646,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
 
     private fun onAnimationEnd() {
-        for(cube in mCubes) {
-            cube.onAnimationEnd()
+        for(set in mSets) {
+            set.onAnimationEnd()
         }
         for(square in mSquares) {
             square.onAnimationEnd()
@@ -810,22 +657,11 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         mCamera.onAnimationEnd()
 
+
         //this stuff shouldn't be here - fire and forget commands will simplify everything
         //so destroy cube on tap, creating squares and then animating them
         //on closing a cube, destroy all squares and create an open cube and animate it closing
         ///////////////////////////////////////////////////////////////////////////////////////
-        if(mOpeningCube != null) {
-            mSquares = mOpeningCube!!.spawnSquares(puzzleData[mOpeningCube!!.mIndex])
-            mCubes.remove(mOpeningCube)
-            mOpeningCube = null
-        }
-
-
-        if(mClosingSquare != Surface.None  && getOpenCubeIndex() != -1) {
-            mFractals.clear()
-            mSquares.add(Cube.spawnSquare(puzzleData[getOpenCubeIndex()][mClosingSquare.value], mClosingSquare, getOpenCubeIndex()))
-            mClosingSquare = Surface.None
-        }
 
         if(mMergeFractals != null) {
             mFractals.add(merge(mMergeFractals!!))
@@ -835,28 +671,20 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             mMergeFractals = null
         }
 
+        //recreate at end of animation (to reduce complexity by not having to save angle state, mostly)
         if(mRecreateFractal != null) {
-            mFractals.add(Fractal(getElements(getOpenCubeIndex(), getOpenSquareSurface().value, mRecreateFractal!!.mIndex, mRecreateFractal!!.mSize),
+            mFractals.add(Fractal(getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, mRecreateFractal!!.mIndex, mRecreateFractal!!.mSize),
                     mRecreateFractal!!.mSize, mRecreateFractal!!.mIndex, mRecreateFractal!!.pos))
             mFractals.remove(mRecreateFractal!!)
             mRecreateFractal = null
         }
 
-        if(mRecreateSquare != null) {
-            val cubePos = cubeLocations[getOpenCubeIndex()]
-            mSquares.add(Square(puzzleData[getOpenCubeIndex()][mRecreateSquare!!.mSurface.value],
-                    calculateSurfacePos(mRecreateSquare!!.mSurface, cubePos), mRecreateSquare!!.mSurface))
-            mSquares.remove(mRecreateSquare!!)
-            mRecreateSquare = null
-        }
         //////////////////////////////////////////////////////////////////////////////////////////
     }
 
     override fun onDrawFrame(unused: GL10) {
 
-        ////////////////////////////setup///////////////////////////////////////////
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
-        GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT)
+        ////////////////////////////update setup///////////////////////////////////////////
 
         //delta time
         mPreviousTime = mCurrentTime
@@ -897,15 +725,30 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             square.onUpdate(sigmoid)
         }
 
-        for(cube in mCubes) {
-            //cube.onUpdate(sigmoid) //temp disabling
-            cube.angle += .5f
+        for(set in mSets) {
+            set.onUpdate(sigmoid)
         }
+
+        /////////////////////////////////////draw setup////////////////////////////////////
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+        GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT)
 
         Matrix.setLookAtM(mViewMatrix, 0, mCamera.pos[0], mCamera.pos[1], mCamera.pos[2], mCamera.pos[0], mCamera.pos[1], 0f, 0f, 1f, 0f)
         Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0)
 
-        /////////////////////////////////////draw/////////////////////////////////////
+        GLES20.glUseProgram(mProgram)
+        mPosAttrib = GLES20.glGetAttribLocation(mProgram, "aPosition")
+        mTexCoordAttrib = GLES20.glGetAttribLocation(mProgram, "aTexCoord")
+        mTexUniform = GLES20.glGetUniformLocation(mProgram, "uTexture")
+        mModelUniform = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix")
+        GLES20.glEnableVertexAttribArray(mPosAttrib)
+        GLES20.glEnableVertexAttribArray(mTexCoordAttrib)
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureHandle)
+        GLES20.glUniform1i(mTexUniform, 0)
+
+        //////////////////////draw////////////////////////////////////
         for(fractal in mFractals) {
             fractal.draw(mVPMatrix)
         }
@@ -914,9 +757,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             square.draw(mVPMatrix)
         }
 
-        for(cube in mCubes) {
-            cube.draw(mVPMatrix)
+        for(set in mSets) {
+            set.draw(mVPMatrix)
         }
+
+        //////////////////////draw cleanup/////////////////////////////
+        GLES20.glDisableVertexAttribArray(mPosAttrib)
+        GLES20.glDisableVertexAttribArray(mTexCoordAttrib)
 
     }
 
@@ -953,26 +800,5 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return textureHandle[0]
     }
 
-    companion object {
-        var mTextureHandle = -1
-        val mVPMatrix = FloatArray(16)
-        fun compileShaders(vertexShaderCode: String, fragmentShaderCode: String): Int {
 
-            val vertexShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER).also {
-                GLES20.glShaderSource(it, vertexShaderCode)
-                GLES20.glCompileShader(it)
-            }
-
-            val fragmentShader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER).also {
-                GLES20.glShaderSource(it, fragmentShaderCode)
-                GLES20.glCompileShader(it)
-            }
-
-            return GLES20.glCreateProgram().also {
-                GLES20.glAttachShader(it, vertexShader)
-                GLES20.glAttachShader(it, fragmentShader)
-                GLES20.glLinkProgram(it)
-            }
-        }
-    }
 }

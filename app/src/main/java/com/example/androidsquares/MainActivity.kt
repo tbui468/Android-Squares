@@ -1,16 +1,17 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //make puzzles contain be playable in a 4x6 grid
+    //don't worry about transitions now - create and destroy everything on open/close
+        //deal with animations later
 
-    //make a new Set class that can be clicked to zoom
-        //on click
-            //set fades out and is destroyed on animation end
-            //create squares, and fade in
-            //camera zooms in
+
+    //have all squares appear when opening a set
+        //set all indices to max 4x6 (4 columns and 6 rows)
 
     //on click square
-        //square fades out, and is destroyed on animation end
-        //create fractals, and fade in
+    //square fades out, and is destroyed on animation end
+    //create fractals, and fade in
+
+    //make puzzles contain be playable in a 4x6 grid
 
     //make everything 2d again - make the 'cube' a puzzleset to select
         //selecting apuzzleset zooms in to display a grid of up to 24 puzzles (recall that we can fit 6x4 squares on the screen)
