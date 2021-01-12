@@ -118,7 +118,7 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
     var angle = 0f
     private var fromAngle = 0f
     private var toAngle = 0f
-    var rotationAxis = floatArrayOf(0f, 0f, 1f)
+    var rotationAxis = floatArrayOf(0f, 2f, 1f)
 
     var alpha = 1f
     private var fromAlpha = 1f

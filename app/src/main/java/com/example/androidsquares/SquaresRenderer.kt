@@ -898,7 +898,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
 
         for(cube in mCubes) {
-            cube.onUpdate(sigmoid)
+            //cube.onUpdate(sigmoid) //temp disabling
+            cube.angle += .5f
         }
 
         Matrix.setLookAtM(mViewMatrix, 0, mCamera.pos[0], mCamera.pos[1], mCamera.pos[2], mCamera.pos[0], mCamera.pos[1], 0f, 0f, 1f, 0f)
