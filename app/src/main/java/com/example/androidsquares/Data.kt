@@ -52,7 +52,7 @@ enum class FractalType {
 val squareVertices = FloatArray(5 * 4 * 24).also {
     for(quad in 0 until 24) {
         val left = -2f + (quad % 4).toFloat()
-        val bottom = 3f - (quad / 4).toFloat()
+        val bottom = 2f - (quad / 4).toFloat()
         //bottom left vertex
         it[quad * 20 + 0] = left
         it[quad * 20 + 1] = bottom
@@ -249,6 +249,14 @@ fun calculateSquarePosition(setPos: FloatArray, squareIndex: Int): FloatArray {
     return floatArrayOf(hOffset + setPos[0] + 1.5f * col, vOffset + setPos[1] - 2f * row, setPos[2])
 }
 
+//always size 1 for grid size of 4x6
+fun calculateInitFractalPos(index: IntArray, squareCenter: FloatArray): FloatArray {
+    val xStart = -.25f * 1.5f
+    val yStart = .25f * 2.5f
+
+    return floatArrayOf(squareCenter[0] + xStart + .25f * index[0], squareCenter[1] + yStart - .25f * index[1], squareCenter[2])
+}
+
 //gets center of fractal of given size/index
 fun calculateFractalPos(index: IntArray, size: Int, squareCenter: FloatArray): FloatArray {
     val SPACING = .35f
@@ -264,7 +272,8 @@ fun calculateFractalPosForTarget(index: IntArray, size: Int, targetIndex: IntArr
     val halfWidth = (targetSize - 1) * .25f / 2f
 
     return floatArrayOf(targetCenter[0] - halfWidth + .25f * (index[0] - targetIndex[0]) + (size - 1) * .25f/2f,
-                        targetCenter[1] + halfWidth - .25f * (index[1] - targetIndex[1]) - (size -1) * .25f/2f, squareCenter[2])
+                        targetCenter[1] + halfWidth - .25f * (index[1] - targetIndex[1]) - (size -1) * .25f/2f,
+                        squareCenter[2])
 }
 
 

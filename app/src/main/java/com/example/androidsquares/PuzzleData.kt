@@ -2,64 +2,93 @@ package com.example.androidsquares
 
 
 val puzzle00 = arrayOf(
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
         FractalType.Empty, FractalType.Empty, FractalType.Blue, FractalType.Empty,
         FractalType.Empty, FractalType.Empty, FractalType.Normal, FractalType.Empty,
         FractalType.Empty, FractalType.Empty, FractalType.Normal, FractalType.Empty,
-        FractalType.Empty, FractalType.Empty, FractalType.Normal, FractalType.Empty,
-        FractalType.Empty, FractalType.Empty, FractalType.Normal, FractalType.Empty,
-        FractalType.Normal, FractalType.Empty, FractalType.Normal, FractalType.BlueB)
+        FractalType.BlueB, FractalType.BlueB, FractalType.Normal, FractalType.BlueB,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty)
 
 val puzzle01 = arrayOf(
         FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
-        FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
-        FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
-        FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.BlueB, FractalType.Normal, FractalType.Blue,
         FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.Empty,
-        FractalType.Empty, FractalType.Empty, FractalType.Blue, FractalType.Empty)
+        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.BlueB, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty)
 
 val puzzle02 = arrayOf(
-        FractalType.Blue, FractalType.Normal, FractalType.Empty, FractalType.Empty,
-        FractalType.Empty, FractalType.Normal, FractalType.BlueB, FractalType.Empty,
-        FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
-        FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
-        FractalType.Empty, FractalType.Empty, FractalType.Normal, FractalType.Blue,
-        FractalType.Red, FractalType.Empty, FractalType.Empty, FractalType.Empty)
+        FractalType.BlueB, FractalType.Empty, FractalType.Normal, FractalType.Blue,
+        FractalType.BlueB, FractalType.Normal, FractalType.Normal, FractalType.BlueB,
+        FractalType.Empty, FractalType.Blue, FractalType.Empty, FractalType.BlueB,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty)
 
 val puzzle03 = arrayOf(
         FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
-        FractalType.Empty, FractalType.Normal, FractalType.Empty, FractalType.Empty,
         FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.BlueB, FractalType.Blue, FractalType.Blue, FractalType.Empty,
         FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
-        FractalType.Blue, FractalType.Normal, FractalType.Blue, FractalType.Empty,
-        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty)
+        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty)
 
 val puzzle04 = arrayOf(
-        FractalType.Blue, FractalType.Normal, FractalType.Red, FractalType.Normal,
-        FractalType.Empty, FractalType.Normal, FractalType.Empty, FractalType.RedB,
-        FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
-        FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
-        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.RedB,
-        FractalType.Blue, FractalType.Empty, FractalType.Empty, FractalType.Empty)
+        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Blue, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Normal, FractalType.Blue, FractalType.Empty,
+        FractalType.Blue, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty)
 
 val puzzle05 = arrayOf(
-        FractalType.Red, FractalType.Blue, FractalType.Red, FractalType.Empty,
-        FractalType.BlueB, FractalType.Empty, FractalType.RedB, FractalType.Empty,
-        FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
-        FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
-        FractalType.Red, FractalType.Blue, FractalType.Blue, FractalType.Empty,
-        FractalType.RedB, FractalType.Empty, FractalType.Empty, FractalType.Empty)
+        FractalType.BlueB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.BlueB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Normal, FractalType.Blue, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Blue, FractalType.BlueB, FractalType.Empty,
+        FractalType.Empty, FractalType.Blue, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty)
+
+
+val puzzle06 = arrayOf(
+        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Blue, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.BlueB, FractalType.BlueB, FractalType.BlueB,
+        FractalType.RedB, FractalType.RedB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.Red,
+        FractalType.Empty, FractalType.RedB, FractalType.Empty, FractalType.Empty)
+
+val puzzle07 = arrayOf(
+        FractalType.Empty, FractalType.BlueB, FractalType.RedB, FractalType.Empty,
+        FractalType.Empty, FractalType.BlueB, FractalType.RedB, FractalType.Empty,
+        FractalType.Red, FractalType.Normal, FractalType.Normal, FractalType.Blue,
+        FractalType.Empty, FractalType.BlueB, FractalType.RedB, FractalType.Empty,
+        FractalType.Empty, FractalType.BlueB, FractalType.RedB, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty)
+
+val puzzle08 = arrayOf(
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Red,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty)
+
+
 
 
 val cubeData0: Array<Array<FractalType>> = Array(16){Array(24){FractalType.Normal}}.also {
-    it[0] = puzzle00
-    it[1] = puzzle01
-    it[2] = puzzle02
-    it[3] = puzzle03
-    it[4] = emptyArray()
-    it[5] = puzzle05
-    for(i in 6 until 16) {
-        it[i] = puzzle00.copyOf()
+    for(i in 0 until 16) {
+        it[i] = emptyArray()
     }
+    it[8] = puzzle00
+    it[9] = puzzle01
+    it[10] = puzzle02
+    it[6] = puzzle03
+    it[2] = puzzle04
+    it[3] = puzzle05
+    it[14] = puzzle06
+    it[15] = puzzle07
 }
 
 val puzzle10 = arrayOf(

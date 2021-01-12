@@ -126,6 +126,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun openSquare(square: Square) {
         mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4.5f))
         mBackButton.moveTo(floatArrayOf(square.pos[0] + mBackButtonOffset[0], square.pos[1] + mBackButtonOffset[1], 4.5f + mBackButtonOffset[2]))
+
         mFractals = square.spawnFractals(puzzleData[getOpenSet()!!.mIndex][square.mIndex]) //temp: just grabbing first index
         for(fractal in mFractals) {
             fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos))
@@ -133,6 +134,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         square.mIsOpen = true
 
+        square.makeInvisible()
         for(s in mSquares) {
             s.fadeTo(0f)
         }

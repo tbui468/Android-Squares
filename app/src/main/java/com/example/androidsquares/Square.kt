@@ -57,7 +57,8 @@ class Square(elements: Array<FractalType>, setPos: FloatArray, squareIndex: Int)
         for(i in elements.indices) {
             if(elements[i] != FractalType.Empty) {
                 val index = intArrayOf(i % 4, i / 4)
-                list.add(Fractal(arrayOf(elements[i]), 1, index, calculateFractalPosForTarget(index, 1, intArrayOf(0, 0), 4, pos)))
+                //list.add(Fractal(arrayOf(elements[i]), 1, index, calculateFractalPosForTarget(index, 1, intArrayOf(0, 0), 4, pos)))
+                list.add(Fractal(arrayOf(elements[i]), 1, index, calculateInitFractalPos(index, pos)))
             }
         }
         return list

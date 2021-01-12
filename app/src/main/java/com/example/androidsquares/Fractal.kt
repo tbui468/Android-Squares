@@ -5,7 +5,6 @@ package com.example.androidsquares
 
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
-import android.util.Log
 
 import android.opengl.Matrix
 import android.opengl.GLES20

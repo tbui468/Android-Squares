@@ -36,6 +36,12 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
         alpha = fromAlpha + (toAlpha - fromAlpha) * t
     }
 
+    fun makeInvisible() {
+        alpha = 0f
+        fromAlpha = 0f
+        toAlpha = 0f
+    }
+
     open fun onAnimationEnd() {
         pos = toPos
         fromPos = toPos

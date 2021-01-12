@@ -1,43 +1,19 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //make backbutton that goes back one screen on tap
-        //have it track the camera (moves relative to camera movement so that it's always the same distance away from camera)
+    //make two sets of puzzles (modify the current ones if possible) to prepare for transformation limits and undo function
+        //doesn't need to be 16 total puzzles - the first set should be quite short
+        //make the shape interesting too - the shapes also determine unlock order of puzzles
 
-    //base GUI on messenger
-        //go back button on top left of screen when square/puzzle is open
-        //put undo icons/bar at bottom center of screen
+    //transformation limit and limit icon display
+        //it can be similar to how the BackButton was implemented
 
-    //on click square
-    //square fades out, and is destroyed on animation end
-    //create fractals, and fade in
+    //undo option for puzzles - need to save this somewhere too
 
-    //make puzzles contain be playable in a 4x6 grid
-
-    //make everything 2d again - make the 'cube' a puzzleset to select
-        //selecting apuzzleset zooms in to display a grid of up to 24 puzzles (recall that we can fit 6x4 squares on the screen)
-        //one bronze level, two silver levels, 3 gold levels, 3 platinum levels
+    //design some puzzles with more interesting shapes and obvious ends goals
 
     //puzzle goal should be obvious when looking at a puzzle for the first time
         //user should know exactly where the colored squares need to go to connect all the colors
         //having a clear end goal will make the puzzle for interesting, and encourage users to start thinking about solutions
-
-    //reset camera back to normal position looking down z axis
-        //get the puzzles fun first before worring fancy 3d cameras
-        //design 1 cube puzzle (both fractal and square puzzles)
-        //make egdes of square visible for easier selection/transformation
-
-    //get cubes in correct location on screen (Dali cross formation)
-    //save camera positions for easy/quick changing
-        //give all cubes the same orientation when opening (including the squares/fractals)
-        //when opening a cube/square, move to camera towards the center point, but keep the camera orienation the same
-            //from camera's perspective, just shift left/right/up/down
-            //this will simplify everything since everything is facing the same direction
-
-            //IMPLEMENTATION: calculate camera orientation default (when camera is first created)
-                //start camera orientation and open cube/square orientation are set once and never changed
-                //calculate point that is x distance from center of cube/square, that also satisfies camera orientation requirement (equal to default orientation)
-                    //need to save look-at variable to camera class and update per step while animating this
-                //look at will just be set to center pos of cube/square
 
     //problem - there isn't enough integration with current puzzles -
         //it feels like a cluster of random colors (it should feel like I'm connection colors together into lines/trees
