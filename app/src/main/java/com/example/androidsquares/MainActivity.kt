@@ -1,6 +1,7 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
     //make backbutton that goes back one screen on tap
+        //have it track the camera (moves relative to camera movement so that it's always the same distance away from camera)
 
     //base GUI on messenger
         //go back button on top left of screen when square/puzzle is open
