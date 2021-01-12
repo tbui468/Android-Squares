@@ -5,7 +5,7 @@ import android.opengl.GLES20
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 
-class Set(pos: FloatArray, index: Int): Entity(pos, floatArrayOf(1f, 1f, 1f), 1) {
+class Set(pos: FloatArray, index: Int): Entity(pos, floatArrayOf(8f, 8f, 8f), 1) {
 
     private var mVertexBuffer: FloatBuffer = createFloatBuffer(vertices1)
     private var mIndexBuffer: ShortBuffer = createShortBuffer(indices1)
@@ -16,9 +16,12 @@ class Set(pos: FloatArray, index: Int): Entity(pos, floatArrayOf(1f, 1f, 1f), 1)
 
 
     fun spawnSquares(): MutableList<Square>{
-        return mutableListOf(Square(puzzleData[0][0], pos, 0),
-                            Square(puzzleData[0][1], pos, 1)
-        )
+        return mutableListOf<Square>().also {
+            for(i in 0 until 16) {
+                if(puzzleData[mIndex][i].isNotEmpty())
+                    it.add(Square(puzzleData[mIndex][i], pos, i))
+            }
+        }
     }
 
 

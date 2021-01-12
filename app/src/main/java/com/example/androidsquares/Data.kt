@@ -48,9 +48,54 @@ enum class FractalType {
 //quads start at top left.  Left to right.  Top to bottom
 //sizes 1x1, 2x2 and 4x4.  Cubes will consist of 6 4x4s that are transformed into correct position
 
-val vertices1 = floatArrayOf(-0.5f, -0.5f, 0.0f, 0f, 1f,
-                            0.5f, -0.5f, 0.0f, 1f, 1f,
-                            0.5f, 0.5f, 0.0f, 1f, 0f,
+//square Ojbect vertices and indices (not actually a square for historical reasons)
+val squareVertices = FloatArray(5 * 4 * 24).also {
+    for(quad in 0 until 24) {
+        val left = -2f + (quad % 4).toFloat()
+        val bottom = 3f - (quad / 4).toFloat()
+        //bottom left vertex
+        it[quad * 20 + 0] = left
+        it[quad * 20 + 1] = bottom
+        it[quad * 20 + 2] = 0f
+        it[quad * 20 + 3] = 0f
+        it[quad * 20 + 4] = 0f
+        //bottom right vertex
+        it[quad * 20 + 5] = left + 1f
+        it[quad * 20 + 6] = bottom
+        it[quad * 20 + 7] = 0f
+        it[quad * 20 + 8] = 0f
+        it[quad * 20 + 9] = 0f
+        //top right vertex
+        it[quad * 20 + 10] = left + 1f
+        it[quad * 20 + 11] = bottom + 1f
+        it[quad * 20 + 12] = 0f
+        it[quad * 20 + 13] = 0f
+        it[quad * 20 + 14] = 0f
+        //top left vertex
+        it[quad * 20 + 15] = left
+        it[quad * 20 + 16] = bottom + 1f
+        it[quad * 20 + 17] = 0f
+        it[quad * 20 + 18] = 0f
+        it[quad * 20 + 19] = 0f
+    }
+}
+
+val squareIndices = ShortArray(6 * 24).also {
+    var offset: Short = 0
+    for(quad in 0 until 24) {
+        it[quad * 6 + 0] = offset
+        it[quad * 6 + 1] = (offset + 1).toShort()
+        it[quad * 6 + 2] = (offset + 2).toShort()
+        it[quad * 6 + 3] = offset
+        it[quad * 6 + 4] = (offset + 2).toShort()
+        it[quad * 6 + 5] = (offset + 3).toShort()
+        offset = (offset + 4).toShort()
+    }
+}
+
+val vertices1 = floatArrayOf(-0.5f, -0.5f, 0.0f, .0f, .25f,
+                            0.5f, -0.5f, 0.0f, .25f, .25f,
+                            0.5f, 0.5f, 0.0f, .25f, 0f,
                             -0.5f, 0.5f, 0.0f, 0f, 0f)
 
 val indices1 = shortArrayOf(0, 1, 2, 0, 2, 3)
@@ -193,27 +238,22 @@ val indices4 = shortArrayOf(0, 1, 2, 0, 2, 3,
 
 
 
-val cubeLocations = arrayOf(floatArrayOf(0f, 3f, 0f),
-                            floatArrayOf(0f, 1f, 0f),
-                            floatArrayOf(0f, -1f, 0f),
-                            floatArrayOf(0f, -3f, 0f))
-/*
-                            floatArrayOf(3f, 2f, 0f),
-                            floatArrayOf(-3f, 2f, 0f),
-                            floatArrayOf(0f, 2f, -3f),
-                            floatArrayOf(0f, 2f, 3f))*/
 
 
-
+//4 cols, and 6 rows
 fun calculateSquarePosition(setPos: FloatArray, squareIndex: Int): FloatArray {
-    return floatArrayOf(setPos[0] + 1f * squareIndex, setPos[1], setPos[2])
+    val col = squareIndex % 4
+    val row = squareIndex / 4
+    val hOffset = -1.5f * 3f / 2
+    val vOffset = 2f * 3f / 2
+    return floatArrayOf(hOffset + setPos[0] + 1.5f * col, vOffset + setPos[1] - 2f * row, setPos[2])
 }
 
 //gets center of fractal of given size/index
 fun calculateFractalPos(index: IntArray, size: Int, squareCenter: FloatArray): FloatArray {
     val SPACING = .35f
     val topLeftX = squareCenter[0] - SPACING * (3)/2f + SPACING * index[0]
-    val topLeftY = squareCenter[1] + SPACING * (3)/2f - SPACING * index[1]
+    val topLeftY = squareCenter[1] + SPACING * (5)/2f - SPACING * index[1]
     val halfWidth = (size - 1) * SPACING / 2f
     return floatArrayOf(topLeftX + halfWidth, topLeftY - halfWidth, squareCenter[2])
 }

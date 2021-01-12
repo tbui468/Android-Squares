@@ -18,12 +18,9 @@ class Square(elements: Array<FractalType>, setPos: FloatArray, squareIndex: Int)
     var mIndex = squareIndex
     var mIsOpen = false
 
-
-
-
     init {
-        val vertices = vertices4
-        val indices = indices4
+        val vertices = squareVertices
+        val indices = squareIndices
         val emptyFractalCount = findEmptyFractalCount(elements)
         val floatsToTrim = emptyFractalCount * FLOATS_PER_QUAD //four vertices per fractal, and 5 floats per vertex
         val trimmedVertices = FloatArray(vertices.size - floatsToTrim)

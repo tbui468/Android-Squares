@@ -1,11 +1,10 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //don't worry about transitions now - create and destroy everything on open/close
-        //deal with animations later
+    //make backbutton that goes back one screen on tap
 
-
-    //have all squares appear when opening a set
-        //set all indices to max 4x6 (4 columns and 6 rows)
+    //base GUI on messenger
+        //go back button on top left of screen when square/puzzle is open
+        //put undo icons/bar at bottom center of screen
 
     //on click square
     //square fades out, and is destroyed on animation end

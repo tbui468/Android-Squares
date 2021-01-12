@@ -97,7 +97,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
 
         mCamera = Camera(floatArrayOf(0f, 0f, 3f))
-        mCamera.moveTo(floatArrayOf(0f, 0f, 16f))
+        mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
 
     }
 
@@ -106,7 +106,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             s.fadeTo(0f)
         }
         set.mIsOpen = true
-        mCamera.moveTo(floatArrayOf(set.pos[0], set.pos[1], 8f))
+        mCamera.moveTo(floatArrayOf(set.pos[0], set.pos[1], 15f))
         mSquares = set.spawnSquares()
     }
 
@@ -115,12 +115,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             s.fadeTo(1f)
         }
         set.mIsOpen = false
-        mCamera.moveTo(floatArrayOf(0f, 0f, 16f))
+        mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
         mSquares.clear()
     }
 
     private fun openSquare(square: Square) {
-        mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4.5f))
+        mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4f))
         mFractals = square.spawnFractals(puzzleData[getOpenSet()!!.mIndex][square.mIndex]) //temp: just grabbing first index
         for(fractal in mFractals) {
             fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos))
@@ -138,7 +138,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         for (fractal in mFractals) {
             fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, intArrayOf(0, 0), 4, square.pos))
         }
-        mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1] + .25f * 4f / 2f, 10f))
+        mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1] + .25f * 4f / 2f, 15f))
 
         for(s in mSquares) {
             s.fadeTo(1f)
@@ -174,7 +174,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     //////////////helper functions for commands//////////////////////////////////////////
     private fun getFractal(index: IntArray): Fractal? {
-        if(index[0] < 0 || index[0] >=4 || index[1] < 0 || index[1] >= 4) return null
+        if(index[0] < 0 || index[0] >=4 || index[1] < 0 || index[1] >= 6) return null
 
         for(fractal in mFractals) {
             if(fractal.mIndex[0] == index[0] && fractal.mIndex[1] == index[1]) return fractal
@@ -523,7 +523,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             }
             Screen.Square -> {
                 for (square in mSquares) {
-                    if(touchType == TouchType.PinchOut && square.centerCollision(x, y)) {
+                    if(touchType == TouchType.Tap && square.centerCollision(x, y)) {
                         openSquare(square)
                         return true
                     }
@@ -773,7 +773,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val ratio = width.toFloat() / height
 
         //Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 7f) //allow depth up to 100f away from camera
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 33f) //allow depth up to 30 units away
+        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 103f) //allow depth up to 100 units away
     }
 
     private fun loadTexture(context: Context, resourceID: Int): Int {
