@@ -72,8 +72,20 @@ val puzzle07 = PuzzleData(arrayOf(
 
 
 val set0 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puzzle05, puzzle06, puzzle07,
-                            null, null, null, null, null, null, null, null), false, false, floatArrayOf(-8f, 21f, 0f))
+        null, null, null, null, null, null, null, null), false, false, floatArrayOf(-8f, 21f, 0f))
 val set1 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puzzle05, puzzle06, puzzle07,
-                            null, null, null, null, null, null, null, null), false, false, floatArrayOf(-8f, 7f, 0f))
+        null, null, null, null, null, null, null, null), true, false, floatArrayOf(-8f, 7f, 0f))
+val set2 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puzzle05, puzzle06, puzzle07,
+        null, null, null, null, null, null, null, null), true, false, floatArrayOf(-8f, -7f, 0f))
+val set3 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puzzle05, puzzle06, puzzle07,
+        null, null, null, null, null, null, null, null), true, false, floatArrayOf(-8f, -21f, 0f))
+val set4 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puzzle05, puzzle06, puzzle07,
+        null, null, null, null, null, null, null, null), true, false, floatArrayOf(8f, 21f, 0f))
+val set5 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puzzle05, puzzle06, puzzle07,
+        null, null, null, null, null, null, null, null), true, false, floatArrayOf(8f, 7f, 0f))
+val set6 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puzzle05, puzzle06, puzzle07,
+        null, null, null, null, null, null, null, null), true, false, floatArrayOf(8f, -7f, 0f))
+val set7 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puzzle05, puzzle06, puzzle07,
+        null, null, null, null, null, null, null, null), true, false, floatArrayOf(8f, -21f, 0f))
 
-val appData = AppData(arrayOf(set0, set1), true)
+val appData = AppData(arrayOf(set0, set1, set2, set3, set4, set5, set6, set7), true)

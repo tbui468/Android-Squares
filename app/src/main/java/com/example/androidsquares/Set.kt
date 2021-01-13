@@ -5,19 +5,31 @@ import android.opengl.GLES20
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 
-class Set(pos: FloatArray, index: Int, locked: Boolean): Entity(pos, floatArrayOf(8f, 8f, 8f), 1) {
+class Set(pos: FloatArray, index: Int, locked: Boolean, cleared: Boolean): Entity(pos, floatArrayOf(8f, 8f, 8f), 1) {
     private var mVertexBuffer: FloatBuffer
     private var mIndexBuffer: ShortBuffer = createShortBuffer(indices1.copyOf())
     private var mIndexCount = indices1.size
     private var mModelMatrix = FloatArray(16)
     var mIndex = index
     var mIsOpen = false
-    var mIsLocked = locked
 
     init {
         val vertices = vertices1.copyOf()
 
-        if(!mIsLocked) {
+        if(cleared) {
+            //bottom left
+            vertices[3] = 0f
+            vertices[4] = .5f
+            //bottom right
+            vertices[8] = .25f
+            vertices[9] = .5f
+            //top right
+            vertices[13] = .25f
+            vertices[14] = .25f
+            //top left
+            vertices[18] = 0f
+            vertices[19] = .25f
+        }else if(!locked) {
             //bottom left
             vertices[3] = 0f
             vertices[4] = .25f
@@ -54,17 +66,10 @@ class Set(pos: FloatArray, index: Int, locked: Boolean): Entity(pos, floatArrayO
             for(i in 0 until 16) {
                 //if(puzzleData[mIndex][i].isNotEmpty()) {
                 if(appData.setData[mIndex].puzzleData[i] != null) {
-                    if (i % 2 == 0)
-                        it.add(Square(pos, i, false))
-                    else
-                        it.add(Square(pos, i, true))
+                    it.add(Square(pos, i, appData.setData[mIndex].puzzleData[i]!!.isLocked, appData.setData[mIndex].puzzleData[i]!!.isCleared))
                 }
             }
         }
-    }
-
-    fun unlock() {
-        mIsLocked = false
     }
 
 

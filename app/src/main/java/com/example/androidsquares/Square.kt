@@ -6,19 +6,32 @@ import android.opengl.GLES20
 import java.nio.FloatBuffer
 
 
-class Square(setPos: FloatArray, squareIndex: Int, locked: Boolean) : Entity(calculateSquarePosition(setPos, squareIndex), floatArrayOf(1f, 1f, 1f), 1){
+class Square(setPos: FloatArray, squareIndex: Int, locked: Boolean, cleared: Boolean) : Entity(calculateSquarePosition(setPos, squareIndex), floatArrayOf(1f, 1f, 1f), 1){
     private val mIndexCount = indices1.size
     private var mVertexBuffer: FloatBuffer
     private var mIndexBuffer = createShortBuffer(indices1.copyOf())
     private var mModelMatrix = FloatArray(16)
     var mIndex = squareIndex
     var mIsOpen = false
-    var mIsLocked = locked
 
     init {
         val vertices = vertices1.copyOf()
-        //change texture if depending on lock status
-        if(!mIsLocked) {
+        //change texture if depending on lock status (setting cleared to green)
+        if(cleared) {
+            //bottom left
+            vertices[3] = 0f
+            vertices[4] = .5f
+            //bottom right
+            vertices[8] = .25f
+            vertices[9] = .5f
+            //top right
+            vertices[13] = .25f
+            vertices[14] = .25f
+            //top left
+            vertices[18] = 0f
+            vertices[19] = .25f
+        }
+        else if(!locked) {
             //bottom left
             vertices[3] = 0f
             vertices[4] = .25f
@@ -31,7 +44,7 @@ class Square(setPos: FloatArray, squareIndex: Int, locked: Boolean) : Entity(cal
             //top left
             vertices[18] = 0f
             vertices[19] = 0f
-        }else {
+        }else { //locked and not cleared
             //bottom left
             vertices[3] = .5f
             vertices[4] = .25f
@@ -59,10 +72,6 @@ class Square(setPos: FloatArray, squareIndex: Int, locked: Boolean) : Entity(cal
             }
         }
         return list
-    }
-
-    fun unlock() {
-        mIsLocked = false
     }
 
     fun draw(vpMatrix: FloatArray) {

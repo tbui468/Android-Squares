@@ -93,15 +93,21 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mProgram = compileShaders()
 
 
-        for(puzzleIndex in appData.setData.indices) {
-            mSets.add(Set(appData.setData[puzzleIndex].pos, puzzleIndex, appData.setData[puzzleIndex].isLocked))
-        }
+        mSets = spawnSets()
 
 
         mCamera = Camera(floatArrayOf(0f, 0f, 3f))
         mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
         //moving button offscreen for main screen
         mBackButton = BackButton(floatArrayOf(mCamera.pos[0] + mBackButtonOffset[0] - 1f,  mCamera.pos[1] + mBackButtonOffset[1], 98f + mBackButtonOffset[2]))
+    }
+
+    private fun spawnSets(): MutableList<Set> {
+        val list = mutableListOf<Set>()
+        for(puzzleIndex in appData.setData.indices) {
+            list.add(Set(appData.setData[puzzleIndex].pos, puzzleIndex, appData.setData[puzzleIndex].isLocked, appData.setData[puzzleIndex].isCleared))
+        }
+        return list
     }
 
     private fun openSet(set: Set) {
@@ -122,6 +128,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
         mBackButton.moveTo(floatArrayOf(0f + mBackButtonOffset[0] - 1f, 0f + mBackButtonOffset[1], 98f + mBackButtonOffset[2]))
         mSquares.clear()
+        mSets = spawnSets()
     }
 
     private fun openSquare(square: Square) {
@@ -151,11 +158,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1], 15f))
         mBackButton.moveTo(floatArrayOf(cubePos[0] + mBackButtonOffset[0], cubePos[1] + mBackButtonOffset[1], 15f + mBackButtonOffset[2]))
 
-        for(s in mSquares) {
-            s.fadeTo(1f)
-        }
-
-        square.mIsOpen = false
+        mSquares = getOpenSet()!!.spawnSquares()
 
         mFractals.clear()
     }
@@ -228,6 +231,20 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 //puzzleData[cubeIndex][squareIndex][index[0] + col + (index[1] + row) * 4] = elements[col + row * size]
                 appData.setData[cubeIndex].puzzleData[squareIndex]!!.elements[index[0] + col + (index[1] + row) * 4] = elements[col + row * size]
             }
+        }
+    }
+
+    private fun setCleared(set: Set): Boolean {
+        for(puzzleData in appData.setData[set.mIndex].puzzleData) {
+            if(puzzleData != null && !puzzleData.isCleared)
+                return false
+        }
+        return true
+    }
+
+    private fun unlockAdjacentSets(set: Set) {
+        if(set.mIndex < 7) { //temp: unlock the next set if not already last set
+            appData.setData[set.mIndex + 1].isLocked = false
         }
     }
 
@@ -311,10 +328,14 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun unlockAdjacentSquares(square: Square) {
         val col = square.mIndex % 4
         val row = square.mIndex / 4
-        getSquare(col + 1 + row * 4).also { if(it != null && it.mIsLocked)  it.unlock() }
-        getSquare(col - 1 + row * 4).also { if(it != null && it.mIsLocked)  it.unlock() }
-        getSquare(col + (row + 1) * 4).also { if(it != null && it.mIsLocked)  it.unlock() }
-        getSquare(col + (row - 1) * 4).also { if(it != null && it.mIsLocked)  it.unlock() }
+        getSquare(col + 1 + row * 4).also { if(it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
+            appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false }
+        getSquare(col - 1 + row * 4).also { if(it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
+            appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false }
+        getSquare(col + (row + 1) * 4).also { if(it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
+            appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false }
+        getSquare(col + (row - 1) * 4).also { if(it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
+            appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false }
     }
 
 
@@ -600,7 +621,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             Screen.Set -> {
                 if(touchType == TouchType.Tap) {
                     for (set in mSets) {
-                        if (set.pointCollision(x, y) == CollisionBox.Center && !set.mIsLocked) {
+                        if (set.pointCollision(x, y) == CollisionBox.Center && !appData.setData[set.mIndex].isLocked) {
                             openSet(set)
                             return true
                         }
@@ -610,7 +631,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             Screen.Square -> {
                 if(touchType == TouchType.Tap) {
                     for (square in mSquares) {
-                        if (square.centerCollision(x, y) && !square.mIsLocked) {
+                        if (square.centerCollision(x, y) && !appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.isLocked) {
                             openSquare(square)
                             return true
                         }
@@ -639,7 +660,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
                                     if(puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
+                                        appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.isCleared = true
                                         unlockAdjacentSquares(getOpenSquare()!!)
+                                        if(setCleared(getOpenSet()!!)) {
+                                            appData.setData[getOpenSet()!!.mIndex].isCleared = true
+                                            unlockAdjacentSets(getOpenSet()!!)
+                                        }
                                     }
                                     return true
                                 }
@@ -657,7 +683,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
                                     if(puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
+                                        appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.isCleared = true
                                         unlockAdjacentSquares(getOpenSquare()!!)
+                                        if(setCleared(getOpenSet()!!)) {
+                                            appData.setData[getOpenSet()!!.mIndex].isCleared = true
+                                            unlockAdjacentSets(getOpenSet()!!)
+                                        }
                                     }
                                     return true
                                 }
@@ -675,7 +706,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
                                     if(puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
+                                        appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.isCleared = true
                                         unlockAdjacentSquares(getOpenSquare()!!)
+                                        if(setCleared(getOpenSet()!!)) {
+                                            appData.setData[getOpenSet()!!.mIndex].isCleared = true
+                                            unlockAdjacentSets(getOpenSet()!!)
+                                        }
                                     }
                                     return true
                                 }
@@ -693,11 +729,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
                                     if(puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
+                                        appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.isCleared = true
                                         unlockAdjacentSquares(getOpenSquare()!!)
-                                        /*
-                                        if(setCleared(getOpenSet())) {
-                                            unlockAdjacentSets(getOpenSet())
-                                        }*/
+                                        if(setCleared(getOpenSet()!!)) {
+                                            appData.setData[getOpenSet()!!.mIndex].isCleared = true
+                                            unlockAdjacentSets(getOpenSet()!!)
+                                        }
                                     }
                                     return true
                                 }
