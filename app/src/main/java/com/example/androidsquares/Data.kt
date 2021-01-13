@@ -7,6 +7,7 @@ import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import android.util.Log
 
 data class CoordinatePair(val x: Float, val y: Float)
 
@@ -29,6 +30,17 @@ enum class CollisionBox {
     Left,
     Right,
     Bottom
+}
+
+enum class Transformation {
+    TranslatePosX,
+    TranslateNegX,
+    TranslatePosY,
+    TranslateNegY,
+    RotateCW,
+    RotateCCW,
+    ReflectX,
+    ReflectY
 }
 
 enum class Screen {
@@ -299,5 +311,15 @@ fun createShortBuffer(shortArray: ShortArray): ShortBuffer {
             put(shortArray)
             position(0)
         }
+    }
+}
+
+//making my own assert bc android makes things difficult
+//assert(false) will crash app. Look down trace call to see what function called assert(false)
+fun myAssert(bool: Boolean, message: String) {
+    if(!bool) {
+        Log.d("assert", message)
+        val array = FloatArray(1){0f}
+        array[-10] = 10f
     }
 }

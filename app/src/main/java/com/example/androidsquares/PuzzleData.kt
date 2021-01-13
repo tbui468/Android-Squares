@@ -1,6 +1,10 @@
 package com.example.androidsquares
 
-data class PuzzleData(val elements: Array<FractalType>, var isLocked: Boolean, var isCleared: Boolean)
+import java.util.Stack
+
+data class UndoData(val transformation: Transformation, val index: IntArray, val size: Int)
+
+data class PuzzleData(val elements: Array<FractalType>, val undoStack: Stack<UndoData>, val maxTransformations: Int, var isLocked: Boolean, var isCleared: Boolean)
 data class SetData(val puzzleData: Array<PuzzleData?>, var isLocked: Boolean, var isCleared: Boolean, val pos: FloatArray)
 data class AppData(val setData: Array<SetData>, var defaultData: Boolean)
 
@@ -10,16 +14,16 @@ val puzzle00 = PuzzleData(arrayOf(
         FractalType.BlueB, FractalType.Empty, FractalType.Normal, FractalType.Empty,
         FractalType.BlueB, FractalType.Empty, FractalType.Normal, FractalType.Empty,
         FractalType.BlueB, FractalType.BlueB, FractalType.Normal, FractalType.BlueB,
-        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB), false, false)
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB), Stack<UndoData>(), 3, false, false)
 
 
 val puzzle01 = PuzzleData(arrayOf(
         FractalType.Empty, FractalType.BlueB, FractalType.BlueB, FractalType.BlueB,
-        FractalType.Empty, FractalType.BlueB, FractalType.Normal, FractalType.Blue,
+        FractalType.Empty, FractalType.Blue, FractalType.Normal, FractalType.Blue,
         FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.Empty,
         FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
         FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
-        FractalType.BlueB, FractalType.BlueB, FractalType.Empty, FractalType.Empty), true, false)
+        FractalType.BlueB, FractalType.BlueB, FractalType.Empty, FractalType.Empty), Stack<UndoData>(), 3, true, false)
 
 val puzzle02 = PuzzleData(arrayOf(
         FractalType.BlueB, FractalType.BlueB, FractalType.BlueB, FractalType.BlueB,
@@ -27,7 +31,7 @@ val puzzle02 = PuzzleData(arrayOf(
         FractalType.BlueB, FractalType.Empty, FractalType.Normal, FractalType.Blue,
         FractalType.BlueB, FractalType.Normal, FractalType.Normal, FractalType.BlueB,
         FractalType.Empty, FractalType.Blue, FractalType.Empty, FractalType.BlueB,
-        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB), true, false)
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB), Stack<UndoData>(), 3, true, false)
 
 val puzzle03 = PuzzleData(arrayOf(
         FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
@@ -35,7 +39,7 @@ val puzzle03 = PuzzleData(arrayOf(
         FractalType.BlueB, FractalType.Blue, FractalType.Blue, FractalType.Empty,
         FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
         FractalType.Empty, FractalType.BlueB, FractalType.BlueB, FractalType.BlueB,
-        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB), true, false)
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB), Stack<UndoData>(), 3, true, false)
 
 val puzzle04 = PuzzleData(arrayOf(
         FractalType.Empty, FractalType.BlueB, FractalType.BlueB, FractalType.BlueB,
@@ -43,7 +47,7 @@ val puzzle04 = PuzzleData(arrayOf(
         FractalType.Empty, FractalType.Normal, FractalType.Blue, FractalType.Empty,
         FractalType.Blue, FractalType.Normal, FractalType.Empty, FractalType.Empty,
         FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
-        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty), true, false)
+        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty), Stack<UndoData>(), 3, true, false)
 
 val puzzle05 = PuzzleData(arrayOf(
         FractalType.BlueB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
@@ -51,7 +55,7 @@ val puzzle05 = PuzzleData(arrayOf(
         FractalType.Normal, FractalType.Blue, FractalType.Empty, FractalType.Empty,
         FractalType.Empty, FractalType.Blue, FractalType.BlueB, FractalType.BlueB,
         FractalType.Empty, FractalType.Blue, FractalType.Empty, FractalType.BlueB,
-        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB), true, false)
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB), Stack<UndoData>(), 3, true, false)
 
 
 val puzzle06 = PuzzleData(arrayOf(
@@ -60,7 +64,7 @@ val puzzle06 = PuzzleData(arrayOf(
         FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
         FractalType.RedB, FractalType.RedB, FractalType.Empty, FractalType.Empty,
         FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.Red,
-        FractalType.Empty, FractalType.RedB, FractalType.RedB, FractalType.RedB), true, false)
+        FractalType.Empty, FractalType.RedB, FractalType.RedB, FractalType.RedB), Stack<UndoData>(), 3, true, false)
 
 val puzzle07 = PuzzleData(arrayOf(
         FractalType.BlueB, FractalType.BlueB, FractalType.RedB, FractalType.Empty,
@@ -68,7 +72,7 @@ val puzzle07 = PuzzleData(arrayOf(
         FractalType.Red, FractalType.Normal, FractalType.Normal, FractalType.Blue,
         FractalType.Empty, FractalType.BlueB, FractalType.RedB, FractalType.Empty,
         FractalType.Empty, FractalType.BlueB, FractalType.RedB, FractalType.Empty,
-        FractalType.RedB, FractalType.RedB, FractalType.RedB, FractalType.Empty), true, false)
+        FractalType.RedB, FractalType.RedB, FractalType.RedB, FractalType.Empty), Stack<UndoData>(), 3, true, false)
 
 
 val set0 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puzzle05, puzzle06, puzzle07,
