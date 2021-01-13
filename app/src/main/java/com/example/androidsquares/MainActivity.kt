@@ -1,9 +1,9 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
     //clear a puzzle
-        //check clear condition after every transformation (rotation/translation/reflection)
-        //play a simple animation
-        //check all squares/sets and unlock them as needed (should really move this info from instances to global data structure)
+        //implement unlocking sets when all puzzles in a set are cleared
+
+    //play a simple animation on clear puzzle
 
     //transformation limit and limit icon display
         //it can be similar to how the BackButton was implemented

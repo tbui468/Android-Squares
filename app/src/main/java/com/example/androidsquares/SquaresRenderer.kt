@@ -307,6 +307,15 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             DFS(elements, visited, dim, intArrayOf(col, row), targetColors)
     }
 
+    private fun unlockAdjacentSquares(square: Square) {
+        val col = square.mIndex % 4
+        val row = square.mIndex / 4
+        getSquare(col + 1 + row * 4).also { if(it != null && it.mIsLocked)  it.unlock() }
+        getSquare(col - 1 + row * 4).also { if(it != null && it.mIsLocked)  it.unlock() }
+        getSquare(col + (row + 1) * 4).also { if(it != null && it.mIsLocked)  it.unlock() }
+        getSquare(col + (row - 1) * 4).also { if(it != null && it.mIsLocked)  it.unlock() }
+    }
+
 
     private fun swap(fractal0: Fractal, fractal1: Fractal) {
         //update data
@@ -628,9 +637,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
                                     if(puzzleClear(puzzleData[getOpenSet()!!.mIndex][getOpenSquare()!!.mIndex], intArrayOf(4, 6))) {
-                                        Log.d("clearPuzzle", "Puzzle cleared!")
-                                    }else {
-                                        Log.d("clearPuzzle", "Puzzle not cleared!")
+                                        unlockAdjacentSquares(getOpenSquare()!!)
                                     }
                                     return true
                                 }
@@ -648,9 +655,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
                                     if(puzzleClear(puzzleData[getOpenSet()!!.mIndex][getOpenSquare()!!.mIndex], intArrayOf(4, 6))) {
-                                        Log.d("clearPuzzle", "Puzzle cleared!")
-                                    }else {
-                                        Log.d("clearPuzzle", "Puzzle not cleared!")
+                                        unlockAdjacentSquares(getOpenSquare()!!)
                                     }
                                     return true
                                 }
@@ -668,9 +673,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
                                     if(puzzleClear(puzzleData[getOpenSet()!!.mIndex][getOpenSquare()!!.mIndex], intArrayOf(4, 6))) {
-                                        Log.d("clearPuzzle", "Puzzle cleared!")
-                                    }else {
-                                        Log.d("clearPuzzle", "Puzzle not cleared!")
+                                        unlockAdjacentSquares(getOpenSquare()!!)
                                     }
                                     return true
                                 }
@@ -688,9 +691,11 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
                                     if(puzzleClear(puzzleData[getOpenSet()!!.mIndex][getOpenSquare()!!.mIndex], intArrayOf(4, 6))) {
-                                        Log.d("clearPuzzle", "Puzzle cleared!")
-                                    }else {
-                                        Log.d("clearPuzzle", "Puzzle not cleared!")
+                                        unlockAdjacentSquares(getOpenSquare()!!)
+                                        /*
+                                        if(setClear(getOpenSet())) {
+                                            unlockAdjacentSet(getOpenSet()!!)
+                                        }*/
                                     }
                                     return true
                                 }

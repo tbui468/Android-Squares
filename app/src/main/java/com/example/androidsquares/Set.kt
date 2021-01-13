@@ -62,6 +62,10 @@ class Set(pos: FloatArray, index: Int, locked: Boolean): Entity(pos, floatArrayO
         }
     }
 
+    fun unlock() {
+        mIsLocked = false
+    }
+
 
     fun draw(vpMatrix: FloatArray) {
         mModelMatrix = calculateModelMatrix()

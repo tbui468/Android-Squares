@@ -13,7 +13,7 @@ class Square(setPos: FloatArray, squareIndex: Int, locked: Boolean) : Entity(cal
     private var mModelMatrix = FloatArray(16)
     var mIndex = squareIndex
     var mIsOpen = false
-    val mIsLocked = locked
+    var mIsLocked = locked
 
     init {
         val vertices = vertices1.copyOf()
@@ -59,6 +59,10 @@ class Square(setPos: FloatArray, squareIndex: Int, locked: Boolean) : Entity(cal
             }
         }
         return list
+    }
+
+    fun unlock() {
+        mIsLocked = false
     }
 
     fun draw(vpMatrix: FloatArray) {
