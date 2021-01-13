@@ -5,7 +5,7 @@ import android.opengl.GLES20
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 
-class BackButton(pos: FloatArray) : Entity(pos, floatArrayOf(.1f, .1f, .1f), 1) {
+class Button(pos: FloatArray) : Entity(pos, floatArrayOf(.1f, .1f, .1f), 1) {
 
     private var mVertexBuffer: FloatBuffer = createFloatBuffer(vertices1.copyOf())
     private var mIndexBuffer: ShortBuffer = createShortBuffer(indices1.copyOf())

@@ -1,8 +1,8 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-
     //transformation limit and limit icon display
         //it can be similar to how the BackButton was implemented
+        //should slide into screen when user opens a puzzle (formerly called a square)
 
     //undo option for puzzles - need to save this somewhere too
 
