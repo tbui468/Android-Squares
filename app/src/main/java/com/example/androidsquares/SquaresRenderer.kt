@@ -341,14 +341,31 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun unlockAdjacentSquares(square: Square) {
         val col = square.mIndex % 4
         val row = square.mIndex / 4
-        getSquare(col + 1 + row * 4).also { if(it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
-            appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false }
-        getSquare(col - 1 + row * 4).also { if(it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
-            appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false }
-        getSquare(col + (row + 1) * 4).also { if(it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
-            appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false }
-        getSquare(col + (row - 1) * 4).also { if(it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
-            appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false }
+        //to the right
+        if(col + 1 < 4) {
+            getSquare(col + 1 + row * 4).also {
+                if (it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
+                    appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false
+            }
+        }
+        if(col - 1 >= 0) {
+            getSquare(col - 1 + row * 4).also {
+                if (it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
+                    appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false
+            }
+        }
+        if(row + 1 < 6) {
+            getSquare(col + (row + 1) * 4).also {
+                if (it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
+                    appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false
+            }
+        }
+        if(row - 1 >= 0) {
+            getSquare(col + (row - 1) * 4).also {
+                if (it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
+                    appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false
+            }
+        }
     }
 
     private fun getTransformationsRemaining(setIndex: Int, puzzleIndex: Int): Int {
@@ -763,12 +780,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                             }
                             TouchType.FlickUp -> {
                                 if (fractal.leftCollision(x, y) && fractal.mSize > 1) { //rotate ccw
-                                    rotateCW(fractal)
-                                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.RotateCCW, fractal.mIndex, fractal.mSize))
+                                    transform(fractal, Transformation.RotateCW)
                                     return true
                                 } else if (fractal.rightCollision(x, y) && fractal.mSize > 1) { //rotate cw
-                                    rotateCCW(fractal)
-                                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.RotateCW, fractal.mIndex, fractal.mSize))
+                                    transform(fractal, Transformation.RotateCCW)
                                     return true
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                     val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
