@@ -1,7 +1,7 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
     //transformation limit and limit icon display
-        //when user pushes button undo last transformation
+        //Undos work when all fractal sizes/indices are correct - now make them work when fractal sizes/indices are wrong
         //need a command queue (that adds multiple commands to run in sequence)
         //when user pushes undo button, two possibilities:
             //if fractals need to be merged/split before undo transformation, put this command on the queue and then undo transformation next in the queue
