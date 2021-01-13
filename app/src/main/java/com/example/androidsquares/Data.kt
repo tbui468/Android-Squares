@@ -39,8 +39,10 @@ enum class Transformation {
     TranslateNegY,
     RotateCW,
     RotateCCW,
-    ReflectX,
-    ReflectY
+    ReflectXTop,
+    ReflectXBottom,
+    ReflectYLeft,
+    ReflectYRight
 }
 
 enum class Screen {

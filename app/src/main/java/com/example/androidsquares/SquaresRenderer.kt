@@ -360,6 +360,66 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         appData.setData[setIndex].puzzleData[puzzleIndex]!!.undoStack.push(undoData)
     }
 
+    //assumes transformation is valid (remaining transformations, swapped fractal exists)
+    private fun transform(fractal: Fractal, transformation: Transformation) {
+        when(transformation) {
+            Transformation.TranslatePosX -> {
+                val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1]))
+                swap(fractal, swappedFractal!!)
+                pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.TranslateNegX, fractal.mIndex, fractal.mSize))
+            }
+            Transformation.TranslateNegX -> {
+                val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, fractal.mIndex[1]))
+                swap(fractal, swappedFractal!!)
+                pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.TranslatePosX, fractal.mIndex, fractal.mSize))
+            }
+            Transformation.TranslatePosY -> {
+                val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize))
+                swap(fractal, swappedFractal!!)
+                pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.TranslateNegY, fractal.mIndex, fractal.mSize))
+            }
+            Transformation.TranslateNegY -> {
+                val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
+                swap(fractal, swappedFractal!!)
+                pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.TranslatePosY, fractal.mIndex, fractal.mSize))
+            }
+            Transformation.RotateCW -> {
+                rotateCW(fractal)
+                pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.RotateCCW, fractal.mIndex, fractal.mSize))
+            }
+            Transformation.RotateCCW -> {
+                rotateCCW(fractal)
+                pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.RotateCW, fractal.mIndex, fractal.mSize))
+            }
+            Transformation.ReflectXTop -> {
+                reflectX(fractal, true)
+                pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.ReflectXBottom, fractal.mIndex, fractal.mSize))
+            }
+            Transformation.ReflectXBottom -> {
+                reflectX(fractal, false)
+                pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.ReflectXTop, fractal.mIndex, fractal.mSize))
+            }
+            Transformation.ReflectYLeft -> {
+                reflectY(fractal, true)
+                pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.ReflectYRight, fractal.mIndex, fractal.mSize))
+            }
+            Transformation.ReflectYRight -> {
+                reflectY(fractal, false)
+                pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.ReflectYLeft, fractal.mIndex, fractal.mSize))
+            }
+        }
+
+
+        if (puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
+            appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.isCleared = true
+            unlockAdjacentSquares(getOpenSquare()!!)
+            if (setCleared(getOpenSet()!!)) {
+                appData.setData[getOpenSet()!!.mIndex].isCleared = true
+                unlockAdjacentSets(getOpenSet()!!)
+            }
+        }
+    }
+
 
     private fun swap(fractal0: Fractal, fractal1: Fractal) {
         //update data
@@ -673,52 +733,30 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                         when (touchType) {
                             TouchType.FlickLeft -> {
                                 if (fractal.topCollision(x, y) && fractal.mSize > 1) { //rotate ccw
-                                    rotateCCW(fractal)
-                                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.RotateCW, fractal.mIndex, fractal.mSize))
+                                    transform(fractal, Transformation.RotateCCW)
                                     return true
                                 } else if (fractal.bottomCollision(x, y) && fractal.mSize > 1) { //rotate cw
-                                    rotateCW(fractal)
-                                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.RotateCCW, fractal.mIndex, fractal.mSize))
+                                    transform(fractal, Transformation.RotateCW)
                                     return true
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                     val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, fractal.mIndex[1]))
                                     if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
-                                        swap(fractal, swappedFractal)
-                                        pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.TranslatePosX, fractal.mIndex, fractal.mSize))
-                                        if (puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
-                                            appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.isCleared = true
-                                            unlockAdjacentSquares(getOpenSquare()!!)
-                                            if (setCleared(getOpenSet()!!)) {
-                                                appData.setData[getOpenSet()!!.mIndex].isCleared = true
-                                                unlockAdjacentSets(getOpenSet()!!)
-                                            }
-                                        }
+                                        transform(fractal, Transformation.TranslateNegX)
                                         return true
                                     }
                                 }
                             }
                             TouchType.FlickRight -> {
                                 if (fractal.topCollision(x, y) && fractal.mSize > 1) { //rotate ccw
-                                    rotateCW(fractal)
-                                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.RotateCCW, fractal.mIndex, fractal.mSize))
+                                    transform(fractal, Transformation.RotateCW)
                                     return true
                                 } else if (fractal.bottomCollision(x, y) && fractal.mSize > 1) { //rotate cw
-                                    rotateCCW(fractal)
-                                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.RotateCW, fractal.mIndex, fractal.mSize))
+                                    transform(fractal, Transformation.RotateCCW)
                                     return true
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                     val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1]))
                                     if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
-                                        swap(fractal, swappedFractal)
-                                        pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.TranslateNegX, fractal.mIndex, fractal.mSize))
-                                        if (puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
-                                            appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.isCleared = true
-                                            unlockAdjacentSquares(getOpenSquare()!!)
-                                            if (setCleared(getOpenSet()!!)) {
-                                                appData.setData[getOpenSet()!!.mIndex].isCleared = true
-                                                unlockAdjacentSets(getOpenSet()!!)
-                                            }
-                                        }
+                                        transform(fractal, Transformation.TranslatePosX)
                                         return true
                                     }
                                 }
@@ -735,62 +773,38 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                     val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
                                     if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
-                                        swap(fractal, swappedFractal)
-                                        pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.TranslateNegY, fractal.mIndex, fractal.mSize))
-                                        if (puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
-                                            appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.isCleared = true
-                                            unlockAdjacentSquares(getOpenSquare()!!)
-                                            if (setCleared(getOpenSet()!!)) {
-                                                appData.setData[getOpenSet()!!.mIndex].isCleared = true
-                                                unlockAdjacentSets(getOpenSet()!!)
-                                            }
-                                        }
+                                        transform(fractal, Transformation.TranslateNegY)
                                         return true
                                     }
                                 }
                             }
                             TouchType.FlickDown -> {
                                 if (fractal.leftCollision(x, y) && fractal.mSize > 1) { //rotate ccw
-                                    rotateCCW(fractal)
-                                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.RotateCW, fractal.mIndex, fractal.mSize))
+                                    transform(fractal, Transformation.RotateCCW)
                                     return true
                                 } else if (fractal.rightCollision(x, y) && fractal.mSize > 1) { //rotate cw
-                                    rotateCW(fractal)
-                                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.RotateCCW, fractal.mIndex, fractal.mSize))
+                                    transform(fractal, Transformation.RotateCW)
                                     return true
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                     val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize))
                                     if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
-                                        swap(fractal, swappedFractal)
-                                        pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.TranslatePosY, fractal.mIndex, fractal.mSize))
-                                        if (puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
-                                            appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.isCleared = true
-                                            unlockAdjacentSquares(getOpenSquare()!!)
-                                            if (setCleared(getOpenSet()!!)) {
-                                                appData.setData[getOpenSet()!!.mIndex].isCleared = true
-                                                unlockAdjacentSets(getOpenSet()!!)
-                                            }
-                                        }
+                                        transform(fractal, Transformation.TranslatePosY)
                                         return true
                                     }
                                 }
                             }
                             TouchType.Tap -> { //a block of size > 1 should never exists, so won't check for it
                                 if (fractal.leftCollision(x, y) && fractal.mSize > 1) {
-                                    reflectY(fractal, true)
-                                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.ReflectY, fractal.mIndex, fractal.mSize))
+                                    transform(fractal, Transformation.ReflectYLeft)
                                     return true
                                 } else if (fractal.rightCollision(x, y) && fractal.mSize > 1) {
-                                    reflectY(fractal, false)
-                                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.ReflectY, fractal.mIndex, fractal.mSize))
+                                    transform(fractal, Transformation.ReflectYRight)
                                     return true
                                 } else if (fractal.topCollision(x, y) && fractal.mSize > 1) {
-                                    reflectX(fractal, true)
-                                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.ReflectX, fractal.mIndex, fractal.mSize))
+                                    transform(fractal, Transformation.ReflectXTop)
                                     return true
                                 } else if (fractal.bottomCollision(x, y) && fractal.mSize > 1) {
-                                    reflectX(fractal, false)
-                                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.ReflectX, fractal.mIndex, fractal.mSize))
+                                    transform(fractal, Transformation.ReflectXBottom)
                                     return true
                                 }
                             }
