@@ -25,16 +25,16 @@ class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, p
 
         when(elements.size) {
             1 -> {
-                vertices = vertices1
-                indices = indices1
+                vertices = vertices1.copyOf()
+                indices = indices1.copyOf()
             }
             4 -> {
-                vertices = vertices2
-                indices = indices2
+                vertices = vertices2.copyOf()
+                indices = indices2.copyOf()
             }
             16 -> {
-                vertices = vertices4
-                indices = indices4
+                vertices = vertices4.copyOf()
+                indices = indices4.copyOf()
             }
             else -> {
                 //temp: this should be an assert false

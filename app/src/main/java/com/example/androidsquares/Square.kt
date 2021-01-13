@@ -4,52 +4,50 @@ package com.example.androidsquares
 import android.opengl.Matrix
 import android.opengl.GLES20
 import java.nio.FloatBuffer
-import java.nio.ShortBuffer
 
 
-
-
-class Square(elements: Array<FractalType>, setPos: FloatArray, squareIndex: Int) : Entity(calculateSquarePosition(setPos, squareIndex), floatArrayOf(.25f, .25f, .25f), 4){
-    private val mIndexCount: Int //indices for drawing
+class Square(setPos: FloatArray, squareIndex: Int, locked: Boolean) : Entity(calculateSquarePosition(setPos, squareIndex), floatArrayOf(1f, 1f, 1f), 1){
+    private val mIndexCount = indices1.size
     private var mVertexBuffer: FloatBuffer
-    private var mIndexBuffer: ShortBuffer
+    private var mIndexBuffer = createShortBuffer(indices1.copyOf())
     private var mModelMatrix = FloatArray(16)
-    private val mSize: Int = 4
     var mIndex = squareIndex
     var mIsOpen = false
+    val mIsLocked = locked
 
     init {
-        val vertices = squareVertices
-        val indices = squareIndices
-        val emptyFractalCount = findEmptyFractalCount(elements)
-        val floatsToTrim = emptyFractalCount * FLOATS_PER_QUAD //four vertices per fractal, and 5 floats per vertex
-        val trimmedVertices = FloatArray(vertices.size - floatsToTrim)
-
-        var trimmedVerticesOffset = 0
-        var col: Int
-        var row: Int
-        elements.forEachIndexed { index, element ->
-            run {
-                col = index % mSize
-                row = index / mSize
-                if (element != FractalType.Empty) {
-                    setTexture(vertices, mSize, col, row, element)
-                    vertices.copyInto(trimmedVertices, trimmedVerticesOffset, (row * mSize + col) * FLOATS_PER_QUAD, (row * mSize + col + 1) * FLOATS_PER_QUAD)
-                    trimmedVerticesOffset += FLOATS_PER_QUAD
-                }
-            }
+        val vertices = vertices1.copyOf()
+        //change texture if depending on lock status
+        if(!mIsLocked) {
+            //bottom left
+            vertices[3] = 0f
+            vertices[4] = .25f
+            //bottom right
+            vertices[8] = .25f
+            vertices[9] = .25f
+            //top right
+            vertices[13] = .25f
+            vertices[14] = 0f
+            //top left
+            vertices[18] = 0f
+            vertices[19] = 0f
+        }else {
+            //bottom left
+            vertices[3] = .5f
+            vertices[4] = .25f
+            //bottom right
+            vertices[8] = .75f
+            vertices[9] = .25f
+            //top right
+            vertices[13] = .75f
+            vertices[14] = 0f
+            //top left
+            vertices[18] = .5f
+            vertices[19] = 0f
         }
 
-        val trimmedIndices = ShortArray(indices.size - 6 * emptyFractalCount)
-        indices.copyInto(trimmedIndices, 0, 0, trimmedIndices.size)
-        mIndexCount = trimmedIndices.size
-
-        //put vertices and indices into buffer
-        mVertexBuffer = createFloatBuffer(trimmedVertices)
-        mIndexBuffer = createShortBuffer(trimmedIndices)
+        mVertexBuffer = createFloatBuffer(vertices)
     }
-
-
 
     //all of size 1 - used when opening square for the first time
     fun spawnFractals(elements: Array<FractalType>): MutableList<Fractal> {
@@ -57,7 +55,6 @@ class Square(elements: Array<FractalType>, setPos: FloatArray, squareIndex: Int)
         for(i in elements.indices) {
             if(elements[i] != FractalType.Empty) {
                 val index = intArrayOf(i % 4, i / 4)
-                //list.add(Fractal(arrayOf(elements[i]), 1, index, calculateFractalPosForTarget(index, 1, intArrayOf(0, 0), 4, pos)))
                 list.add(Fractal(arrayOf(elements[i]), 1, index, calculateInitFractalPos(index, pos)))
             }
         }

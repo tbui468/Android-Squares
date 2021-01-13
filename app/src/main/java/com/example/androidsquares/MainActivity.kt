@@ -1,8 +1,9 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //make two sets of puzzles (modify the current ones if possible) to prepare for transformation limits and undo function
-        //doesn't need to be 16 total puzzles - the first set should be quite short
-        //make the shape interesting too - the shapes also determine unlock order of puzzles
+    //clear a puzzle
+        //check clear condition after every transformation (rotation/translation/reflection)
+        //play a simple animation
+        //check all squares/sets and unlock them as needed (should really move this info from instances to global data structure)
 
     //transformation limit and limit icon display
         //it can be similar to how the BackButton was implemented

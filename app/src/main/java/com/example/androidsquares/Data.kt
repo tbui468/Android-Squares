@@ -1,6 +1,5 @@
 package com.example.androidsquares
 
-import android.opengl.Matrix
 import kotlin.math.exp
 import kotlin.math.sqrt
 import kotlin.math.pow
@@ -237,16 +236,13 @@ val indices4 = shortArrayOf(0, 1, 2, 0, 2, 3,
 
 
 
-
-
-
 //4 cols, and 6 rows
 fun calculateSquarePosition(setPos: FloatArray, squareIndex: Int): FloatArray {
     val col = squareIndex % 4
     val row = squareIndex / 4
     val hOffset = -1.5f * 3f / 2
-    val vOffset = 2f * 3f / 2
-    return floatArrayOf(hOffset + setPos[0] + 1.5f * col, vOffset + setPos[1] - 2f * row, setPos[2])
+    val vOffset = 1.5f * 3f / 2
+    return floatArrayOf(hOffset + setPos[0] + 1.5f * col, vOffset + setPos[1] - 1.5f * row, setPos[2])
 }
 
 //always size 1 for grid size of 4x6

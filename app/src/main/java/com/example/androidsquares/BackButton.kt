@@ -7,8 +7,8 @@ import java.nio.ShortBuffer
 
 class BackButton(pos: FloatArray) : Entity(pos, floatArrayOf(.1f, .1f, .1f), 1) {
 
-    private var mVertexBuffer: FloatBuffer = createFloatBuffer(vertices1)
-    private var mIndexBuffer: ShortBuffer = createShortBuffer(indices1)
+    private var mVertexBuffer: FloatBuffer = createFloatBuffer(vertices1.copyOf())
+    private var mIndexBuffer: ShortBuffer = createShortBuffer(indices1.copyOf())
     private var mIndexCount = indices1.size
     private var mModelMatrix = FloatArray(16)
 
