@@ -52,7 +52,8 @@ class Set(pos: FloatArray, index: Int, locked: Boolean): Entity(pos, floatArrayO
     fun spawnSquares(): MutableList<Square>{
         return mutableListOf<Square>().also {
             for(i in 0 until 16) {
-                if(puzzleData[mIndex][i].isNotEmpty()) {
+                //if(puzzleData[mIndex][i].isNotEmpty()) {
+                if(appData.setData[mIndex].puzzleData[i] != null) {
                     if (i % 2 == 0)
                         it.add(Square(pos, i, false))
                     else

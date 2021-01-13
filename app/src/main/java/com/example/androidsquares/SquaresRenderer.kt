@@ -93,11 +93,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mProgram = compileShaders()
 
 
-        for(i in cubeLocations.indices) {
-            if(i != 0)
-                mSets.add(Set(cubeLocations[i], i, true))
-            else
-                mSets.add(Set(cubeLocations[i], i, false))
+        for(puzzleIndex in appData.setData.indices) {
+            mSets.add(Set(appData.setData[puzzleIndex].pos, puzzleIndex, appData.setData[puzzleIndex].isLocked))
         }
 
 
@@ -131,7 +128,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4.5f))
         mBackButton.moveTo(floatArrayOf(square.pos[0] + mBackButtonOffset[0], square.pos[1] + mBackButtonOffset[1], 4.5f + mBackButtonOffset[2]))
 
-        mFractals = square.spawnFractals(puzzleData[getOpenSet()!!.mIndex][square.mIndex]) //temp: just grabbing first index
+        //mFractals = square.spawnFractals(puzzleData[getOpenSet()!!.mIndex][square.mIndex]) //temp: just grabbing first index
+        mFractals = square.spawnFractals(appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.elements) //temp: just grabbing first index
         for(fractal in mFractals) {
             fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos))
         }
@@ -145,7 +143,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun closeSquare(square: Square) {
-        val cubePos = cubeLocations[getOpenSet()!!.mIndex]
+        //val cubePos = cubeLocations[getOpenSet()!!.mIndex]
+        val cubePos = appData.setData[getOpenSet()!!.mIndex].pos
         for (fractal in mFractals) {
             fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, intArrayOf(0, 0), 4, square.pos))
         }
@@ -209,7 +208,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val elements = Array(size * size){FractalType.Normal}
         for(row in 0 until size) {
             for(col in 0 until size) {
-                elements[col + row * size] = puzzleData[cubeIndex][squareIndex][index[0] + col + (index[1] + row) * 4]
+                //elements[col + row * size] = puzzleData[cubeIndex][squareIndex][index[0] + col + (index[1] + row) * 4]
+                elements[col + row * size] = appData.setData[cubeIndex].puzzleData[squareIndex]!!.elements[index[0] + col + (index[1] + row) * 4]
             }
         }
         return elements
@@ -225,19 +225,20 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         for(row in 0 until size) {
             for(col in 0 until size) {
-                puzzleData[cubeIndex][squareIndex][index[0] + col + (index[1] + row) * 4] = elements[col + row * size]
+                //puzzleData[cubeIndex][squareIndex][index[0] + col + (index[1] + row) * 4] = elements[col + row * size]
+                appData.setData[cubeIndex].puzzleData[squareIndex]!!.elements[index[0] + col + (index[1] + row) * 4] = elements[col + row * size]
             }
         }
     }
 
-    private fun puzzleClear(elements: Array<FractalType>, dim: IntArray): Boolean {
-        if(!colorClear(elements, dim, FractalType.Red)) return false
-        if(!colorClear(elements, dim, FractalType.Green)) return false
-        if(!colorClear(elements, dim, FractalType.Blue)) return false
+    private fun puzzleCleared(elements: Array<FractalType>, dim: IntArray): Boolean {
+        if(!colorCleared(elements, dim, FractalType.Red)) return false
+        if(!colorCleared(elements, dim, FractalType.Green)) return false
+        if(!colorCleared(elements, dim, FractalType.Blue)) return false
         return true
     }
 
-    private fun colorClear(elements: Array<FractalType>, dim: IntArray, fractalType: FractalType): Boolean {
+    private fun colorCleared(elements: Array<FractalType>, dim: IntArray, fractalType: FractalType): Boolean {
         val targetColor0: FractalType
         val targetColor1: FractalType
 
@@ -515,7 +516,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 for (col in 0 until c.mSize) {
                     val newCol = col + c.mIndex[0] - topLeftIndex[0]
                     val newRow = row + c.mIndex[1] - topLeftIndex[1]
-                    elements[newCol + newRow * newSize] = puzzleData[getOpenSet()!!.mIndex][getOpenSquare()!!.mIndex][c.mIndex[0] + col + 4 * (c.mIndex[1] + row)]
+                    //elements[newCol + newRow * newSize] = puzzleData[getOpenSet()!!.mIndex][getOpenSquare()!!.mIndex][c.mIndex[0] + col + 4 * (c.mIndex[1] + row)]
+                    elements[newCol + newRow * newSize] = appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements[c.mIndex[0] + col + 4 * (c.mIndex[1] + row)]
                 }
             }
         }
@@ -636,7 +638,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, fractal.mIndex[1]))
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
-                                    if(puzzleClear(puzzleData[getOpenSet()!!.mIndex][getOpenSquare()!!.mIndex], intArrayOf(4, 6))) {
+                                    if(puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
                                         unlockAdjacentSquares(getOpenSquare()!!)
                                     }
                                     return true
@@ -654,7 +656,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1]))
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
-                                    if(puzzleClear(puzzleData[getOpenSet()!!.mIndex][getOpenSquare()!!.mIndex], intArrayOf(4, 6))) {
+                                    if(puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
                                         unlockAdjacentSquares(getOpenSquare()!!)
                                     }
                                     return true
@@ -672,7 +674,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
-                                    if(puzzleClear(puzzleData[getOpenSet()!!.mIndex][getOpenSquare()!!.mIndex], intArrayOf(4, 6))) {
+                                    if(puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
                                         unlockAdjacentSquares(getOpenSquare()!!)
                                     }
                                     return true
@@ -690,11 +692,11 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize))
                                 if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                     swap(fractal, swappedFractal)
-                                    if(puzzleClear(puzzleData[getOpenSet()!!.mIndex][getOpenSquare()!!.mIndex], intArrayOf(4, 6))) {
+                                    if(puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
                                         unlockAdjacentSquares(getOpenSquare()!!)
                                         /*
-                                        if(setClear(getOpenSet())) {
-                                            unlockAdjacentSet(getOpenSet()!!)
+                                        if(setCleared(getOpenSet())) {
+                                            unlockAdjacentSets(getOpenSet())
                                         }*/
                                     }
                                     return true

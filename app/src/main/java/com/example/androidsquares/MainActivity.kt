@@ -4,6 +4,8 @@
         //implement unlocking sets when all puzzles in a set are cleared
 
     //play a simple animation on clear puzzle
+        //will need to queue an animation immediately puzzleCleared() function is called
+        //this function will trigger right after the transformation that cleared the puzzle animation ends
 
     //transformation limit and limit icon display
         //it can be similar to how the BackButton was implemented
