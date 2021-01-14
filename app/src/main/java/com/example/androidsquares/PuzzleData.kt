@@ -3,6 +3,7 @@ package com.example.androidsquares
 import java.util.Stack
 
 data class UndoData(val transformation: Transformation, val index: IntArray, val size: Int)
+data class FractalData(val index: IntArray, val size: Int)
 
 data class PuzzleData(val elements: Array<FractalType>, val undoStack: Stack<UndoData>, val maxTransformations: Int, var isLocked: Boolean, var isCleared: Boolean)
 data class SetData(val puzzleData: Array<PuzzleData?>, var isLocked: Boolean, var isCleared: Boolean, val pos: FloatArray)

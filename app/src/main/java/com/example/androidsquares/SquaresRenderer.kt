@@ -33,7 +33,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private var mPreviousTime: Long = 0
     private val mContext = context
     var mInputQueue = InputQueue()
-    private var mMergeFractals: Array<Fractal>? = null
+    private var mMergeFractals: Array<MutableList<Fractal>>? = null
     private var mRecreateFractal: Fractal? = null
     private var mCommandQueue: Deque<UndoData> = ArrayDeque() //only used for two step undo data for now
 
@@ -482,14 +482,67 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun undoResize(transformation: Transformation, index: IntArray, size: Int) {
-        //resize fractals (split and merge)
-            //redo split
-                //split should return a list of fractals (1x1 or 2x2 in size) that fit the given split condition
-                    //calling moveTo(...) to the client calling code (it can destroy large fractal though)
-                    //what split conditions???
-                //startMerge() and merge() needs to be more general too
-                    //instead of corners, let it take in a list of fractals to animate merging - can this just be in client code???
-                    //merge() takes in a list and creates new large fractal (destroying the small ones)
+        //get list of fractals on edge of given fractal conditions (2 for swap, 1 for other transformations)
+        val conditions = when(transformation) {
+            Transformation.TranslatePosX -> {
+                arrayOf(FractalData(index, size), FractalData(intArrayOf(index[0] + size, index[1]), size))
+            }
+            Transformation.TranslateNegX -> {
+                arrayOf(FractalData(index, size), FractalData(intArrayOf(index[0] - size, index[1]), size))
+            }
+            Transformation.TranslatePosY -> {
+                arrayOf(FractalData(index, size), FractalData(intArrayOf(index[0], index[1] + size), size))
+            }
+            Transformation.TranslateNegY -> {
+                arrayOf(FractalData(index, size), FractalData(intArrayOf(index[0], index[1] - size), size))
+            }
+            else -> {
+                arrayOf(FractalData(index, size))
+            }
+        }
+
+        val overlapList = mutableListOf<Fractal>()
+        for(fractal in mFractals) {
+            for(c in conditions) {
+                if(onFractalEdge(fractal, c.index, c.size)) {
+                    overlapList.add(fractal)
+                    break //should only add it once even if it overlaps multiple target fractals
+                }
+            }
+        }
+
+        //call split on those (including passing in list of conditions: 2 conditions if transformation is swap)
+        val splitList = mutableListOf<Fractal>()
+        for(f in overlapList) {
+            for(sf in split(f, conditions, FractalData(f.mIndex, f.mSize))) {
+                mFractals.add(sf)
+                splitList.add(sf)
+            }
+        }
+
+
+        val insideListA = mutableListOf<Fractal>()
+        val insideListB = mutableListOf<Fractal>()
+
+        //call moveToMerge on the fractals completely inside conditions (2 for swap, 1 for other) to target
+        //need to call it on all fractals, not just the recently split ones
+        for(f in mFractals) {
+            if(insideFractal(f, conditions[0].index, conditions[0].size)) {
+                f.moveTo(calculateFractalPosForTarget(f.mIndex, f.mSize, conditions[0].index, conditions[0].size, getOpenSquare()!!.pos))
+                insideListA.add(f)
+            }else if(conditions.size == 2 && insideFractal(f, conditions[1].index, conditions[1].size)) {
+                f.moveTo(calculateFractalPosForTarget(f.mIndex, f.mSize, conditions[1].index, conditions[1].size, getOpenSquare()!!.pos))
+                insideListB.add(f)
+            }else{
+                f.moveTo(calculateFractalPos(f.mIndex, f.mSize, getOpenSquare()!!.pos))
+            }
+        }
+
+        if(conditions.size == 1) {
+            mMergeFractals = arrayOf(insideListA)
+        }else {
+            mMergeFractals = arrayOf(insideListA, insideListB)
+        }
     }
 
     private fun undoTransform(transformation: Transformation, index: IntArray, size: Int) {
@@ -631,7 +684,34 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mRecreateFractal = fractal
     }
 
-    private fun split(fractal: Fractal): Array<Fractal> {
+    //returns true if there is partial overlap between fractal and target fractal
+    //returns false if completely outside or completely inside target fractal
+    private fun insideFractal(fractal: Fractal, targetIndex: IntArray, targetSize: Int): Boolean {
+        if(fractal.mSize <= targetSize) {
+            val inLeft = fractal.mIndex[0] >= targetIndex[0]
+            val inRight = fractal.mIndex[0] + fractal.mSize <= targetIndex[0] + targetSize
+            val inTop = fractal.mIndex[1] >= targetIndex[1]
+            val inBottom = fractal.mIndex[1] + fractal.mSize <= targetIndex[1] + targetSize
+
+            if(inLeft && inRight && inTop && inBottom) return true
+        }
+        return false
+    }
+
+    private fun onFractalEdge(fractal: Fractal, targetIndex: IntArray, targetSize: Int): Boolean {
+
+        //check if completely outside target
+        if(fractal.mIndex[0] >= targetIndex[0] + targetSize) return false
+        if(targetIndex[0] >= fractal.mIndex[0] + fractal.mSize) return false
+        if(fractal.mIndex[1] >= targetIndex[1] + targetSize) return false
+        if(targetIndex[1] >= fractal.mIndex[1] + fractal.mSize) return false
+
+        if(insideFractal(fractal, targetIndex, targetSize)) return false
+
+        return true
+    }
+
+    private fun split(fractal: Fractal, conditions: Array<FractalData>?, ogFractal: FractalData): MutableList<Fractal> {
         val squarePos = getOpenSquare()!!.pos
 
         val index = fractal.mIndex
@@ -642,23 +722,46 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val elements2 = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, intArrayOf(index[0], index[1] + newSize), newSize)
         val elements3 = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, intArrayOf(index[0] + newSize, index[1] + newSize), newSize)
 
-        val topLeft = Fractal(elements0, newSize, index,
-                calculateFractalPosForTarget(index, newSize, fractal.mIndex, fractal.mSize, squarePos))
-        val topRight = Fractal(elements1, newSize, intArrayOf(index[0] + newSize, index[1]),
-                calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1]), newSize, fractal.mIndex, fractal.mSize, squarePos))
-        val bottomLeft = Fractal(elements2, newSize, intArrayOf(index[0], index[1] + newSize),
-                calculateFractalPosForTarget(intArrayOf(index[0], index[1] + newSize), newSize, fractal.mIndex, fractal.mSize, squarePos))
-        val bottomRight = Fractal(elements3, newSize, intArrayOf(index[0] + newSize, index[1] + newSize),
-                calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1] + newSize), newSize, fractal.mIndex, fractal.mSize, squarePos))
+        val retList = mutableListOf<Fractal>()
 
+        val corners = arrayOf(
+            Fractal(elements0, newSize, index, //top left
+                    calculateFractalPosForTarget(index, newSize, ogFractal.index, ogFractal.size, squarePos)),
+            Fractal(elements1, newSize, intArrayOf(index[0] + newSize, index[1]), //top right
+                    calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1]), newSize, ogFractal.index, ogFractal.size, squarePos)),
+            Fractal(elements2, newSize, intArrayOf(index[0], index[1] + newSize), //bottom left
+                    calculateFractalPosForTarget(intArrayOf(index[0], index[1] + newSize), newSize, ogFractal.index, ogFractal.size, squarePos)),
+            Fractal(elements3, newSize, intArrayOf(index[0] + newSize, index[1] + newSize), //bottom righ
+                    calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1] + newSize), newSize, ogFractal.index, ogFractal.size, squarePos))
+        )
 
         mFractals.remove(fractal)
 
-        return arrayOf(topLeft, topRight, bottomLeft, bottomRight)
+        var splitAgain: Boolean
+
+        if(conditions != null) {
+            for (splitF in corners) {
+                splitAgain = false
+                for (c in conditions) {
+                    if (onFractalEdge(splitF, c.index, c.size)) {
+                        splitAgain = true
+                        retList.addAll(split(splitF, arrayOf(FractalData(c.index, c.size)), ogFractal))
+                        break
+                    }
+                }
+                if(!splitAgain) {
+                    retList.add(splitF)
+                }
+            }
+        }else {
+            retList.addAll(corners)
+        }
+
+        return retList
 
     }
 
-    private fun getFractalIndex(fractals: Array<Fractal>): IntArray {
+    private fun getFractalIndex(fractals: MutableList<Fractal>): IntArray {
         var topLeftIndex = intArrayOf(100, 100)
         for(c in fractals) {
             //update finding top left index
@@ -668,7 +771,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return topLeftIndex
     }
 
-    private fun getFractalSize(fractals: Array<Fractal>): Int {
+    private fun getFractalSize(fractals: MutableList<Fractal>): Int {
         val topLeftIndex = getFractalIndex(fractals)
         var targetSize = 0
         for(c in fractals) {
@@ -679,7 +782,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     //assume all fractals fit perfectly into square target - client responsibility to check before call this
-    private fun moveToMerge(fractals: Array<Fractal>) {
+    private fun moveToMerge(fractals: MutableList<Fractal>) {
 
         val targetIndex = getFractalIndex(fractals)
         val targetSize = getFractalSize(fractals)
@@ -689,7 +792,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
     }
 
-    private fun merge(fractals: Array<Fractal>): Fractal {
+    private fun merge(fractals: MutableList<Fractal>): Fractal {
 
         val newSize = getFractalSize(fractals)
         val newIndex = getFractalIndex(fractals)
@@ -883,7 +986,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
                 for (fractal in mFractals) {
                     if(touchType == TouchType.PinchOut && fractal.centerCollision(x, y) && fractal.mSize > 1) {
-                        val newFractals = split(fractal)
+                        val newFractals = split(fractal, null, FractalData(fractal.mIndex, fractal.mSize))
 
                         for(newFractal in newFractals) {
                             newFractal.moveTo(calculateFractalPos(newFractal.mIndex, newFractal.mSize, getOpenSquare()!!.pos))
@@ -897,8 +1000,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 if(touchType == TouchType.PinchIn) {
                     val cornerFractals = getCornerFractals(x, y) //checks for blocks in this function and returns null if ANY fractal is a block
                     if(cornerFractals != null) {
-                        moveToMerge(cornerFractals)
-                        mMergeFractals = cornerFractals
+                        moveToMerge(cornerFractals.toMutableList())
+                        mMergeFractals = arrayOf(cornerFractals.toMutableList())
                         return true
                     }
                 }
@@ -951,9 +1054,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         ///////////////////////////////////////////////////////////////////////////////////////
 
         if(mMergeFractals != null) {
-            mFractals.add(merge(mMergeFractals!!))
-            for(fractal in mMergeFractals!!) {
-                mFractals.remove(fractal)
+            for(mergeGroup in mMergeFractals!!) {
+                mFractals.add(merge(mergeGroup))
+            }
+            for(mergeGroup in mMergeFractals!!) {
+                for(fractal in mergeGroup) {
+                    mFractals.remove(fractal)
+                }
             }
             mMergeFractals = null
         }
