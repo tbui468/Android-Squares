@@ -1,11 +1,17 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
     //transformation limit and limit icon display
+        //split needs to recursively call split again (should never need more than one recursive call)
+            //if certain split conditions are not met
+
         //Undos work when all fractal sizes/indices are correct - now make them work when fractal sizes/indices are wrong
-        //need a command queue (that adds multiple commands to run in sequence)
-        //when user pushes undo button, two possibilities:
-            //if fractals need to be merged/split before undo transformation, put this command on the queue and then undo transformation next in the queue
-            //if no fractals need to be merged/split, put undo transformation directly on the queue
+            //need a command queue (that adds multiple commands to run in sequence)
+                //make this first and have commands (which are called directly now), queued up
+                //commands have no decay time (unlike input queue), so if two commands are queued up in sequence, they will dispatch in sequence
+                    //in this case, user cannot interrupt queue.  User inputs triggering other commands will be placed last
+            //when user pushes undo button, two possibilities:
+                //if fractals need to be merged/split before undo transformation, put this command on the queue and then undo transformation next in the queue
+                //if no fractals need to be merged/split, put undo transformation directly on the queue
 
     //design some puzzles with more interesting shapes and obvious ends goals
 

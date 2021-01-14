@@ -8,7 +8,8 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.Bitmap
 import android.util.Log
-import java.util.Stack
+import java.util.Deque
+import java.util.ArrayDeque
 
 import android.opengl.GLSurfaceView
 import android.opengl.GLES20
@@ -34,6 +35,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mInputQueue = InputQueue()
     private var mMergeFractals: Array<Fractal>? = null
     private var mRecreateFractal: Fractal? = null
+    private var mCommandQueue: Deque<UndoData> = ArrayDeque() //only used for two step undo data for now
 
 
     companion object {
@@ -450,7 +452,46 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
     }
 
-    //temp: assumming all fractals are of correct size and index
+    private fun resizeRequired(transformation: Transformation, index: IntArray, size: Int): Boolean {
+        val fractal = getFractal(index) ?: return true
+
+        if(fractal.mSize != size) return true
+
+        val swappedFractal: Fractal?
+
+        when(transformation) {
+            Transformation.TranslatePosX -> {
+                swappedFractal = getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1])) ?: return true
+                if(swappedFractal.mSize != size) return true
+            }
+            Transformation.TranslateNegX -> {
+                swappedFractal = getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, fractal.mIndex[1])) ?: return true
+                if(swappedFractal.mSize != size) return true
+            }
+            Transformation.TranslatePosY -> {
+                swappedFractal = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize)) ?: return true
+                if(swappedFractal.mSize != size) return true
+            }
+            Transformation.TranslateNegY -> {
+                swappedFractal = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize)) ?: return true
+                if(swappedFractal.mSize != size) return true
+            }
+        }
+
+        return false
+    }
+
+    private fun undoResize(transformation: Transformation, index: IntArray, size: Int) {
+        //resize fractals (split and merge)
+            //redo split
+                //split should return a list of fractals (1x1 or 2x2 in size) that fit the given split condition
+                    //calling moveTo(...) to the client calling code (it can destroy large fractal though)
+                    //what split conditions???
+                //startMerge() and merge() needs to be more general too
+                    //instead of corners, let it take in a list of fractals to animate merging - can this just be in client code???
+                    //merge() takes in a list and creates new large fractal (destroying the small ones)
+    }
+
     private fun undoTransform(transformation: Transformation, index: IntArray, size: Int) {
         val fractal = getFractal(index)
         transform(fractal!!, transformation, true)
@@ -590,7 +631,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mRecreateFractal = fractal
     }
 
-    private fun split(fractal: Fractal) {
+    private fun split(fractal: Fractal): Array<Fractal> {
         val squarePos = getOpenSquare()!!.pos
 
         val index = fractal.mIndex
@@ -610,58 +651,51 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val bottomRight = Fractal(elements3, newSize, intArrayOf(index[0] + newSize, index[1] + newSize),
                 calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1] + newSize), newSize, fractal.mIndex, fractal.mSize, squarePos))
 
-        topLeft.moveTo(calculateFractalPos(topLeft.mIndex, topLeft.mSize, squarePos))
-        topRight.moveTo(calculateFractalPos(topRight.mIndex, topRight.mSize, squarePos))
-        bottomLeft.moveTo(calculateFractalPos(bottomLeft.mIndex, bottomLeft.mSize, squarePos))
-        bottomRight.moveTo(calculateFractalPos(bottomRight.mIndex, bottomRight.mSize, squarePos))
-
-        mFractals.add(topLeft)
-        mFractals.add(topRight)
-        mFractals.add(bottomLeft)
-        mFractals.add(bottomRight)
 
         mFractals.remove(fractal)
+
+        return arrayOf(topLeft, topRight, bottomLeft, bottomRight)
+
     }
 
-    private fun startMerge(corners: Array<Fractal>) {
+    private fun getFractalIndex(fractals: Array<Fractal>): IntArray {
         var topLeftIndex = intArrayOf(100, 100)
-        for(c in corners) {
+        for(c in fractals) {
             //update finding top left index
             if((c.mIndex[0] + c.mIndex[1]) < (topLeftIndex[0] + topLeftIndex[1]))
                 topLeftIndex = c.mIndex
         }
+        return topLeftIndex
+    }
 
+    private fun getFractalSize(fractals: Array<Fractal>): Int {
+        val topLeftIndex = getFractalIndex(fractals)
+        var targetSize = 0
+        for(c in fractals) {
+            if(c.mIndex[0] - topLeftIndex[0] + c.mSize > targetSize)
+                targetSize = c.mIndex[0] - topLeftIndex[0] + c.mSize
+        }
+        return targetSize
+    }
 
-        for(c in corners) {
-            c.moveTo(calculateFractalPosForTarget(c.mIndex, c.mSize, topLeftIndex, c.mSize * 2, getOpenSquare()!!.pos))
+    //assume all fractals fit perfectly into square target - client responsibility to check before call this
+    private fun moveToMerge(fractals: Array<Fractal>) {
+
+        val targetIndex = getFractalIndex(fractals)
+        val targetSize = getFractalSize(fractals)
+
+        for(c in fractals) {
+            c.moveTo(calculateFractalPosForTarget(c.mIndex, c.mSize, targetIndex, targetSize, getOpenSquare()!!.pos))
         }
     }
 
-    private fun merge(corners: Array<Fractal>): Fractal {
-        val newSize = corners[0].mSize * 2
+    private fun merge(fractals: Array<Fractal>): Fractal {
 
-        val elements = Array(newSize * newSize){FractalType.Red}
+        val newSize = getFractalSize(fractals)
+        val newIndex = getFractalIndex(fractals)
+        val elements = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, newIndex, newSize)
 
-        var topLeftIndex = intArrayOf(100, 100)
-        for(c in corners) {
-            //update finding top left index
-            if((c.mIndex[0] + c.mIndex[1]) < (topLeftIndex[0] + topLeftIndex[1]))
-                topLeftIndex = c.mIndex
-        }
-
-        for(c in corners) {
-            //fill in elements
-            for (row in 0 until c.mSize) {
-                for (col in 0 until c.mSize) {
-                    val newCol = col + c.mIndex[0] - topLeftIndex[0]
-                    val newRow = row + c.mIndex[1] - topLeftIndex[1]
-                    //elements[newCol + newRow * newSize] = puzzleData[getOpenSet()!!.mIndex][getOpenSquare()!!.mIndex][c.mIndex[0] + col + 4 * (c.mIndex[1] + row)]
-                    elements[newCol + newRow * newSize] = appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements[c.mIndex[0] + col + 4 * (c.mIndex[1] + row)]
-                }
-            }
-        }
-
-        return Fractal(elements, newSize, topLeftIndex, calculateFractalPos(topLeftIndex, newSize, getOpenSquare()!!.pos))
+        return Fractal(elements, newSize, newIndex, calculateFractalPos(newIndex, newSize, getOpenSquare()!!.pos))
     }
 
     private fun getClosestFractal(x: Float, y: Float): Fractal {
@@ -849,7 +883,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
                 for (fractal in mFractals) {
                     if(touchType == TouchType.PinchOut && fractal.centerCollision(x, y) && fractal.mSize > 1) {
-                        split(fractal)
+                        val newFractals = split(fractal)
+
+                        for(newFractal in newFractals) {
+                            newFractal.moveTo(calculateFractalPos(newFractal.mIndex, newFractal.mSize, getOpenSquare()!!.pos))
+                            mFractals.add(newFractal)
+                        }
+
                         return true
                     }
                 }
@@ -857,7 +897,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 if(touchType == TouchType.PinchIn) {
                     val cornerFractals = getCornerFractals(x, y) //checks for blocks in this function and returns null if ANY fractal is a block
                     if(cornerFractals != null) {
-                        startMerge(cornerFractals)
+                        moveToMerge(cornerFractals)
                         mMergeFractals = cornerFractals
                         return true
                     }
@@ -874,7 +914,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     //if undo stack is not empty
                     if(!appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.undoStack.empty()) {
                         val undoData = appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.undoStack.pop()
-                        undoTransform(undoData.transformation, undoData.index, undoData.size)
+                        if(resizeRequired(undoData.transformation, undoData.index, undoData.size)) {
+                            undoResize(undoData.transformation, undoData.index, undoData.size)
+                            mCommandQueue.add(undoData)
+                        }else {
+                            undoTransform(undoData.transformation, undoData.index, undoData.size)
+                        }
                         return true
                     }
                 }
@@ -943,12 +988,18 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
 
         if(mAnimationParameter >= 1f) {
-            var touchRegistered = false
-            while (!mInputQueue.isEmpty() && !touchRegistered) {
-                val data = mInputQueue.getNextInput()
-                touchRegistered = dispatchCommand(data.touchType, data.x, data.y)
+            if(mCommandQueue.isEmpty()) {
+                var touchRegistered = false
+                while (!mInputQueue.isEmpty() && !touchRegistered) { //loops until valid command is found or no more inputs
+                    val data = mInputQueue.getNextInput()
+                    touchRegistered = dispatchCommand(data.touchType, data.x, data.y)
+                }
+                if (touchRegistered) mAnimationParameter = 0f
+            }else {
+                val undoData = mCommandQueue.removeFirst()
+                undoTransform(undoData.transformation, undoData.index, undoData.size)
+                mAnimationParameter = 0f
             }
-            if (touchRegistered) mAnimationParameter = 0f
         }
 
 

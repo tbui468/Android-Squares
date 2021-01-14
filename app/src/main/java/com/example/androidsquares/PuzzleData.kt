@@ -10,10 +10,10 @@ data class AppData(val setData: Array<SetData>, var defaultData: Boolean)
 
 val puzzle00 = PuzzleData(arrayOf(
         FractalType.BlueB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
-        FractalType.BlueB, FractalType.Empty, FractalType.Blue, FractalType.Empty,
-        FractalType.BlueB, FractalType.Empty, FractalType.Normal, FractalType.Empty,
-        FractalType.BlueB, FractalType.Empty, FractalType.Normal, FractalType.Empty,
-        FractalType.BlueB, FractalType.BlueB, FractalType.Normal, FractalType.BlueB,
+        FractalType.Blue, FractalType.Blue, FractalType.Blue, FractalType.Red,
+        FractalType.Blue, FractalType.Blue, FractalType.Blue, FractalType.Red,
+        FractalType.Blue, FractalType.Blue, FractalType.Blue, FractalType.Normal,
+        FractalType.Blue, FractalType.Blue, FractalType.Normal, FractalType.Normal,
         FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB), Stack<UndoData>(), 3, false, false)
 
 
