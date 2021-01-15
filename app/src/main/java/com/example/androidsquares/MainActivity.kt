@@ -1,10 +1,5 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //puzzles layout
-        //have puzzles center on screen regardless of dimensions
-        //current fractal coord functions (both normal and for target size) assume a size of 4x6 (need to pass info about left/right most column, and top/bottom row - ignoring empties)
-        //center them based on runtime-calculated width and height of each puzzle - pass dimension parameters to
-
     //save system
 
     //animation for clearing puzzles
@@ -35,10 +30,10 @@
     //second set introduce reflections/rotations
     //third set introduce translations (and a third color)
     //fourth set up the number of transformations to 4 + introduce 4th color
-    //fifth set introduce 4x4 fractals
+    //fifth set introduce 4x4 fractals - 4 transformations
     //sixth set up the number of transformations to 5 (no new concepts)
-    //seventh up the number of transformations up to 6 (no new concepts)
-    //eighth up the number of transformations up to 7 (no new concepts)
+    //seventh up the number of transformations up to 5 (no new concepts)
+    //eighth up the number of transformations up to 5 (no new concepts)
 
 
 package com.example.androidsquares

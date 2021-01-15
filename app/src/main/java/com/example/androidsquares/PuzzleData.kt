@@ -10,21 +10,21 @@ data class SetData(val puzzleData: Array<PuzzleData?>, var isLocked: Boolean, va
 data class AppData(val setData: Array<SetData>, var defaultData: Boolean)
 
 val puzzle00 = PuzzleData(arrayOf(
-        FractalType.Empty, FractalType.Normal, FractalType.Blue, FractalType.Empty,
-        FractalType.Empty, FractalType.Normal, FractalType.Empty, FractalType.Empty,
-        FractalType.BlueB, FractalType.Normal, FractalType.BlueB, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB,
+        FractalType.Blue, FractalType.Normal, FractalType.Normal, FractalType.Normal,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB,
         FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
         FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
         FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
         Stack<UndoData>(), 3, false, false)
 
 val puzzle01 = PuzzleData(arrayOf(
-        FractalType.Empty, FractalType.Empty, FractalType.BlueB, FractalType.Empty,
-        FractalType.Empty, FractalType.BlueB, FractalType.Normal, FractalType.Empty,
-        FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.Empty,
-        FractalType.Empty, FractalType.Blue, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.BlueB, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Normal, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Blue, FractalType.Empty, FractalType.Empty, FractalType.Empty,
         FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
-        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,),
         Stack<UndoData>(), 3, false, false)
 
 val puzzle02 = PuzzleData(arrayOf(

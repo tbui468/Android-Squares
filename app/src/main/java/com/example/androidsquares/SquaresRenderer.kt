@@ -146,8 +146,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         //mFractals = square.spawnFractals(puzzleData[getOpenSet()!!.mIndex][square.mIndex]) //temp: just grabbing first index
         mFractals = square.spawnFractals(appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.elements) //temp: just grabbing first index
+        val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, square.mIndex)
         for(fractal in mFractals) {
-            fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos))
+            fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, fractal.mIndex, 1, square.pos, puzzleDim))
         }
 
         square.mIsOpen = true
@@ -161,8 +162,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun closeSquare(square: Square) {
         //val cubePos = cubeLocations[getOpenSet()!!.mIndex]
         val cubePos = appData.setData[getOpenSet()!!.mIndex].pos
+        val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, square.mIndex)
         for (fractal in mFractals) {
-            fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, intArrayOf(0, 0), 4, square.pos))
+            fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, intArrayOf(0, 0), 4, square.pos, puzzleDim))
         }
         mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1], 15f))
         mBackButton.moveTo(floatArrayOf(cubePos[0] + mBackButtonOffset[0], cubePos[1] + mBackButtonOffset[1], 15f + mBackButtonOffset[2]))
@@ -526,15 +528,16 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         //call moveToMerge on the fractals completely inside conditions (2 for swap, 1 for other) to target
         //need to call it on all fractals, not just the recently split ones
+        val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
         for(f in mFractals) {
             if(insideFractal(f, conditions[0].index, conditions[0].size)) {
-                f.moveTo(calculateFractalPosForTarget(f.mIndex, f.mSize, conditions[0].index, conditions[0].size, getOpenSquare()!!.pos))
+                f.moveTo(calculateFractalPosForTarget(f.mIndex, f.mSize, conditions[0].index, conditions[0].size, getOpenSquare()!!.pos, puzzleDim))
                 insideListA.add(f)
             }else if(conditions.size == 2 && insideFractal(f, conditions[1].index, conditions[1].size)) {
-                f.moveTo(calculateFractalPosForTarget(f.mIndex, f.mSize, conditions[1].index, conditions[1].size, getOpenSquare()!!.pos))
+                f.moveTo(calculateFractalPosForTarget(f.mIndex, f.mSize, conditions[1].index, conditions[1].size, getOpenSquare()!!.pos, puzzleDim))
                 insideListB.add(f)
             }else{
-                f.moveTo(calculateFractalPos(f.mIndex, f.mSize, getOpenSquare()!!.pos))
+                f.moveTo(calculateFractalPos(f.mIndex, f.mSize, getOpenSquare()!!.pos, puzzleDim))
             }
         }
 
@@ -724,15 +727,18 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         val retList = mutableListOf<Fractal>()
 
+
+        val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
+
         val corners = arrayOf(
             Fractal(elements0, newSize, index, //top left
-                    calculateFractalPosForTarget(index, newSize, ogFractal.index, ogFractal.size, squarePos)),
+                    calculateFractalPosForTarget(index, newSize, ogFractal.index, ogFractal.size, squarePos, puzzleDim)),
             Fractal(elements1, newSize, intArrayOf(index[0] + newSize, index[1]), //top right
-                    calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1]), newSize, ogFractal.index, ogFractal.size, squarePos)),
+                    calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1]), newSize, ogFractal.index, ogFractal.size, squarePos, puzzleDim)),
             Fractal(elements2, newSize, intArrayOf(index[0], index[1] + newSize), //bottom left
-                    calculateFractalPosForTarget(intArrayOf(index[0], index[1] + newSize), newSize, ogFractal.index, ogFractal.size, squarePos)),
+                    calculateFractalPosForTarget(intArrayOf(index[0], index[1] + newSize), newSize, ogFractal.index, ogFractal.size, squarePos, puzzleDim)),
             Fractal(elements3, newSize, intArrayOf(index[0] + newSize, index[1] + newSize), //bottom righ
-                    calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1] + newSize), newSize, ogFractal.index, ogFractal.size, squarePos))
+                    calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1] + newSize), newSize, ogFractal.index, ogFractal.size, squarePos, puzzleDim))
         )
 
         mFractals.remove(fractal)
@@ -786,9 +792,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         val targetIndex = getFractalIndex(fractals)
         val targetSize = getFractalSize(fractals)
+        val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
 
         for(c in fractals) {
-            c.moveTo(calculateFractalPosForTarget(c.mIndex, c.mSize, targetIndex, targetSize, getOpenSquare()!!.pos))
+            c.moveTo(calculateFractalPosForTarget(c.mIndex, c.mSize, targetIndex, targetSize, getOpenSquare()!!.pos, puzzleDim))
         }
     }
 
@@ -797,8 +804,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val newSize = getFractalSize(fractals)
         val newIndex = getFractalIndex(fractals)
         val elements = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, newIndex, newSize)
+        val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
 
-        return Fractal(elements, newSize, newIndex, calculateFractalPos(newIndex, newSize, getOpenSquare()!!.pos))
+        return Fractal(elements, newSize, newIndex, calculateFractalPos(newIndex, newSize, getOpenSquare()!!.pos, puzzleDim))
     }
 
     private fun getClosestFractal(x: Float, y: Float): Fractal {
@@ -988,8 +996,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     if(touchType == TouchType.PinchOut && fractal.centerCollision(x, y) && fractal.mSize > 1) {
                         val newFractals = split(fractal, null, FractalData(fractal.mIndex, fractal.mSize))
 
+                        val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
                         for(newFractal in newFractals) {
-                            newFractal.moveTo(calculateFractalPos(newFractal.mIndex, newFractal.mSize, getOpenSquare()!!.pos))
+                            newFractal.moveTo(calculateFractalPos(newFractal.mIndex, newFractal.mSize, getOpenSquare()!!.pos, puzzleDim))
                             mFractals.add(newFractal)
                         }
 
