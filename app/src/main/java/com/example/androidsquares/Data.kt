@@ -32,17 +32,23 @@ enum class CollisionBox {
     Bottom
 }
 
-enum class Transformation {
-    TranslatePosX,
-    TranslateNegX,
-    TranslatePosY,
-    TranslateNegY,
-    RotateCW,
-    RotateCCW,
-    ReflectXTop,
-    ReflectXBottom,
-    ReflectYLeft,
-    ReflectYRight
+enum class Transformation(val value: Int) {
+    None(0),
+    TranslatePosX(1),
+    TranslateNegX(2),
+    TranslatePosY(3),
+    TranslateNegY(4),
+    RotateCW(5),
+    RotateCCW(6),
+    ReflectXTop(7),
+    ReflectXBottom(8),
+    ReflectYLeft(9),
+    ReflectYRight(10);
+
+    companion object {
+        private val VALUES = values()
+        fun getByValue(value: Int) = VALUES.firstOrNull { it.value == value }
+    }
 }
 
 enum class Screen {

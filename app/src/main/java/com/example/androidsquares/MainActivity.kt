@@ -1,6 +1,8 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
     //save system
+        //do preferences until it's not possible - the goal is to iterate fucking fast
+        //write something and then read from it (such clear status of first puzzle in first set)
 
     //animation for clearing puzzles
 

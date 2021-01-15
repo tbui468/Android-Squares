@@ -5,9 +5,9 @@ import java.util.Stack
 data class UndoData(val transformation: Transformation, val index: IntArray, val size: Int)
 data class FractalData(val index: IntArray, val size: Int)
 
-data class PuzzleData(val elements: Array<FractalType>, val undoStack: Stack<UndoData>, val maxTransformations: Int, var isLocked: Boolean, var isCleared: Boolean)
+data class PuzzleData(var elements: Array<FractalType>, val undoStack: Stack<UndoData>, val maxTransformations: Int, var isLocked: Boolean, var isCleared: Boolean)
 data class SetData(val puzzleData: Array<PuzzleData?>, var isLocked: Boolean, var isCleared: Boolean, val pos: FloatArray)
-data class AppData(val setData: Array<SetData>, var defaultData: Boolean)
+data class AppData(val setData: Array<SetData>)
 
 val puzzle00 = PuzzleData(arrayOf(
         FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB,
@@ -186,4 +186,5 @@ val set6 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puz
 val set7 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puzzle05, puzzle06, puzzle07,
         null, null, null, null, null, null, null, null), true, false, floatArrayOf(8f, -21f, 0f))
 
-val appData = AppData(arrayOf(set0, set1, set2, set3, set4, set5, set6, set7), true)
+val defaultAppData = AppData(arrayOf(set0, set1, set2, set3, set4, set5, set6, set7))
+var appData = defaultAppData.copy()

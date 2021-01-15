@@ -1,5 +1,8 @@
 package com.example.androidsquares
 
+
+import androidx.appcompat.app.AppCompatActivity
+
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -8,6 +11,7 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.Bitmap
 import android.util.Log
+import java.util.Stack
 import java.util.Deque
 import java.util.ArrayDeque
 
@@ -93,6 +97,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         GLES20.glDepthFunc(GLES20.GL_LESS)
 //        GLES20.glEnable(GLES20.GL_CULL_FACE)
         //       GLES20.glCullFace(GLES20.GL_BACK)
+
+    //    resetSaveData() //temp
+   //     writeSaveData() //temp
+        readSaveData()
 
         mTextureHandle = loadTexture(mContext, R.drawable.fractal_colors)
         mProgram = compileShaders()
@@ -452,6 +460,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 }
             }
         }
+
     }
 
     private fun resizeRequired(transformation: Transformation, index: IntArray, size: Int): Boolean {
@@ -1082,6 +1091,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             mRecreateFractal = null
         }
 
+
+        writeSaveData()
         //////////////////////////////////////////////////////////////////////////////////////////
     }
 
@@ -1213,6 +1224,123 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
 
         return textureHandle[0]
+    }
+
+    private fun elementsToString(elements: Array<FractalType>): String {
+        var string = ""
+        for(e in elements) {
+            when(e) {
+                FractalType.Red -> string += "r"
+                FractalType.RedB -> string += "R"
+                FractalType.Green -> string += "g"
+                FractalType.GreenB -> string += "G"
+                FractalType.Blue -> string += "b"
+                FractalType.BlueB -> string += "B"
+                FractalType.Normal -> string += "n"
+                FractalType.NormalB -> string += "N"
+                FractalType.Empty -> string += "e"
+            }
+        }
+        return string
+    }
+
+    private fun stringToElements(string: String?): Array<FractalType> {
+        if(string == null) {
+            return Array(24){FractalType.Normal}
+        }
+        val elements = Array(string.length){FractalType.Normal}
+        for(i in string.indices) {
+            elements[i] = when(string[i]) {
+                'r' -> FractalType.Red
+                'R' -> FractalType.RedB
+                'g' -> FractalType.Green
+                'G' -> FractalType.GreenB
+                'b' -> FractalType.Blue
+                'B' -> FractalType.BlueB
+                'n' -> FractalType.Normal
+                'N' -> FractalType.NormalB
+                'e' -> FractalType.Empty
+                else -> FractalType.Normal
+            }
+        }
+        return elements
+    }
+
+    //can only write/read string, int, float, boolean
+    //when writing undo stack, pop each item, save it and push it into a temp stack.  WHen done saving, pop and push undodata from temp stack back to undo stack
+    private fun writeSaveData() {
+        val sharedPref = (mContext as AppCompatActivity).getPreferences(Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            for(i in appData.setData.indices) {
+                for(j in appData.setData[i].puzzleData.indices) {
+                    if(appData.setData[i].puzzleData[j] != null) {
+                        putBoolean(i.toString() + j.toString() + "isCleared", appData.setData[i].puzzleData[j]!!.isCleared)
+                        putString(i.toString() + j.toString() + "elements", elementsToString(appData.setData[i].puzzleData[j]!!.elements))
+
+                        //copying into temp stack
+                        val tempStack = Stack<UndoData>()
+                        while(!appData.setData[i].puzzleData[j]!!.undoStack.isEmpty()) {
+                            tempStack.push(appData.setData[i].puzzleData[j]!!.undoStack.pop())
+                        }
+                        //writing stack to preferences and pushing them back into undostack
+                        for(k in 0 until appData.setData[i].puzzleData[j]!!.maxTransformations) {
+                            if(!tempStack.isEmpty()) {
+                                val undoData = tempStack.pop()
+                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "transformation", undoData.transformation.value)
+                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "col", undoData.index[0])
+                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "row", undoData.index[1])
+                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "size", undoData.size)
+                                //push back into appdata
+                                appData.setData[i].puzzleData[j]!!.undoStack.push(undoData)
+                            }else {
+                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "transformation", Transformation.None.value)
+                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "col", 0)
+                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "row", 0)
+                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "size", 0)
+                            }
+                        }
+                    }
+                }
+            }
+            commit()
+        }
+    }
+
+
+    private fun readSaveData() {
+        val sharedPref = (mContext as AppCompatActivity).getPreferences(Context.MODE_PRIVATE)
+        for(i in appData.setData.indices) {
+            for(j in appData.setData[i].puzzleData.indices) {
+                if(appData.setData[i].puzzleData[j] != null) {
+                    appData.setData[i].puzzleData[j]!!.isCleared = sharedPref.getBoolean(i.toString() + j.toString() + "isCleared",
+                                                                                            defaultAppData.setData[i].puzzleData[j]!!.isCleared)
+                    appData.setData[i].puzzleData[j]!!.elements = stringToElements(sharedPref.getString(i.toString() + j.toString() + "elements",
+                                                                                            elementsToString(defaultAppData.setData[i].puzzleData[j]!!.elements)))
+
+                    //read undo stack
+                    appData.setData[i].puzzleData[j]!!.undoStack.clear()
+                    for(k in 0 until appData.setData[i].puzzleData[j]!!.maxTransformations) {
+                        val transformation = Transformation.getByValue(sharedPref.getInt(i.toString() + j.toString() + "undo" + k.toString() + "transformation", 0))
+                        val col = sharedPref.getInt(i.toString() + j.toString() + "undo" + k.toString() + "col", 0)
+                        val row = sharedPref.getInt(i.toString() + j.toString() + "undo" + k.toString() + "row", 0)
+                        val size = sharedPref.getInt(i.toString() + j.toString() + "undo" + k.toString() + "size", 0)
+
+                        //just check transformation since col row and size should be saved correctly if transformation is too
+                        if(transformation == null || transformation == Transformation.None) break
+
+                        appData.setData[i].puzzleData[j]!!.undoStack.push(UndoData(transformation, intArrayOf(col, row), size))
+                    }
+                }
+            }
+        }
+        //can check puzzle cleared status and update locked status, and set clear/locked status from the results
+        //note: first set is always unlock.  First puzzle in each set is always unlocked
+        //save undo stack (variable puzzle size... along with splitting indices (int array) into two ints)
+        //save element data as a string - can parse later (r for red.  R for redblock.  e for emtpy)
+    }
+
+    private fun resetSaveData() {
+        appData = defaultAppData.copy()
     }
 
 
