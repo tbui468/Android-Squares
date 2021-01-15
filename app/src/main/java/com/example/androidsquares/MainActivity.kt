@@ -1,17 +1,15 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //puzzles - get 2 sets done
-
     //puzzles layout
         //have puzzles center on screen regardless of dimensions
-        //current fractal coord functions (both normal and for target size) assume a size of 4x6
-        //center them based on runtime-calculated width and height of each puzzle
+        //current fractal coord functions (both normal and for target size) assume a size of 4x6 (need to pass info about left/right most column, and top/bottom row - ignoring empties)
+        //center them based on runtime-calculated width and height of each puzzle - pass dimension parameters to
 
     //save system
 
     //animation for clearing puzzles
 
-    //design some puzzles with more interesting shapes and obvious ends goals
+    //design set2 puzzles - introduce translation of 2x2 and a third color
 
     //puzzle goal should be obvious when looking at a puzzle for the first time
         //user should know exactly where the colored squares need to go to connect all the colors
@@ -31,6 +29,17 @@
     //idea: have a shader that changes color theme inside each complete cube
 
     //holding finger down highlights what part of the cube you are touch (center, edge or corner) so that user learns where to touch to transform
+
+    //puzzles - get 2 sets done (combine first two current sets together into one set.  Finish reflection/rotation for second set)
+    //first set be 1x1s (of up to two colors)
+    //second set introduce reflections/rotations
+    //third set introduce translations (and a third color)
+    //fourth set up the number of transformations to 4 + introduce 4th color
+    //fifth set introduce 4x4 fractals
+    //sixth set up the number of transformations to 5 (no new concepts)
+    //seventh up the number of transformations up to 6 (no new concepts)
+    //eighth up the number of transformations up to 7 (no new concepts)
+
 
 package com.example.androidsquares
 
