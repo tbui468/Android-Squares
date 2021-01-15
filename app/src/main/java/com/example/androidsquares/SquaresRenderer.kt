@@ -98,8 +98,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 //        GLES20.glEnable(GLES20.GL_CULL_FACE)
         //       GLES20.glCullFace(GLES20.GL_BACK)
 
-    //    resetSaveData() //temp
-   //     writeSaveData() //temp
         readSaveData()
 
         mTextureHandle = loadTexture(mContext, R.drawable.fractal_colors)
@@ -267,9 +265,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return true
     }
 
-    private fun unlockAdjacentSets(set: Set) {
-        if(set.mIndex < 7) { //temp: unlock the next set if not already last set
-            appData.setData[set.mIndex + 1].isLocked = false
+    private fun unlockAdjacentSets(setIndex: Int) {
+        if(setIndex < appData.setData.size - 1) { //temp: unlock the next set if not already last set
+            appData.setData[setIndex + 1].isLocked = false
         }
     }
 
@@ -350,33 +348,28 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             DFS(elements, visited, dim, intArrayOf(col, row), targetColors)
     }
 
-    private fun unlockAdjacentSquares(square: Square) {
-        val col = square.mIndex % 4
-        val row = square.mIndex / 4
+    private fun unlockAdjacentSquares(setIndex: Int, puzzleIndex: Int) {
+        val col = puzzleIndex % 4
+        val row = puzzleIndex / 4
         //to the right
-        if(col + 1 < 4) {
-            getSquare(col + 1 + row * 4).also {
-                if (it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
-                    appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false
-            }
+        val rightIndex = col + 1 + row * 4
+        if(rightIndex >= 0 && rightIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[rightIndex] != null) {
+            appData.setData[setIndex].puzzleData[rightIndex]!!.isLocked = false
         }
-        if(col - 1 >= 0) {
-            getSquare(col - 1 + row * 4).also {
-                if (it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
-                    appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false
-            }
+        //to the left
+        val leftIndex = col - 1 + row * 4
+        if(leftIndex >= 0 && leftIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[leftIndex] != null) {
+            appData.setData[setIndex].puzzleData[leftIndex]!!.isLocked = false
         }
-        if(row + 1 < 6) {
-            getSquare(col + (row + 1) * 4).also {
-                if (it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
-                    appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false
-            }
+        //to the top
+        val topIndex = col + (row - 1) * 4
+        if(topIndex >= 0 && topIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[topIndex] != null) {
+            appData.setData[setIndex].puzzleData[topIndex]!!.isLocked = false
         }
-        if(row - 1 >= 0) {
-            getSquare(col + (row - 1) * 4).also {
-                if (it != null && appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked)
-                    appData.setData[getOpenSet()!!.mIndex].puzzleData[it.mIndex]!!.isLocked = false
-            }
+        //to the bottom
+        val bottomIndex = col + (row + 1) * 4
+        if(bottomIndex >= 0 && bottomIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[bottomIndex] != null) {
+            appData.setData[setIndex].puzzleData[bottomIndex]!!.isLocked = false
         }
     }
 
@@ -453,10 +446,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         if(!undo) {
             if (puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
                 appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.isCleared = true
-                unlockAdjacentSquares(getOpenSquare()!!)
+                unlockAdjacentSquares(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
                 if (setCleared(getOpenSet()!!)) {
                     appData.setData[getOpenSet()!!.mIndex].isCleared = true
-                    unlockAdjacentSets(getOpenSet()!!)
+                    unlockAdjacentSets(getOpenSet()!!.mIndex)
                 }
             }
         }
@@ -1302,7 +1295,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     }
                 }
             }
-            commit()
+            apply()
         }
     }
 
@@ -1330,13 +1323,17 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
                         appData.setData[i].puzzleData[j]!!.undoStack.push(UndoData(transformation, intArrayOf(col, row), size))
                     }
+
+                    //loop through all puzzles in all sets
+                    //if that puzzle is cleared, unlock all adjacent puzzles (shouldn't matter if they're already unlocked or not)
+
+                    //loop through all sets
+                    //if all puzzles in that set are cleared, clear that set (set it to true)
+
+                    //loop through all sets.  If cleared, set adjacent sets to unlocked
                 }
             }
         }
-        //can check puzzle cleared status and update locked status, and set clear/locked status from the results
-        //note: first set is always unlock.  First puzzle in each set is always unlocked
-        //save undo stack (variable puzzle size... along with splitting indices (int array) into two ints)
-        //save element data as a string - can parse later (r for red.  R for redblock.  e for emtpy)
     }
 
     private fun resetSaveData() {

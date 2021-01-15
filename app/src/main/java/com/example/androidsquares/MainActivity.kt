@@ -1,8 +1,8 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //save system
-        //do preferences until it's not possible - the goal is to iterate fucking fast
-        //write something and then read from it (such clear status of first puzzle in first set)
+    //save system - the following data can be inferred from individual puzzle status - calculate this info at end of readSaveData() function
+        //implement isLocked for adjacent puzzles (calculate/set this after reading data)
+        //implement isCleared and isLocked for adjacent sets (calculate/set this after reading data)
 
     //animation for clearing puzzles
 
@@ -16,10 +16,6 @@
         //it feels like a cluster of random colors (it should feel like I'm connection colors together into lines/trees
         //could add more darks colors
         //keep in mind that all the colors needs to connect on the surface of the cube
-
-    //load default data from Data.kt
-    //save data to preferences (since this is so much easier than using a database)
-        //save puzzle data as single string per puzzle.  Can parse on load to get fractal types
 
     //allows swapping with difference sizes, with the condition being that IF the swapped fractal were the correct size the swap would be valid
 
