@@ -1,11 +1,13 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //design set2 puzzles - introduce translation of 2x2 and a third color
+    //animation for clearing puzzles (queue both these commands)
+        //need to pulse colored fractals....
+        //all colored fractals pulse white
 
     //tutorial for swap, pinch in, pinch out, rotate, reflect
         //have a dot animate showing finger motion to perform certain action
 
-    //animation for clearing puzzles
+    //add set 3 puzzles - introduce 4x4 fractals.  Introduce 4th color.  Introduce longer (3+) length connections.
 
     //puzzle goal should be obvious when looking at a puzzle for the first time
         //user should know exactly where the colored squares need to go to connect all the colors

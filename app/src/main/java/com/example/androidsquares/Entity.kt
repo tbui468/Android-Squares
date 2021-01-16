@@ -21,6 +21,9 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
     private var fromAlpha = 1f
     private var toAlpha = 1f
 
+    private var scalePulse = false
+    private var alphaPulse = false
+
     fun calculateModelMatrix(): FloatArray {
         val modelMatrix = FloatArray(16)
         Matrix.setIdentityM(modelMatrix, 0)
@@ -33,7 +36,21 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
     open fun onUpdate(t: Float) {
         pos = floatArrayOf(fromPos[0] + (toPos[0] - fromPos[0]) * t, fromPos[1] + (toPos[1] - fromPos[1]) * t, fromPos[2] + (toPos[2] - fromPos[2]) * t)
         angle = fromAngle + (toAngle - fromAngle) * t
-        alpha = fromAlpha + (toAlpha - fromAlpha) * t
+
+        val alphaT = if(alphaPulse && t > .5f) {
+            1f - t
+        }else {
+            t
+        }
+
+        alpha = fromAlpha + (toAlpha - fromAlpha) * alphaT
+
+        val newT = if(scalePulse && t > .5f) {
+            1f - t
+        }else {
+            t
+        }
+        scale = floatArrayOf(fromScale[0] + (toScale[0] - fromScale[0]) * newT, fromScale[1] + (toScale[1] - fromScale[1]) * newT, fromScale[2] + (toScale[2] - fromScale[2]) * newT)
     }
 
     fun makeInvisible() {
@@ -45,17 +62,36 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
     open fun onAnimationEnd() {
         pos = toPos
         fromPos = toPos
-        scale = toScale
-        fromScale = toScale
         angle = toAngle
         fromAngle = toAngle
-        alpha = toAlpha
-        fromAlpha = toAlpha
+
+        if(!alphaPulse) {
+            alpha = toAlpha
+            fromAlpha = toAlpha
+        }else {
+            fromAlpha = alpha
+            toAlpha = alpha
+        }
+        alphaPulse = false
+
+        if(!scalePulse) {
+            scale = toScale
+            fromScale = toScale
+        }else {
+            fromScale = scale
+            toScale = scale
+        }
+        scalePulse = false
     }
 
     open fun fadeTo(newAlpha: Float) {
         fromAlpha = alpha
         toAlpha = newAlpha
+    }
+
+    fun alphaPulse(newAlpha: Float) {
+        alphaPulse = true
+        fadeTo(newAlpha)
     }
 
     open fun moveTo(newPos: FloatArray) {
@@ -65,6 +101,10 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
     fun scaleTo(newScale: FloatArray) {
         fromScale = scale
         toScale = newScale
+    }
+    fun scalePulse(newScale: FloatArray) {
+        scalePulse = true
+        scaleTo(newScale)
     }
     fun rotateTo(newAngle: Float, axis: FloatArray) {
         fromAngle = angle

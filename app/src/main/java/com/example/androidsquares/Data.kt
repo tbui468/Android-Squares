@@ -305,7 +305,9 @@ fun calculatePuzzleOffset(width: Int, height: Int): FloatArray {
 
 //gets center of fractal of given size/index
 fun calculateFractalPos(index: IntArray, size: Int, squareCenter: FloatArray, puzzleDim: IntArray): FloatArray {
-    val SPACING = .35f
+    val flush = false
+    val SPACING = if(flush) .25f
+    else .35f
     val offset = calculatePuzzleOffset(puzzleDim[0], puzzleDim[1])
     val puzzleCenter = floatArrayOf(squareCenter[0] + offset[0], squareCenter[1] - offset[1], squareCenter[2])
     val topLeftX = puzzleCenter[0] - SPACING * (3)/2f + SPACING * index[0]
@@ -315,9 +317,6 @@ fun calculateFractalPos(index: IntArray, size: Int, squareCenter: FloatArray, pu
 }
 
 fun calculateFractalPosForTarget(index: IntArray, size: Int, targetIndex: IntArray, targetSize: Int, squareCenter: FloatArray, puzzleDim: IntArray): FloatArray {
-    val SPACING = .35f * size
-    //val offset = calculatePuzzleOffset(puzzleDim[0], puzzleDim[1])
-    //val puzzleCenter = floatArrayOf(squareCenter[0] - offset[0], squareCenter[1] - offset[1], squareCenter[2])
     val targetCenter = calculateFractalPos(targetIndex, targetSize, squareCenter, puzzleDim)
     val halfWidth = (targetSize - 1) * .25f / 2f
 

@@ -23,6 +23,7 @@ import android.opengl.GLUtils
 
 class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mAnimationParameter = 0f //main animation timer
+    var mAnimationSpeed = 1f
     var mSets = mutableListOf<Set>()
     var mSquares = mutableListOf<Square>()
     var mFractals = mutableListOf<Fractal>()
@@ -40,6 +41,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private var mMergeFractals: Array<MutableList<Fractal>>? = null
     private var mRecreateFractal: Fractal? = null
     private var mCommandQueue: Deque<UndoData> = ArrayDeque() //only used for two step undo data for now
+    private var mClearSplitFlag = false
+    private var mClearPulseFlag = false
 
 
     companion object {
@@ -112,6 +115,11 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         //moving button offscreen for main screen
         mBackButton = Button(floatArrayOf(mCamera.pos[0] + mBackButtonOffset[0] - 1f,  mCamera.pos[1] + mBackButtonOffset[1], 98f + mBackButtonOffset[2]))
         mUndoButton = Button(floatArrayOf(mCamera.pos[0] + mUndoButtonOffset[0],  mCamera.pos[1] + mUndoButtonOffset[1] - 1f, 98f + mUndoButtonOffset[2]))
+    }
+
+    private fun startAnimation(speed: Float) {
+        mAnimationParameter = 0f
+        mAnimationSpeed = speed
     }
 
     private fun spawnSets(): MutableList<Set> {
@@ -213,16 +221,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         for(fractal in mFractals) {
             if(fractal.mIndex[0] == index[0] && fractal.mIndex[1] == index[1]) return fractal
-        }
-
-        return null
-    }
-
-    private fun getSquare(index: Int): Square? {
-        if(index >= 24) return null
-
-        for(square in mSquares) {
-            if(index == square.mIndex) return square
         }
 
         return null
@@ -451,9 +449,47 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     appData.setData[getOpenSet()!!.mIndex].isCleared = true
                     unlockAdjacentSets(getOpenSet()!!.mIndex)
                 }
+                mClearSplitFlag = true
             }
         }
 
+    }
+
+    //split all fractals on clear
+    private fun clearSplit(): Boolean {
+        val splitList = mutableListOf<Fractal>()
+        for(f in mFractals) {
+            if(f.mSize > 1) splitList.add(f)
+        }
+
+        if(splitList.isEmpty()) return false
+
+        for(f in splitList) {
+            val newFractals = split(f, null, FractalData(f.mIndex, f.mSize))
+            for(newF in newFractals) {
+                newF.moveTo(calculateFractalPos(newF.mIndex, newF.mSize, getOpenSquare()!!.pos, getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)))
+            }
+            mFractals.remove(f)
+            mFractals.addAll(newFractals)
+        }
+        splitList.clear()
+
+        return true
+    }
+
+    //pulse all colored fractals white
+    //fade out non-colored fractals????
+    private fun clearPulse() {
+        var type: FractalType
+        for(fractal in mFractals) {
+            type = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, fractal.mSize)[0]
+            if(type != FractalType.Normal && type != FractalType.NormalB) {
+                val scale = fractal.scale[0] * 2f
+                fractal.scalePulse(floatArrayOf(scale, scale, 1f))
+            }else {
+                //fractal.alphaPulse(0f)
+            }
+        }
     }
 
     private fun resizeRequired(transformation: Transformation, index: IntArray, size: Int): Boolean {
@@ -733,14 +769,14 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
 
         val corners = arrayOf(
-            Fractal(elements0, newSize, index, //top left
-                    calculateFractalPosForTarget(index, newSize, ogFractal.index, ogFractal.size, squarePos, puzzleDim)),
-            Fractal(elements1, newSize, intArrayOf(index[0] + newSize, index[1]), //top right
-                    calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1]), newSize, ogFractal.index, ogFractal.size, squarePos, puzzleDim)),
-            Fractal(elements2, newSize, intArrayOf(index[0], index[1] + newSize), //bottom left
-                    calculateFractalPosForTarget(intArrayOf(index[0], index[1] + newSize), newSize, ogFractal.index, ogFractal.size, squarePos, puzzleDim)),
-            Fractal(elements3, newSize, intArrayOf(index[0] + newSize, index[1] + newSize), //bottom righ
-                    calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1] + newSize), newSize, ogFractal.index, ogFractal.size, squarePos, puzzleDim))
+                Fractal(elements0, newSize, index, //top left
+                        calculateFractalPosForTarget(index, newSize, ogFractal.index, ogFractal.size, squarePos, puzzleDim)),
+                Fractal(elements1, newSize, intArrayOf(index[0] + newSize, index[1]), //top right
+                        calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1]), newSize, ogFractal.index, ogFractal.size, squarePos, puzzleDim)),
+                Fractal(elements2, newSize, intArrayOf(index[0], index[1] + newSize), //bottom left
+                        calculateFractalPosForTarget(intArrayOf(index[0], index[1] + newSize), newSize, ogFractal.index, ogFractal.size, squarePos, puzzleDim)),
+                Fractal(elements3, newSize, intArrayOf(index[0] + newSize, index[1] + newSize), //bottom righ
+                        calculateFractalPosForTarget(intArrayOf(index[0] + newSize, index[1] + newSize), newSize, ogFractal.index, ogFractal.size, squarePos, puzzleDim))
         )
 
         mFractals.remove(fractal)
@@ -1096,7 +1132,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         //delta time
         mPreviousTime = mCurrentTime
         mCurrentTime = SystemClock.uptimeMillis()
-        val deltaTime = 0.0015f * (mCurrentTime - mPreviousTime).toInt()
+        val deltaTime = 0.0015f * (mCurrentTime - mPreviousTime).toInt() * mAnimationSpeed
 
 
         //only want to call onAnimationEnd() once per animation
@@ -1108,17 +1144,26 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
 
         if(mAnimationParameter >= 1f) {
-            if(mCommandQueue.isEmpty()) {
+            if(mClearPulseFlag) {
+                clearPulse()
+                startAnimation(.5f)
+                mClearPulseFlag = false
+            }else if(mClearSplitFlag) {
+                val split: Boolean = clearSplit()
+                if(split) startAnimation(1f) //skip animation is no fractals are split
+                mClearSplitFlag = false
+                mClearPulseFlag = true
+            }else if(mCommandQueue.isEmpty()) {
                 var touchRegistered = false
                 while (!mInputQueue.isEmpty() && !touchRegistered) { //loops until valid command is found or no more inputs
                     val data = mInputQueue.getNextInput()
                     touchRegistered = dispatchCommand(data.touchType, data.x, data.y)
                 }
-                if (touchRegistered) mAnimationParameter = 0f
+                if (touchRegistered) startAnimation(1f)
             }else {
                 val undoData = mCommandQueue.removeFirst()
                 undoTransform(undoData.transformation, undoData.index, undoData.size)
-                mAnimationParameter = 0f
+                startAnimation(1f)
             }
         }
 
@@ -1305,9 +1350,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             for(j in appData.setData[i].puzzleData.indices) {
                 if(appData.setData[i].puzzleData[j] != null) {
                     appData.setData[i].puzzleData[j]!!.isCleared = sharedPref.getBoolean(i.toString() + j.toString() + "isCleared",
-                                                                                            defaultAppData.setData[i].puzzleData[j]!!.isCleared)
+                            defaultAppData.setData[i].puzzleData[j]!!.isCleared)
                     appData.setData[i].puzzleData[j]!!.elements = stringToElements(sharedPref.getString(i.toString() + j.toString() + "elements",
-                                                                                            elementsToString(defaultAppData.setData[i].puzzleData[j]!!.elements)))
+                            elementsToString(defaultAppData.setData[i].puzzleData[j]!!.elements)))
 
                     //read undo stack
                     appData.setData[i].puzzleData[j]!!.undoStack.clear()
