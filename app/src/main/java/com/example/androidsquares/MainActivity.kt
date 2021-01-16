@@ -2,6 +2,9 @@
 
     //design set2 puzzles - introduce translation of 2x2 and a third color
 
+    //tutorial for swap, pinch in, pinch out, rotate, reflect
+        //have a dot animate showing finger motion to perform certain action
+
     //animation for clearing puzzles
 
     //puzzle goal should be obvious when looking at a puzzle for the first time
@@ -23,7 +26,7 @@
     //first set be 1x1s (of up to two colors)
     //second set introduce reflections/rotations
     //third set introduce translations (and a third color)
-    //fourth set up the number of transformations to 4 + introduce 4th color
+    //fourth set up the number of transformations to 4 + introduce 4th color (also lengthen color connections to 3 to 4 colored blocks)
     //fifth set introduce 4x4 fractals - 4 transformations
     //sixth set up the number of transformations to 5 (no new concepts)
     //seventh up the number of transformations up to 5 (no new concepts)
