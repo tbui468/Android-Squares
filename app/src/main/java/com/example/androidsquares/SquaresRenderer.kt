@@ -348,7 +348,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             DFS(elements, visited, dim, intArrayOf(col, row), targetColors)
     }
 
-    private fun unlockAdjacentSquares(setIndex: Int, puzzleIndex: Int) {
+    private fun unlockAdjacentPuzzles(setIndex: Int, puzzleIndex: Int) {
         val col = puzzleIndex % 4
         val row = puzzleIndex / 4
         //to the right
@@ -446,7 +446,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         if(!undo) {
             if (puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(4, 6))) {
                 appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.isCleared = true
-                unlockAdjacentSquares(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
+                unlockAdjacentPuzzles(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
                 if (setCleared(getOpenSet()!!)) {
                     appData.setData[getOpenSet()!!.mIndex].isCleared = true
                     unlockAdjacentSets(getOpenSet()!!.mIndex)
@@ -1259,8 +1259,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return elements
     }
 
-    //can only write/read string, int, float, boolean
-    //when writing undo stack, pop each item, save it and push it into a temp stack.  WHen done saving, pop and push undodata from temp stack back to undo stack
+    //optimization: setting 'dataChanged' flags for each puzzle/set, and only write puzzle data for those that changes between previous and current write
     private fun writeSaveData() {
         val sharedPref = (mContext as AppCompatActivity).getPreferences(Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
@@ -1324,14 +1323,33 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                         appData.setData[i].puzzleData[j]!!.undoStack.push(UndoData(transformation, intArrayOf(col, row), size))
                     }
 
-                    //loop through all puzzles in all sets
-                    //if that puzzle is cleared, unlock all adjacent puzzles (shouldn't matter if they're already unlocked or not)
-
-                    //loop through all sets
-                    //if all puzzles in that set are cleared, clear that set (set it to true)
-
-                    //loop through all sets.  If cleared, set adjacent sets to unlocked
                 }
+            }
+        }
+
+        //if puzzle is cleared, unlock all adjacent puzzles (shouldn't matter if they're already unlocked or not)
+        //if all puzzles in a set cleared, set set.isCleared to true
+        var allPuzzlesCleared: Boolean
+        for(setIndex in appData.setData.indices) {
+            allPuzzlesCleared = true
+            for (puzzleIndex in appData.setData[setIndex].puzzleData.indices) {
+                if(appData.setData[setIndex].puzzleData[puzzleIndex] != null) {
+                    if (appData.setData[setIndex].puzzleData[puzzleIndex]!!.isCleared) {
+                        unlockAdjacentPuzzles(setIndex, puzzleIndex)
+                    } else {
+                        allPuzzlesCleared = false
+                    }
+                }
+            }
+            if(allPuzzlesCleared) {
+                appData.setData[setIndex].isCleared = true
+            }
+        }
+
+        //loop through all sets.  If cleared, set adjacent sets to unlocked
+        for(setIndex in appData.setData.indices) {
+            if(appData.setData[setIndex].isCleared) {
+                unlockAdjacentSets(setIndex)
             }
         }
     }

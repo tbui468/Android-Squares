@@ -1,12 +1,8 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //save system - the following data can be inferred from individual puzzle status - calculate this info at end of readSaveData() function
-        //implement isLocked for adjacent puzzles (calculate/set this after reading data)
-        //implement isCleared and isLocked for adjacent sets (calculate/set this after reading data)
+    //design set2 puzzles - introduce translation of 2x2 and a third color
 
     //animation for clearing puzzles
-
-    //design set2 puzzles - introduce translation of 2x2 and a third color
 
     //puzzle goal should be obvious when looking at a puzzle for the first time
         //user should know exactly where the colored squares need to go to connect all the colors
