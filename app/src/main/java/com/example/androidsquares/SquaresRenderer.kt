@@ -27,8 +27,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mSets = mutableListOf<Set>()
     var mSquares = mutableListOf<Square>()
     var mFractals = mutableListOf<Fractal>()
-    private val mBackButtonOffset = floatArrayOf(-.55f, .92f, -3.1f) //offset amount from camera to remain in top left corner
-    lateinit var mBackButton: Button
     private val mUndoButtonOffset = floatArrayOf(0f, -.85f, -3.1f) //offset amount from camera to remain in top left corner
     lateinit var mUndoButton: Button
     lateinit var mCamera: Camera
@@ -116,7 +114,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mCamera = Camera(floatArrayOf(0f, 0f, 3f))
         mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
         //moving button offscreen for main screen
-        mBackButton = Button(floatArrayOf(mCamera.pos[0] + mBackButtonOffset[0] - 1f,  mCamera.pos[1] + mBackButtonOffset[1], 98f + mBackButtonOffset[2]))
         mUndoButton = Button(floatArrayOf(mCamera.pos[0] + mUndoButtonOffset[0],  mCamera.pos[1] + mUndoButtonOffset[1] - 1f, 98f + mUndoButtonOffset[2]))
     }
 
@@ -139,7 +136,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         set.mIsOpen = true
         mCamera.moveTo(floatArrayOf(set.pos[0], set.pos[1], 15f))
-        mBackButton.moveTo(floatArrayOf(set.pos[0] + mBackButtonOffset[0], set.pos[1] + mBackButtonOffset[1], 15f + mBackButtonOffset[2]))
         mUndoButton.moveTo(floatArrayOf(set.pos[0] + mUndoButtonOffset[0], set.pos[1] + mUndoButtonOffset[1] - 1f, 15f + mUndoButtonOffset[2]))
         mSquares = set.spawnSquares()
     }
@@ -150,7 +146,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         set.mIsOpen = false
         mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
-        mBackButton.moveTo(floatArrayOf(0f + mBackButtonOffset[0] - 1f, 0f + mBackButtonOffset[1], 98f + mBackButtonOffset[2]))
         mUndoButton.moveTo(floatArrayOf(0f + mUndoButtonOffset[0], 0f + mUndoButtonOffset[1] - 1f, 98f + mUndoButtonOffset[2]))
         mSquares.clear()
         mSets = spawnSets()
@@ -158,7 +153,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun openSquare(square: Square) {
         mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4.5f))
-        mBackButton.moveTo(floatArrayOf(square.pos[0] + mBackButtonOffset[0], square.pos[1] + mBackButtonOffset[1], 4.5f + mBackButtonOffset[2]))
         mUndoButton.moveTo(floatArrayOf(square.pos[0] + mUndoButtonOffset[0], square.pos[1] + mUndoButtonOffset[1], 4.5f + mUndoButtonOffset[2]))
 
         //mFractals = square.spawnFractals(puzzleData[getOpenSet()!!.mIndex][square.mIndex]) //temp: just grabbing first index
@@ -184,7 +178,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, intArrayOf(0, 0), 4, square.pos, puzzleDim))
         }
         mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1], 15f))
-        mBackButton.moveTo(floatArrayOf(cubePos[0] + mBackButtonOffset[0], cubePos[1] + mBackButtonOffset[1], 15f + mBackButtonOffset[2]))
         mUndoButton.moveTo(floatArrayOf(cubePos[0] + mUndoButtonOffset[0], cubePos[1] + mUndoButtonOffset[1] - 1f, 15f + mUndoButtonOffset[2]))
 
         mSquares = getOpenSet()!!.spawnSquares()
@@ -192,7 +185,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mFractals.clear()
     }
 
-    private fun getScreenState(): Screen {
+    fun getScreenState(): Screen {
         if(mFractals.size > 0) return Screen.Fractal
         if(mSquares.size > 0) return Screen.Square
         return Screen.Set
@@ -942,7 +935,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     }
                 }
 
-                if(touchType == TouchType.Tap && mBackButton.centerCollision(x, y)) {
+                if(touchType == TouchType.Back) {
                     val openSet = getOpenSet()
                     if(openSet != null)
                         closeSet(openSet)
@@ -1056,7 +1049,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     }
                 }
 
-                if(touchType == TouchType.Tap && mBackButton.centerCollision(x, y)) {
+                if(touchType == TouchType.Back) {
                     val openSquare = getOpenSquare()
                     if(openSquare != null)
                         closeSquare(openSquare)
@@ -1094,7 +1087,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             fractal.onAnimationEnd()
         }
         mCamera.onAnimationEnd()
-        mBackButton.onAnimationEnd()
         mUndoButton.onAnimationEnd()
 
 
@@ -1191,7 +1183,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             set.onUpdate(sigmoid)
         }
 
-        mBackButton.onUpdate(sigmoid)
         mUndoButton.onUpdate(sigmoid)
 
         /////////////////////////////////////draw setup////////////////////////////////////
@@ -1226,7 +1217,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             set.draw(mVPMatrix)
         }
 
-        mBackButton.draw(mVPMatrix)
         mUndoButton.draw(mVPMatrix)
 
         //////////////////////draw cleanup/////////////////////////////

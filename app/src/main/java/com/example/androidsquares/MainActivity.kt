@@ -1,7 +1,5 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //android back button to go back screens
-
     //animation for clearing puzzles (queue both these commands)
         //need to pulse colored fractals....
         //all colored fractals pulse white
@@ -49,6 +47,13 @@ class MainActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mSquaresSurfaceView = SquaresSurfaceView(this)
         setContentView(mSquaresSurfaceView)
+    }
+
+    override fun onBackPressed() {
+        if(mSquaresSurfaceView.renderer.getScreenState() == Screen.Set)
+            super.onBackPressed() //exit app
+        else
+            mSquaresSurfaceView.renderer.mInputQueue.add(InputData(TouchType.Back, 0f, 0f, 0.3f))
     }
 
     public override fun onResume() {
