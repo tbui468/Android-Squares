@@ -44,6 +44,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private var mClearSplitFlag = false
     private var mClearPulseFlag = false
 
+    private var mScreenWidth = 0
+    private var mScreenHeight = 0
+
 
     companion object {
         var mTextureHandle = -1
@@ -1157,7 +1160,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 var touchRegistered = false
                 while (!mInputQueue.isEmpty() && !touchRegistered) { //loops until valid command is found or no more inputs
                     val data = mInputQueue.getNextInput()
-                    touchRegistered = dispatchCommand(data.touchType, data.x, data.y)
+                    val pair = screenToNormalizedCoords(data.x, data.y)
+                    touchRegistered = dispatchCommand(data.touchType, pair.x, pair.y)
                 }
                 if (touchRegistered) startAnimation(1f)
             }else {
@@ -1236,8 +1240,16 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         val ratio = width.toFloat() / height
 
+        mScreenWidth = width
+        mScreenHeight = height
+
         //Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 7f) //allow depth up to 100f away from camera
         Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 103f) //allow depth up to 100 units away
+    }
+
+    //normalize to -1 to 1 in both dimensions
+    private fun screenToNormalizedCoords(screenX: Float, screenY: Float): CoordinatePair {
+        return CoordinatePair(screenX * 2 / mScreenWidth - 1, -(screenY * 2 / mScreenHeight - 1))
     }
 
     private fun loadTexture(context: Context, resourceID: Int): Int {

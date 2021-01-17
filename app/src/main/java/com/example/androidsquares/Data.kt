@@ -56,7 +56,7 @@ enum class Screen {
 }
 
 enum class TouchType {
-    Tap, PinchIn, PinchOut, FlickLeft, FlickRight, FlickDown, FlickUp, DoubleTap
+    Tap, FlickLeft, FlickRight, FlickDown, FlickUp, DoubleTap
 }
 
 //Block types (postfixed with B) are darker than their non-block counterparts and cannot be transformed/split/merged

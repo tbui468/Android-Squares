@@ -1,7 +1,5 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
-    //double tap for forming splitting
-
     //android back button to go back screens
 
     //animation for clearing puzzles (queue both these commands)
