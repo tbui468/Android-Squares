@@ -39,7 +39,6 @@ class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
                 mFirstTouch = arrayOf(mFirstTouch[0], mFirstTouch[1], floatArrayOf(event.getX(event.actionIndex), event.getY(event.actionIndex)))
 
                 if(!mFlicked && pointDistance(mFirstTouch[0][0], mFirstTouch[0][1], mFirstTouch[2][0], mFirstTouch[2][1]) < TAP_THRESHOLD) {
-                    Log.d("kouch", "Tap")
                     pair = screenToNormalizedCoords(mFirstTouch[0][0], mFirstTouch[0][1])
                     renderer.mInputQueue.add(InputData(TouchType.Tap, pair.x, pair.y, 0.3f))
                 }

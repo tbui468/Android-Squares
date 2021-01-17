@@ -922,7 +922,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             Screen.Set -> {
                 if(touchType == TouchType.Tap) {
                     for (set in mSets) {
-                        if (set.pointCollision(x, y) == CollisionBox.Center && !appData.setData[set.mIndex].isLocked) {
+                        if (set.pointCollision(x, y) && !appData.setData[set.mIndex].isLocked) {
                             openSet(set)
                             return true
                         }
@@ -1031,7 +1031,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
 
                 for (fractal in mFractals) {
-                    if(touchType == TouchType.PinchOut && fractal.centerCollision(x, y) && fractal.mSize > 1) {
+                    if(touchType == TouchType.DoubleTap && fractal.pointCollision(x, y) && fractal.mSize > 1) {
                         val newFractals = split(fractal, null, FractalData(fractal.mIndex, fractal.mSize))
 
                         val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
@@ -1044,7 +1044,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     }
                 }
 
-                if(touchType == TouchType.PinchIn) {
+                if(touchType == TouchType.DoubleTap) {
                     val cornerFractals = getCornerFractals(x, y) //checks for blocks in this function and returns null if ANY fractal is a block
                     if(cornerFractals != null) {
                         moveToMerge(cornerFractals.toMutableList())

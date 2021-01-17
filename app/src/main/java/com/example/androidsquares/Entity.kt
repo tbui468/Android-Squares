@@ -197,16 +197,16 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
         return true
     }
 
-    fun pointCollision(mouseX: Float, mouseY: Float): CollisionBox {
+    fun pointCollision(mouseX: Float, mouseY: Float): Boolean {
         val projBox = getScreenCoords()
 
         //check if outside box
-        if(mouseX < projBox[0]) return CollisionBox.None
-        if(mouseX > projBox[2]) return CollisionBox.None
-        if(mouseY < projBox[1]) return CollisionBox.None
-        if(mouseY > projBox[3]) return CollisionBox.None
+        if(mouseX < projBox[0]) return false
+        if(mouseX > projBox[2]) return false
+        if(mouseY < projBox[1]) return false
+        if(mouseY > projBox[3]) return false
 
-        return CollisionBox.Center
+        return true
     }
 
 
