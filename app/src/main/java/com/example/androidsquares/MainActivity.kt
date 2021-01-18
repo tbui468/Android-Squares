@@ -1,9 +1,5 @@
 //get a complete vertical slice with two puzzle cubes
 
-    //splash screen (asynchronous loading of both login view and surfaceview)
-        //make two backgrounds - one splash screen and one login page background
-        //use gimp (find proper resolution - how to deal with different aspect ratios?)
-
     //facebook login page (or choose to play without online data)
         //this is the default view on opening the app
         //transition to the game view after logging in/choosing not to log in
@@ -81,16 +77,31 @@
 package com.example.androidsquares
 
 import androidx.appcompat.app.AppCompatActivity
+import android.widget.Button
 import android.os.Bundle
 
 class MainActivity: AppCompatActivity() {
     private lateinit var mSquaresSurfaceView: SquaresSurfaceView
+    private lateinit var mSkipButton: Button
+    private lateinit var mLoginButton: Button
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.SplashScreen)
         super.onCreate(savedInstanceState)
-        mSquaresSurfaceView = SquaresSurfaceView(this)
-        setContentView(mSquaresSurfaceView)
+        setContentView(R.layout.login)
+
+        mSkipButton = findViewById(R.id.skip_button)
+        mLoginButton = findViewById(R.id.login_button)
+
+        //login to facebook
+        mLoginButton.setOnClickListener {
+        }
+
+        //skip loggin into facebook
+        mSkipButton.setOnClickListener {
+            mSquaresSurfaceView = SquaresSurfaceView(this)
+            setContentView(mSquaresSurfaceView)
+        }
     }
 
     override fun onBackPressed() {
