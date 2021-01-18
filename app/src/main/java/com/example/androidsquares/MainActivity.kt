@@ -9,15 +9,16 @@
         //transition to the game view after logging in/choosing not to log in
 
     //cache test data on server - name, profile pic, and (set, puzzle, transformation count in solution)
+        //try testing by logging in with my account
 
     //read test friend data from server and display profile pics of friends
 
     //complete puzzle set 5: similar to set 3, make a few variations of puzzles - can mix them up later
-    //3 adjacent 2x2 squares variation
-    //3 adjacent above and two adjacent below (or 1)
+        //3 adjacent 2x2 squares variation
+        //3 adjacent above and two adjacent below (or 1)
+        //make puzzles where user has to connect 3 dark blocks (don't have too many of those yet) (including 2+ colors)
 
-
-    //Back button is normal to have in the app - keep it there
+    //Back button is normal to have in the app - keep it there since it's better to have an in-app way to go back (but include android back button functionality too)
 
     //bug - a 4x4 doesn't split apart to 1x1s when puzzle is cleared (it splits only to 1x1s)
         //also refactor puzzle clear code - it's very messy
@@ -86,6 +87,7 @@ class MainActivity: AppCompatActivity() {
     private lateinit var mSquaresSurfaceView: SquaresSurfaceView
 
     public override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.SplashScreen)
         super.onCreate(savedInstanceState)
         mSquaresSurfaceView = SquaresSurfaceView(this)
         setContentView(mSquaresSurfaceView)
