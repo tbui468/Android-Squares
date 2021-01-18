@@ -13,8 +13,6 @@ data class CoordinatePair(val x: Float, val y: Float)
 
 data class InputData(val touchType: TouchType, val x: Float, val y: Float, var life: Float)
 
-
-
 const val FLOAT_SIZE = 4
 const val SHORT_SIZE = 2
 const val FLOATS_PER_QUAD = 4 * 5 //four vertices, and 5 floats per vertex
@@ -308,8 +306,11 @@ fun calculateFractalPos(index: IntArray, size: Int, squareCenter: FloatArray, pu
     val flush = false
     val SPACING = if(flush) .25f
     else .35f
+
     val offset = calculatePuzzleOffset(puzzleDim[0], puzzleDim[1])
-    val puzzleCenter = floatArrayOf(squareCenter[0] + offset[0], squareCenter[1] - offset[1], squareCenter[2])
+
+    val belowCenter = .2f
+    val puzzleCenter = floatArrayOf(squareCenter[0] + offset[0], squareCenter[1] - offset[1] - belowCenter, squareCenter[2])
     val topLeftX = puzzleCenter[0] - SPACING * (3)/2f + SPACING * index[0]
     val topLeftY = puzzleCenter[1] + SPACING * (5)/2f - SPACING * index[1]
     val halfWidth = (size - 1) * SPACING / 2f

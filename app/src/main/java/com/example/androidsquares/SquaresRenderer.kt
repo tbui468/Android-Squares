@@ -27,8 +27,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mSets = mutableListOf<Set>()
     var mSquares = mutableListOf<Square>()
     var mFractals = mutableListOf<Fractal>()
-    private val mUndoButtonOffset = floatArrayOf(0f, -.85f, -3.1f) //offset amount from camera to remain in top left corner
-    lateinit var mUndoButton: Button
+    private val mUndoButtonOffset = floatArrayOf(0f, .85f, -3.6f) //offset amount from camera to remain in top left corner
+    lateinit var mUndoButton: UndoButton
     lateinit var mCamera: Camera
     private val mProjectionMatrix = FloatArray(16)
     private val mViewMatrix = FloatArray(16)
@@ -114,7 +114,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mCamera = Camera(floatArrayOf(0f, 0f, 3f))
         mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
         //moving button offscreen for main screen
-        mUndoButton = Button(floatArrayOf(mCamera.pos[0] + mUndoButtonOffset[0],  mCamera.pos[1] + mUndoButtonOffset[1] - 1f, 98f + mUndoButtonOffset[2]))
+        mUndoButton = UndoButton(floatArrayOf(mCamera.pos[0] + mUndoButtonOffset[0],  mCamera.pos[1] + mUndoButtonOffset[1] + 1f, 98f + mUndoButtonOffset[2]))
     }
 
     private fun startAnimation(speed: Float) {
@@ -136,7 +136,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         set.mIsOpen = true
         mCamera.moveTo(floatArrayOf(set.pos[0], set.pos[1], 15f))
-        mUndoButton.moveTo(floatArrayOf(set.pos[0] + mUndoButtonOffset[0], set.pos[1] + mUndoButtonOffset[1] - 1f, 15f + mUndoButtonOffset[2]))
+        mUndoButton.moveTo(floatArrayOf(set.pos[0] + mUndoButtonOffset[0], set.pos[1] + mUndoButtonOffset[1] + 1f, 15f + mUndoButtonOffset[2]))
         mSquares = set.spawnSquares()
     }
 
@@ -146,13 +146,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         set.mIsOpen = false
         mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
-        mUndoButton.moveTo(floatArrayOf(0f + mUndoButtonOffset[0], 0f + mUndoButtonOffset[1] - 1f, 98f + mUndoButtonOffset[2]))
+        mUndoButton.moveTo(floatArrayOf(0f + mUndoButtonOffset[0], 0f + mUndoButtonOffset[1] + 1f, 98f + mUndoButtonOffset[2]))
         mSquares.clear()
         mSets = spawnSets()
     }
 
     private fun openSquare(square: Square) {
-        mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4.5f))
+        mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4f))
         mUndoButton.moveTo(floatArrayOf(square.pos[0] + mUndoButtonOffset[0], square.pos[1] + mUndoButtonOffset[1], 4.5f + mUndoButtonOffset[2]))
 
         //mFractals = square.spawnFractals(puzzleData[getOpenSet()!!.mIndex][square.mIndex]) //temp: just grabbing first index
@@ -178,7 +178,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             fractal.moveTo(calculateFractalPosForTarget(fractal.mIndex, fractal.mSize, intArrayOf(0, 0), 4, square.pos, puzzleDim))
         }
         mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1], 15f))
-        mUndoButton.moveTo(floatArrayOf(cubePos[0] + mUndoButtonOffset[0], cubePos[1] + mUndoButtonOffset[1] - 1f, 15f + mUndoButtonOffset[2]))
+        mUndoButton.moveTo(floatArrayOf(cubePos[0] + mUndoButtonOffset[0], cubePos[1] + mUndoButtonOffset[1] + 1f, 15f + mUndoButtonOffset[2]))
 
         mSquares = getOpenSet()!!.spawnSquares()
 
@@ -374,6 +374,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun pushTransformation(setIndex: Int, puzzleIndex: Int, undoData: UndoData) {
         myAssert(getTransformationsRemaining(setIndex, puzzleIndex) > 0, "No transformations remaining")
         appData.setData[setIndex].puzzleData[puzzleIndex]!!.undoStack.push(undoData)
+        mUndoButton.increment()
     }
 
     //assumes transformation is valid (remaining transformations, swapped fractal exists)
@@ -585,6 +586,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun undoTransform(transformation: Transformation, index: IntArray, size: Int) {
         val fractal = getFractal(index)
         transform(fractal!!, transformation, true)
+        mUndoButton.decrement()
     }
 
 
@@ -1056,7 +1058,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     return true
                 }
 
-                if(touchType == TouchType.Tap && mUndoButton.centerCollision(x, y)) {
+                if(touchType == TouchType.FlickLeft && mUndoButton.centerCollision(x, y)) {
                     //if undo stack is not empty
                     if(!appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.undoStack.empty()) {
                         val undoData = appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.undoStack.pop()

@@ -5,11 +5,36 @@ import android.opengl.GLES20
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 
-class Button(pos: FloatArray) : Entity(pos, floatArrayOf(.1f, .1f, .1f), 1) {
+class Box(pos: FloatArray, dark: Boolean) : Entity(pos, floatArrayOf(.15f, .15f, .1f), 1) {
 
-    private var mVertexBuffer: FloatBuffer = createFloatBuffer(vertices1.copyOf())
-    private var mIndexBuffer: ShortBuffer = createShortBuffer(indices1.copyOf())
-    private var mIndexCount = indices1.size
+    init {
+        if(!dark) {
+            makeInvisible()
+        }
+    }
+
+
+    val vertices = floatArrayOf(-0.5f, -0.5f, 0.0f, .0f, .25f,
+            0.5f, -0.5f, 0.0f, .25f, .25f,
+            0.5f, 0.5f, 0.0f, .25f, 0f,
+            -0.5f, 0.5f, 0.0f, 0f, 0f).also {
+        if(dark) {
+            it[3] = .5f
+            it[4] = .25f
+            it[8] = .75f
+            it[9] = .25f
+            it[13] = .75f
+            it[14] = 0f
+            it[18] = .5f
+            it[19] = 0f
+        }
+    }
+
+    val indices = shortArrayOf(0, 1, 2, 0, 2, 3)
+
+    private var mVertexBuffer: FloatBuffer = createFloatBuffer(vertices)
+    private var mIndexBuffer: ShortBuffer = createShortBuffer(indices)
+    private var mIndexCount = indices.size
     private var mModelMatrix = FloatArray(16)
 
     fun draw(vpMatrix: FloatArray) {
@@ -33,3 +58,4 @@ class Button(pos: FloatArray) : Entity(pos, floatArrayOf(.1f, .1f, .1f), 1) {
         GLES20.glBlendColor(1f, 1f, 1f, 1f)
     }
 }
+

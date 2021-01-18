@@ -5,7 +5,7 @@ import kotlin.math.abs
 
 //what was size again???
 open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
-    private var COLLISION_PADDING = 1.3f //collisions boxes are 50% bigger than size
+    private var COLLISION_PADDING = 1.2f //collisions boxes are 50% bigger than size
     private var fromPos = pos
     private var toPos = pos
 
