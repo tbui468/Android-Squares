@@ -1,9 +1,17 @@
 //get a complete vertical slice with two puzzle cubes (will make it easy to expand to 8 cubes later to form the tesseract)
 
+    //problem with undo button not resetting after selecting new puzzle
+    //easiest to recreate UndoButton whenever user selects a new puzzle
+        //have the constructor take in the max/current transformation count
+
     //complete puzzle set 4: similar to set 3, make a few variations of puzzles - can mix them up later
     //3 adjacent 2x2 squares variation
     //2 adjacent squares variation
     //3 adjacent above and two adjacent below (or 1)
+
+    //splash screen (asynchronous loading of both login view and surfaceview)
+        //make two backgrounds - one splash screen and one login page background
+        //use gimp (find proper resolution - how to deal with different aspect ratios?)
 
     //facebook login page (or choose to play without online data)
         //this is the default view on opening the app
@@ -20,6 +28,7 @@
 
     //make all the puzzles solvable within 2, 3 or 4 moves.  But give player 1, 2, or 3 extra moves.  Don't tell players how many moves puzzles can be completed in
         //then connect to social media and show a pictures of friends who completed it and the number of moves it took them
+        //puzzles floating in the background also have friend's profile pics attached
         //sign into facebook to allow users to see friend's scores
         //can use 'python anywhere' to save data for now (or find some free/easy deployment with nodejs)
             //user facebook name: set, puzzle, number of transformations to solve

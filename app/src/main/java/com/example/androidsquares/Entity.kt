@@ -53,10 +53,23 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
         scale = floatArrayOf(fromScale[0] + (toScale[0] - fromScale[0]) * newT, fromScale[1] + (toScale[1] - fromScale[1]) * newT, fromScale[2] + (toScale[2] - fromScale[2]) * newT)
     }
 
+    //todo: change this to setAlphaData(..) to make it consistent with other functions for setting groups of variables
     fun makeInvisible() {
         alpha = 0f
         fromAlpha = 0f
         toAlpha = 0f
+    }
+
+    fun setPosData(newPos: FloatArray) {
+        pos = newPos
+        fromPos = newPos
+        toPos = newPos
+    }
+
+    fun setAlphaData(newAlpha: Float) {
+        alpha = newAlpha
+        fromAlpha = newAlpha
+        toAlpha = newAlpha
     }
 
     open fun onAnimationEnd() {

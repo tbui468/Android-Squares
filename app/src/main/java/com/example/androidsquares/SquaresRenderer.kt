@@ -27,7 +27,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mSets = mutableListOf<Set>()
     var mSquares = mutableListOf<Square>()
     var mFractals = mutableListOf<Fractal>()
-    private val mUndoButtonOffset = floatArrayOf(0f, .85f, -3.6f) //offset amount from camera to remain in top left corner
+    private val mUndoButtonOffset = floatArrayOf(0f, .95f, -3.6f) //offset amount from camera to remain in top left corner
     lateinit var mUndoButton: UndoButton
     lateinit var mCamera: Camera
     private val mProjectionMatrix = FloatArray(16)
@@ -114,7 +114,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mCamera = Camera(floatArrayOf(0f, 0f, 3f))
         mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
         //moving button offscreen for main screen
-        mUndoButton = UndoButton(floatArrayOf(mCamera.pos[0] + mUndoButtonOffset[0],  mCamera.pos[1] + mUndoButtonOffset[1] + 1f, 98f + mUndoButtonOffset[2]))
+        mUndoButton = UndoButton(3, 0, floatArrayOf(mCamera.pos[0] + mUndoButtonOffset[0],  mCamera.pos[1] + mUndoButtonOffset[1] + 1f, 98f + mUndoButtonOffset[2]))
     }
 
     private fun startAnimation(speed: Float) {
@@ -136,7 +136,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         set.mIsOpen = true
         mCamera.moveTo(floatArrayOf(set.pos[0], set.pos[1], 15f))
-        mUndoButton.moveTo(floatArrayOf(set.pos[0] + mUndoButtonOffset[0], set.pos[1] + mUndoButtonOffset[1] + 1f, 15f + mUndoButtonOffset[2]))
         mSquares = set.spawnSquares()
     }
 
@@ -146,14 +145,18 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         set.mIsOpen = false
         mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
-        mUndoButton.moveTo(floatArrayOf(0f + mUndoButtonOffset[0], 0f + mUndoButtonOffset[1] + 1f, 98f + mUndoButtonOffset[2]))
         mSquares.clear()
         mSets = spawnSets()
     }
 
     private fun openSquare(square: Square) {
         mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4f))
-        mUndoButton.moveTo(floatArrayOf(square.pos[0] + mUndoButtonOffset[0], square.pos[1] + mUndoButtonOffset[1], 4.5f + mUndoButtonOffset[2]))
+        val maxTransformations = appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.maxTransformations
+        val transformationCount = appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.undoStack.size
+        mUndoButton = UndoButton(maxTransformations, transformationCount, //<--put puzzle data in here
+                floatArrayOf(mCamera.pos[0] + mUndoButtonOffset[0],  mCamera.pos[1] + mUndoButtonOffset[1] + 1f, mCamera.pos[2] + mUndoButtonOffset[2]))
+        mUndoButton.moveTo(floatArrayOf(square.pos[0] + mUndoButtonOffset[0], square.pos[1] + mUndoButtonOffset[1], 4f + mUndoButtonOffset[2]))
+
 
         //mFractals = square.spawnFractals(puzzleData[getOpenSet()!!.mIndex][square.mIndex]) //temp: just grabbing first index
         mFractals = square.spawnFractals(appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.elements) //temp: just grabbing first index
@@ -179,6 +182,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1], 15f))
         mUndoButton.moveTo(floatArrayOf(cubePos[0] + mUndoButtonOffset[0], cubePos[1] + mUndoButtonOffset[1] + 1f, 15f + mUndoButtonOffset[2]))
+        mUndoButton.fadeTo(0f)
 
         mSquares = getOpenSet()!!.spawnSquares()
 
@@ -1129,7 +1133,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         //delta time
         mPreviousTime = mCurrentTime
         mCurrentTime = SystemClock.uptimeMillis()
-        val deltaTime = 0.0015f * (mCurrentTime - mPreviousTime).toInt() * mAnimationSpeed
+        val deltaTime = 0.002f * (mCurrentTime - mPreviousTime).toInt() * mAnimationSpeed
 
 
         //only want to call onAnimationEnd() once per animation

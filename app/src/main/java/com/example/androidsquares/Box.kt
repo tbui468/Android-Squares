@@ -9,7 +9,7 @@ class Box(pos: FloatArray, dark: Boolean) : Entity(pos, floatArrayOf(.15f, .15f,
 
     init {
         if(!dark) {
-            makeInvisible()
+            setAlphaData(0f)
         }
     }
 
