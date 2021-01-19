@@ -110,11 +110,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mProgram = compileShaders()
 
 
-        mSets = spawnSets(true)
+        mSets = spawnSets()
 
-        for(set in mSets) {
-            set.moveTo(appData.setData[set.mIndex].pos)
-        }
 
         mCamera = Camera(floatArrayOf(0f, 0f, 98f))
         //mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
@@ -129,21 +126,34 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mAnimationSpeed = speed
     }
 
-    private fun spawnSets(first: Boolean): MutableList<Set> {
+    private fun spawnSets(): MutableList<Set> {
         val list = mutableListOf<Set>()
-        var set: Set
         var pos: FloatArray
         for(puzzleIndex in appData.setData.indices) {
             pos = appData.setData[puzzleIndex].pos
-
-            val offset = if(!first) 0f
-            else if(puzzleIndex % 2 == 0) -35f
+            val offset = if(puzzleIndex % 2 == 0) -35f
             else 35f
-
-            set = Set(floatArrayOf(pos[0] + offset, pos[1], pos[2]), puzzleIndex, appData.setData[puzzleIndex].isLocked, appData.setData[puzzleIndex].isCleared)
-            list.add(set)
+            list.add(Set(floatArrayOf(pos[0] + offset, pos[1], pos[2]), puzzleIndex, appData.setData[puzzleIndex].isLocked, appData.setData[puzzleIndex].isCleared))
         }
         return list
+    }
+
+    fun openGame() {
+        for(set in mSets) {
+            set.moveTo(appData.setData[set.mIndex].pos)
+        }
+        startAnimation(.5f)
+    }
+
+    fun closeGame() {
+        var pos: FloatArray
+        for(set in mSets) {
+            pos = appData.setData[set.mIndex].pos
+            val offset = if(set.mIndex % 2 == 0) -35f
+            else 35f
+            set.moveTo(floatArrayOf(pos[0] + offset, pos[1], pos[2]))
+        }
+        startAnimation(.5f)
     }
 
     private fun openSet(set: Set) {
@@ -162,7 +172,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         set.mIsOpen = false
         mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
         mSquares.clear()
-        mSets = spawnSets(false)
     }
 
     private fun openSquare(square: Square) {

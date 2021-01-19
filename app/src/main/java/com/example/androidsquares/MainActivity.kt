@@ -1,12 +1,6 @@
 //get a complete vertical slice with two puzzle cubes
 
-    //sets - problem with screen flicking black when transitioning from surfaceview to login view
-        //how about embedding the surface view into the main layout (currently called login_layout)
-
-    //make transition from login page to game page more natural (transition buttons off-screen and then transitioning sets on-screen, for example)
-    //recall that we can create View animations using the animation library provided in android standard library (recall the tutorial with rotating stars, etc)
-    //add this basic structure in before the codebase gets too large and complex
-        //start views offscreen and animate them in
+    //start views offscreen and animate them in
 
     //clear a puzzle automatically transitions back to puzzle select screen after animation is done playing (after clearPulse()) function
         //need to clean up the function queue system (currently using a ton of flags to determine which function to queue/call)
@@ -173,6 +167,7 @@ class MainActivity: AppCompatActivity() {
         mSkipButton.setOnClickListener {
             mOnLogin = false
             moveMenuOffScreen()
+            mSquaresSurfaceView.renderer.openGame()
         }
     }
 
@@ -214,7 +209,10 @@ class MainActivity: AppCompatActivity() {
 
     override fun onBackPressed() {
         if(!mOnLogin && mSquaresSurfaceView.renderer.getScreenState() == Screen.Set) {
-            moveMenuOnScreen()
+            Handler(mainLooper).postDelayed({
+                moveMenuOnScreen()
+            }, 500)
+            mSquaresSurfaceView.renderer.closeGame()
             mOnLogin = true
         }else if(mOnLogin) {
             super.onBackPressed()
