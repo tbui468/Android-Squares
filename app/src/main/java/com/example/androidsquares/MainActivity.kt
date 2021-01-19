@@ -1,11 +1,10 @@
 //get a complete vertical slice with two puzzle cubes
 
-    //Bug: when pushing back button while at login screen, the app crashes
-
     //complete puzzle set 5: similar to set 3, make a few variations of puzzles - can mix them up later
     //3 adjacent 2x2 squares variation
-    //3 adjacent above and two adjacent below (or 1)
+    //2 adjacent + 1 column in between them (so instead of 6x2, it's 5x2)
     //make puzzles where user has to connect 3 dark blocks (don't have too many of those yet) (including 2+ colors)
+    //3 adjacent above and two adjacent below (or 1)
 
     //seems to be a problem with setting permission and loggging in (it's doing it twice)
         //push facebook login button passes the baton to CallbackManager which has user login with name/avatar permission
@@ -23,6 +22,11 @@
         //when user solves a puzzle/saves data, write data (such as transformations taken to solve puzzles) to database
 
     //make transition from login page to game page more natural (transition buttons off-screen and then transitioning sets on-screen, for example)
+        //recall that we can create View animations using the animation library provided in android standard library (recall the tutorial with rotating stars, etc)
+
+
+    //instead of a tutorial system, allow players to see first move of friend's solution
+        //put in first touch of my solutions for tutorial puzzles
 
     //reorder puzzles into more interesting format (instead of the rows and columns they are in now)
         //this will also allow user to choose the next puzzle, giving them more agency and choice
@@ -35,6 +39,8 @@
     //make all the puzzles solvable within 2, 3 or 4 moves.  But give player 1, 2, or 3 extra moves.  Don't tell players how many moves puzzles can be completed in
         //then connect to social media and show a pictures of friends who completed it and the number of moves it took them
             //if playing offline, show the lowest possible number of moves
+
+            //how about instead of solution, show friend's touch inputs?? This would be a fun hint (just save transformations/merge/split instead of saving actual raw inputs)
         //puzzles floating in the background also have friend's profile pics attached
         //tap on friend's profile to request hint???
         //sign into facebook to allow users to see friend's scores
