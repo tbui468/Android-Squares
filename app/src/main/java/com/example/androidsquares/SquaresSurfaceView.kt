@@ -2,15 +2,17 @@ package com.example.androidsquares
 
 import android.content.Context
 import android.opengl.GLSurfaceView
+import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.GestureDetector
 import androidx.core.view.GestureDetectorCompat
 
 import kotlin.math.abs
 
-class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
-    val renderer: SquaresRenderer
+class SquaresSurfaceView: GLSurfaceView {
+    var renderer: SquaresRenderer
     var mDetector: GestureDetectorCompat
+
 
     init {
         setEGLContextClientVersion(2)
@@ -18,6 +20,13 @@ class SquaresSurfaceView(context: Context): GLSurfaceView(context) {
         setRenderer(renderer)
         mDetector = GestureDetectorCompat(context, MyGestureListener(renderer))
     }
+
+    constructor(context: Context): super(context) {
+    }
+    constructor(context: Context, attr: AttributeSet): super(context, attr)
+    {
+    }
+
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return mDetector.onTouchEvent(event)

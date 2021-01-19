@@ -1,8 +1,7 @@
 //get a complete vertical slice with two puzzle cubes
 
     //sets - problem with screen flicking black when transitioning from surfaceview to login view
-        //one possible solution is to use TextureView
-        //difference is that Texture view does not create a new window, and is instead treated as a regular view
+        //how about embedding the surface view into the main layout (currently called login_layout)
 
     //make transition from login page to game page more natural (transition buttons off-screen and then transitioning sets on-screen, for example)
     //recall that we can create View animations using the animation library provided in android standard library (recall the tutorial with rotating stars, etc)
@@ -120,12 +119,8 @@ import android.util.Log
 import android.os.Bundle
 import android.os.Handler
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.LinearInterpolator
-import android.view.animation.PathInterpolator
 import android.widget.ImageView
 import com.facebook.AccessToken
-
 
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
@@ -145,12 +140,9 @@ class MainActivity: AppCompatActivity() {
 //        setTheme(R.style.SplashScreen)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login)
-        initLoginView()
-    }
 
-    private fun initLoginView() {
-        mSquaresSurfaceView = SquaresSurfaceView(this)
-
+        //mSquaresSurfaceView = SquaresSurfaceView(this)
+        mSquaresSurfaceView = findViewById(R.id.surface_view)
         mSkipButton = findViewById(R.id.skip_button)
         mLoginButton = findViewById(R.id.login_button)
         mLogo = findViewById(R.id.logo)
@@ -179,34 +171,50 @@ class MainActivity: AppCompatActivity() {
         })
 
         mSkipButton.setOnClickListener {
-            Handler(mainLooper).postDelayed({
-                setContentView(mSquaresSurfaceView)
-                mOnLogin = false
-            }, 400)
-            ObjectAnimator.ofFloat(mLogo, "translationX", 900f).apply {
-                duration = 400
-                interpolator = AccelerateDecelerateInterpolator()
-                start()
-            }
-            ObjectAnimator.ofFloat(mLoginButton, "translationX", -900f).apply {
-                duration = 400
-                interpolator = AccelerateDecelerateInterpolator()
-                start()
-            }
-            ObjectAnimator.ofFloat(it, "translationX", 900f).apply {
-                duration = 400
-                interpolator = AccelerateDecelerateInterpolator()
-                start()
-            }
+            mOnLogin = false
+            moveMenuOffScreen()
         }
     }
 
+    private fun moveMenuOffScreen() {
+        ObjectAnimator.ofFloat(mLogo, "translationX", 900f).apply {
+            duration = 400
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
+        ObjectAnimator.ofFloat(mLoginButton, "translationX", -900f).apply {
+            duration = 400
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
+        ObjectAnimator.ofFloat(mSkipButton, "translationX", 900f).apply {
+            duration = 400
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
+    }
 
+    private fun moveMenuOnScreen() {
+        ObjectAnimator.ofFloat(mLogo, "translationX", 0f).apply {
+            duration = 400
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
+        ObjectAnimator.ofFloat(mLoginButton, "translationX", 0f).apply {
+            duration = 400
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
+        ObjectAnimator.ofFloat(mSkipButton, "translationX", 0f).apply {
+            duration = 400
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
+    }
 
     override fun onBackPressed() {
         if(!mOnLogin && mSquaresSurfaceView.renderer.getScreenState() == Screen.Set) {
-            setContentView(R.layout.login)
-            initLoginView()
+            moveMenuOnScreen()
             mOnLogin = true
         }else if(mOnLogin) {
             super.onBackPressed()
