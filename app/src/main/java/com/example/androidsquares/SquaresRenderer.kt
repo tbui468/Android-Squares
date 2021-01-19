@@ -22,7 +22,7 @@ import android.opengl.GLUtils
 
 
 class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
-    var mAnimationParameter = 0f //main animation timer
+    var mAnimationParameter = 1f //main animation timer
     var mAnimationSpeed = 1f
     var mSets = mutableListOf<Set>()
     var mSquares = mutableListOf<Square>()
@@ -44,6 +44,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private var mScreenWidth = 0
     private var mScreenHeight = 0
+
+    private var mFirstDraw = true
 
 
     companion object {
@@ -108,13 +110,18 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mProgram = compileShaders()
 
 
-        mSets = spawnSets()
+        mSets = spawnSets(true)
 
+        for(set in mSets) {
+            set.moveTo(appData.setData[set.mIndex].pos)
+        }
 
-        mCamera = Camera(floatArrayOf(0f, 0f, 3f))
-        mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
+        mCamera = Camera(floatArrayOf(0f, 0f, 98f))
+        //mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
         //moving button offscreen for main screen
-        mUndoButton = UndoButton(3, 0, floatArrayOf(mCamera.pos[0] + mUndoButtonOffset[0],  mCamera.pos[1] + mUndoButtonOffset[1] + 1f, 98f + mUndoButtonOffset[2]))
+        mUndoButton = UndoButton(3, 0,
+                floatArrayOf(mCamera.pos[0] + mUndoButtonOffset[0],  mCamera.pos[1] + mUndoButtonOffset[1] + 1f, 98f + mUndoButtonOffset[2]))
+        startAnimation(.5f)
     }
 
     private fun startAnimation(speed: Float) {
@@ -122,10 +129,19 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mAnimationSpeed = speed
     }
 
-    private fun spawnSets(): MutableList<Set> {
+    private fun spawnSets(first: Boolean): MutableList<Set> {
         val list = mutableListOf<Set>()
+        var set: Set
+        var pos: FloatArray
         for(puzzleIndex in appData.setData.indices) {
-            list.add(Set(appData.setData[puzzleIndex].pos, puzzleIndex, appData.setData[puzzleIndex].isLocked, appData.setData[puzzleIndex].isCleared))
+            pos = appData.setData[puzzleIndex].pos
+
+            val offset = if(!first) 0f
+            else if(puzzleIndex % 2 == 0) -35f
+            else 35f
+
+            set = Set(floatArrayOf(pos[0] + offset, pos[1], pos[2]), puzzleIndex, appData.setData[puzzleIndex].isLocked, appData.setData[puzzleIndex].isCleared)
+            list.add(set)
         }
         return list
     }
@@ -146,7 +162,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         set.mIsOpen = false
         mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
         mSquares.clear()
-        mSets = spawnSets()
+        mSets = spawnSets(false)
     }
 
     private fun openSquare(square: Square) {
@@ -1129,11 +1145,20 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     override fun onDrawFrame(unused: GL10) {
 
         ////////////////////////////update setup///////////////////////////////////////////
+        //fix for large delta time when app starts
+        if(mFirstDraw) {
+            mPreviousTime = SystemClock.uptimeMillis()
+            mCurrentTime = SystemClock.uptimeMillis()
+            mFirstDraw = false
+        }
 
         //delta time
         mPreviousTime = mCurrentTime
         mCurrentTime = SystemClock.uptimeMillis()
         val deltaTime = 0.002f * (mCurrentTime - mPreviousTime).toInt() * mAnimationSpeed
+
+
+
 
 
         //only want to call onAnimationEnd() once per animation

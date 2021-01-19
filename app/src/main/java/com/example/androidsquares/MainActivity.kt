@@ -1,12 +1,21 @@
 //get a complete vertical slice with two puzzle cubes
 
-    //complete puzzle set 5: similar to set 3, make a few variations of puzzles - can mix them up later
-    //3 adjacent 2x2 squares variation
-    //2 adjacent + 1 column in between them (so instead of 6x2, it's 5x2)
-    //make puzzles where user has to connect 3 dark blocks (don't have too many of those yet) (including 2+ colors)
-    //3 adjacent above and two adjacent below (or 1)
+    //sets - problem with screen flicking black when transitioning from surfaceview to login view
+        //one possible solution is to use TextureView
+        //difference is that Texture view does not create a new window, and is instead treated as a regular view
 
-    //seems to be a problem with setting permission and loggging in (it's doing it twice)
+    //make transition from login page to game page more natural (transition buttons off-screen and then transitioning sets on-screen, for example)
+    //recall that we can create View animations using the animation library provided in android standard library (recall the tutorial with rotating stars, etc)
+    //add this basic structure in before the codebase gets too large and complex
+        //start views offscreen and animate them in
+
+    //clear a puzzle automatically transitions back to puzzle select screen after animation is done playing (after clearPulse()) function
+        //need to clean up the function queue system (currently using a ton of flags to determine which function to queue/call)
+        //need to make it generalized (either queue functions with parameters together, or queue functions and parameters separately and combine at call time)
+        //this should also be combined with the undo queue system.
+        //all commands go through this queue - no more separate systems
+
+    //seems to be a problem with setting permission and logging in (it's doing it twice)
         //push facebook login button passes the baton to CallbackManager which has user login with name/avatar permission
         // then comes back and executes my code in setButtonListener (which adds email permission)
         //this causes facebook to go back to login page with name/avatar/email permission
@@ -21,12 +30,21 @@
         //if fb_user_id and access_token verified, 'log in' to the server database using fb_user_name (and now can alter database entries for this user)
         //when user solves a puzzle/saves data, write data (such as transformations taken to solve puzzles) to database
 
-    //make transition from login page to game page more natural (transition buttons off-screen and then transitioning sets on-screen, for example)
-        //recall that we can create View animations using the animation library provided in android standard library (recall the tutorial with rotating stars, etc)
+    //have bubbles of friends who cleared the current puzzle appear by the transformation box they completed it in
+        //have a ring (or other indicator) showing completion, and the same ring appears on user bubble after clearing a puzzle
+        //if more than two friends, have a bubble showing a "+12" (number of other friends).  Pushing this bubble shows a list of other friends that user can look at
+            //clicking on friend bubble shows the first move transformation that player did as a hint
+
+    //complete puzzle set 6: similar to set 3, make a few variations of puzzles - can mix them up later
+    //make puzzles that can be finished in 2 transformations, but can also allow up to 3 max transformations
+    //make puzzles where user has to connect 3 dark blocks (don't have too many of those yet) (including 2+ colors)
+    //3 adjacent above and two adjacent below (or 1)
 
 
     //instead of a tutorial system, allow players to see first move of friend's solution
-        //put in first touch of my solutions for tutorial puzzles
+    //put in first touch of my solutions for tutorial puzzles
+    //could create an animation object that just animates, fades out, and dies
+    //so I could just create a bunch and not worry about destroying them
 
     //reorder puzzles into more interesting format (instead of the rows and columns they are in now)
         //this will also allow user to choose the next puzzle, giving them more agency and choice
@@ -94,12 +112,20 @@
 
 package com.example.androidsquares
 
+import android.animation.ObjectAnimator
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Button
 import android.util.Log
 import android.os.Bundle
+import android.os.Handler
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.LinearInterpolator
+import android.view.animation.PathInterpolator
+import android.widget.ImageView
 import com.facebook.AccessToken
+
 
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
@@ -112,11 +138,11 @@ class MainActivity: AppCompatActivity() {
     private var mOnLogin = true
     private lateinit var mSkipButton: Button
     private lateinit var mLoginButton: Button
+    private lateinit var mLogo: ImageView
     private lateinit var mCallbackManager: CallbackManager
 
     public override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("hmm", "onCreate called")
-        setTheme(R.style.SplashScreen)
+//        setTheme(R.style.SplashScreen)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login)
         initLoginView()
@@ -127,6 +153,7 @@ class MainActivity: AppCompatActivity() {
 
         mSkipButton = findViewById(R.id.skip_button)
         mLoginButton = findViewById(R.id.login_button)
+        mLogo = findViewById(R.id.logo)
 
         //login to facebook
         mLoginButton.setOnClickListener {
@@ -151,12 +178,29 @@ class MainActivity: AppCompatActivity() {
             }
         })
 
-        //skip loggin into facebook
         mSkipButton.setOnClickListener {
-            setContentView(mSquaresSurfaceView)
-            mOnLogin = false
+            Handler(mainLooper).postDelayed({
+                setContentView(mSquaresSurfaceView)
+                mOnLogin = false
+            }, 400)
+            ObjectAnimator.ofFloat(mLogo, "translationX", 900f).apply {
+                duration = 400
+                interpolator = AccelerateDecelerateInterpolator()
+                start()
+            }
+            ObjectAnimator.ofFloat(mLoginButton, "translationX", -900f).apply {
+                duration = 400
+                interpolator = AccelerateDecelerateInterpolator()
+                start()
+            }
+            ObjectAnimator.ofFloat(it, "translationX", 900f).apply {
+                duration = 400
+                interpolator = AccelerateDecelerateInterpolator()
+                start()
+            }
         }
     }
+
 
 
     override fun onBackPressed() {
