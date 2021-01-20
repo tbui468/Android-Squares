@@ -2,7 +2,20 @@
 
     //get python website working so I can test sending http requests from android to website (just getting admission percent from two test scores)
         //tbui123
-        //python987654321
+
+    //I have the access token from facebook
+    //using android app (and Volley) for now, send GET request to facebook to get name and email"
+    //send over https so that it's secure
+
+    //successfully connected to python website (skim the volley docs for a general overview)
+        //consider setting up request queue as a singleton that lives for duration of application (so that can add http requests anytime in code)
+        //responses can be strings or json objects (which will probably be more useful)
+        //is a POST request necessary for sending data to the server?? Or is a GET with parameters (encrypted) enough
+            //what's the difference between POST and GET again???
+        //encrypt payload (access token and user facebook id) on mobile app side
+        //use Volley to send payload to web server
+        //decrypt payload on web server side before verifying user
+
 
     //clear a puzzle automatically transitions back to puzzle select screen after animation is done playing (after clearPulse()) function
         //need to clean up the function queue system (currently using a ton of flags to determine which function to queue/call)
@@ -122,11 +135,8 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import com.facebook.AccessToken
+import com.facebook.*
 
-import com.facebook.CallbackManager
-import com.facebook.FacebookCallback
-import com.facebook.FacebookException
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 
@@ -137,6 +147,7 @@ class MainActivity: AppCompatActivity() {
     private lateinit var mLoginButton: Button
     private lateinit var mLogo: ImageView
     private lateinit var mCallbackManager: CallbackManager
+    private lateinit var mProfileTracker: ProfileTracker
 
     public override fun onCreate(savedInstanceState: Bundle?) {
 //        setTheme(R.style.SplashScreen)
@@ -149,9 +160,10 @@ class MainActivity: AppCompatActivity() {
         mLoginButton = findViewById(R.id.login_button)
         mLogo = findViewById(R.id.logo)
 
+
         //login to facebook
         mLoginButton.setOnClickListener {
-            LoginManager.getInstance().logInWithReadPermissions(this, mutableListOf("email"))
+            //LoginManager.getInstance().logInWithReadPermissions(this, mutableListOf("email"))
         }
 
         mCallbackManager = CallbackManager.Factory.create()
@@ -160,9 +172,11 @@ class MainActivity: AppCompatActivity() {
         LoginManager.getInstance().registerCallback(mCallbackManager, object: FacebookCallback<LoginResult> {
             override fun onSuccess(loginResult: LoginResult) {
                 Log.d("facebooktest", "success")
-                val accessToken: AccessToken? = AccessToken.getCurrentAccessToken()
-                val isLoggedIn = accessToken != null && !accessToken.isExpired
-                Log.d("facebooktest", isLoggedIn.toString())
+                if(Profile.getCurrentProfile() == null) {
+                    mProfileTracker = MyProfileTracker()
+                }else {
+                    processProfile(Profile.getCurrentProfile())
+                }
             }
             override fun onCancel() {
                 Log.d("facebooktest", "cancel")
@@ -178,22 +192,42 @@ class MainActivity: AppCompatActivity() {
             mSquaresSurfaceView.renderer.openGame()
         }
 
-        var text: String
+    }
 
-        //settting up queue for http requests
-        val queue = Volley.newRequestQueue(this)
-        val url = "http://tbui123.pythonanywhere.com/price/?arg1=60&arg2=40"
-        val requestString = StringRequest(Request.Method.GET, url,
-                { response->
-                    text = response.substring(0, 79)
-                    Log.d("htest", text)
-        },
-                {
-                    text = "error with response"
-                    Log.d("htest", text)
-        })
+    companion object {
+        fun processProfile(profile: Profile) {
+            Log.d("facebooktest", profile.id.toString())
+            /*
+            var text: String
+            //settting up queue for http requests
+            val queue = Volley.newRequestQueue(this)
+            val url = "https://graph.facebook.com/" //user id goes here
+            val fields = "?fields=name&access_token=" //access token goes here
 
-        queue.add(requestString)
+            val accessToken: AccessToken? = AccessToken.getCurrentAccessToken()
+            val isLoggedIn = accessToken != null && !accessToken.isExpired
+            if(accessToken != null) Log.d("facebooktest", "access token: $accessToken")
+            Log.d("facebooktest", isLoggedIn.toString())
+            //val completeUrl = url + user.toString() + fields + accessToken.toString()
+            val requestString = StringRequest(Request.Method.GET, completeUrl,
+                    { response->
+                        text = response.substring(0, 79)
+                        Log.d("facebooktest", text)
+                    },
+                    {
+                        text = "error with response"
+                        Log.d("facebooktest", text)
+                    })
+
+            queue.add(requestString)*/
+        }
+    }
+
+    class MyProfileTracker : ProfileTracker() {
+        override fun onCurrentProfileChanged(oldProfile: Profile?, currentProfile: Profile?) {
+            processProfile(currentProfile!!)
+            stopTracking()
+        }
     }
 
     private fun moveMenuOffScreen() {
