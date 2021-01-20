@@ -1,9 +1,6 @@
 package com.example.androidsquares
 
-import android.opengl.Matrix
 import android.opengl.GLES20
-import java.nio.FloatBuffer
-import java.nio.ShortBuffer
 
 
 class UndoButton(private val mMaxTransformations: Int, private var mTransformationCount: Int, pos: FloatArray) : Entity(pos, floatArrayOf(1f, .15f, .1f), 1) {
@@ -110,7 +107,7 @@ class UndoButton(private val mMaxTransformations: Int, private var mTransformati
     fun draw(vpMatrix: FloatArray) {
 
         GLES20.glDisable(GLES20.GL_DEPTH_TEST)
-        //light boxes and dark boxes at same depth (along the z/camera-look-down axis, so depth buffer will stop drawing of dark boxes even though it's drawn last)
+
         for(box in mDarkBoxes) {
             box!!.draw(vpMatrix)
         }

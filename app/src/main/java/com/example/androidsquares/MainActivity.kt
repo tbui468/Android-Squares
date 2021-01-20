@@ -1,6 +1,21 @@
 //get a complete vertical slice with two puzzle cubes
 
-    //bug: can see undo bar in the far distance when at main/set menu
+    //not a big fan of the zooming in and out now
+        //doesn't fit the flat aesthetic.  May look better to just have squares slide in/out when selecting puzzles
+        //idea: clicking a set makes all other sets move off screen (horizontally or vertically)
+            //all the individual squares spawn on set (make them the same size as sets) and then slide off
+        //keep the flat theme
+
+    //when user clicks on fractal, create a semi transparent circle expand from that point (like how android framework does it)
+        //this is to provide feedback and also keep visual style consistent
+        //also provides visual feedback when waiting for a double tap (rather than just showing no animation)
+
+    //dark color is a bit hard to see
+        //idea: make them the same color, but make the anchor points invisible in the middle
+        //clearing a puzzle 'fills' in the anchor points
+
+    //bug: can see undo bar in the far distance when at main/set menu (also don't really like the undo bar having empty middles - it draws the eyes too much)
+    //bug: undo bar can still be seen with 0 transformations (to the left)
 
     //seems like Facebook graph API documenation with javascript is better than python
         //set up nodejs/expressjs backend and host on heroku (write in Typescript)
