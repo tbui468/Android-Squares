@@ -64,7 +64,6 @@ class Set(pos: FloatArray, index: Int, locked: Boolean, cleared: Boolean): Entit
     fun spawnSquares(): MutableList<Square>{
         return mutableListOf<Square>().also {
             for(i in 0 until 16) {
-                //if(puzzleData[mIndex][i].isNotEmpty()) {
                 if(appData.setData[mIndex].puzzleData[i] != null) {
                     it.add(Square(pos, i, appData.setData[mIndex].puzzleData[i]!!.isLocked, appData.setData[mIndex].puzzleData[i]!!.isCleared))
                 }
@@ -89,8 +88,8 @@ class Set(pos: FloatArray, index: Int, locked: Boolean, cleared: Boolean): Entit
 
         GLES20.glUniformMatrix4fv(SquaresRenderer.mModelUniform, 1, false, mvpMatrix, 0)
 
-        GLES20.glBlendColor(1f, 1f, 1f, alpha)
+//        GLES20.glBlendColor(1f, 1f, 1f, alpha)
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexCount, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
-        GLES20.glBlendColor(1f, 1f, 1f, 1f)
+//        GLES20.glBlendColor(1f, 1f, 1f, 1f)
     }
 }

@@ -96,9 +96,9 @@ class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, p
 
         GLES20.glUniformMatrix4fv(SquaresRenderer.mModelUniform, 1, false, mvpMatrix, 0)
 
-        GLES20.glBlendColor(1f, 1f, 1f, alpha)
+//        GLES20.glBlendColor(1f, 1f, 1f, alpha)
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexCount, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
-        GLES20.glBlendColor(1f, 1f, 1f, 1f)
+ //       GLES20.glBlendColor(1f, 1f, 1f, 1f)
 
     }
 }

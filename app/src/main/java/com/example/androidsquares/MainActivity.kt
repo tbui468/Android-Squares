@@ -1,12 +1,6 @@
 //get a complete vertical slice with two puzzle cubes
 
-
-    //complete puzzle set 6: similar to set 3, make a few variations of puzzles - can mix them up later
-    //make puzzles that can be finished in 2 transformations, but can also allow up to 3 max transformations
-    //make puzzles where user has to connect 3 dark blocks (don't have too many of those yet) (including 2+ colors)
-    //3 adjacent above and two adjacent below (or 1)
-
-    //start views offscreen and animate them in
+    //bug: can see undo bar in the far distance when at main/set menu
 
     //seems like Facebook graph API documenation with javascript is better than python
         //set up nodejs/expressjs backend and host on heroku (write in Typescript)
@@ -25,6 +19,10 @@
         //if more than two friends, have a bubble showing a "+12" (number of other friends).  Pushing this bubble shows a list of other friends that user can look at
             //clicking on friend bubble shows the first move transformation that player did as a hint
 
+    //complete puzzle set 7: similar to set 3, make a few variations of puzzles - can mix them up later
+    //make puzzles that can be finished in 2 transformations, but can also allow up to 3 max transformations
+    //make puzzles where user has to connect 3 dark blocks (don't have too many of those yet) (including 2+ colors)
+    //3 adjacent above and two adjacent below (or 1)
 
     //instead of a tutorial system, allow players to see first move of friend's solution
     //put in first touch of my solutions for tutorial puzzles
@@ -202,22 +200,22 @@ class MainActivity: AppCompatActivity() {
     }
 
     private fun moveMenuOffScreen() {
-        ObjectAnimator.ofFloat(mLogo, "translationX", 900f).apply {
+        ObjectAnimator.ofFloat(mLogo, "translationX", -1200f).apply {
             duration = 400
             interpolator = AccelerateDecelerateInterpolator()
             start()
         }
-        ObjectAnimator.ofFloat(mLoginButton, "translationX", -900f).apply {
+        ObjectAnimator.ofFloat(mLoginButton, "translationX", 1200f).apply {
             duration = 400
             interpolator = AccelerateDecelerateInterpolator()
             start()
         }
-        ObjectAnimator.ofFloat(mSkipButton, "translationX", 900f).apply {
+        ObjectAnimator.ofFloat(mSkipButton, "translationX", -1200f).apply {
             duration = 400
             interpolator = AccelerateDecelerateInterpolator()
             start()
         }
-        ObjectAnimator.ofFloat(mTestButton, "translationX", -900f).apply {
+        ObjectAnimator.ofFloat(mTestButton, "translationX", 1200f).apply {
             duration = 400
             interpolator = AccelerateDecelerateInterpolator()
             start()
