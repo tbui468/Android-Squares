@@ -1,6 +1,8 @@
 //get a complete vertical slice with two puzzle cubes
 
-    //start views offscreen and animate them in
+    //get python website working so I can test sending http requests from android to website (just getting admission percent from two test scores)
+        //tbui123
+        //python987654321
 
     //clear a puzzle automatically transitions back to puzzle select screen after animation is done playing (after clearPulse()) function
         //need to clean up the function queue system (currently using a ton of flags to determine which function to queue/call)
@@ -22,6 +24,8 @@
             //web server has two forms - fb_user_id, and access_token.  use curl to send http request to Graph API with this
         //if fb_user_id and access_token verified, 'log in' to the server database using fb_user_name (and now can alter database entries for this user)
         //when user solves a puzzle/saves data, write data (such as transformations taken to solve puzzles) to database
+
+    //start views offscreen and animate them in
 
     //have bubbles of friends who cleared the current puzzle appear by the transformation box they completed it in
         //have a ring (or other indicator) showing completion, and the same ring appears on user bubble after clearing a puzzle
@@ -114,6 +118,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.facebook.AccessToken
 
 import com.facebook.CallbackManager
@@ -169,6 +177,23 @@ class MainActivity: AppCompatActivity() {
             moveMenuOffScreen()
             mSquaresSurfaceView.renderer.openGame()
         }
+
+        var text: String
+
+        //settting up queue for http requests
+        val queue = Volley.newRequestQueue(this)
+        val url = "http://tbui123.pythonanywhere.com/price/?arg1=60&arg2=40"
+        val requestString = StringRequest(Request.Method.GET, url,
+                { response->
+                    text = response.substring(0, 79)
+                    Log.d("htest", text)
+        },
+                {
+                    text = "error with response"
+                    Log.d("htest", text)
+        })
+
+        queue.add(requestString)
     }
 
     private fun moveMenuOffScreen() {
