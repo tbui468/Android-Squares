@@ -1,21 +1,17 @@
 //get a complete vertical slice with two puzzle cubes
 
-    //get python website working so I can test sending http requests from android to website (just getting admission percent from two test scores)
-        //tbui123
 
-    //I have the access token from facebook
-    //using android app (and Volley) for now, send GET request to facebook to get name and email"
-    //send over https so that it's secure
+    //complete puzzle set 6: similar to set 3, make a few variations of puzzles - can mix them up later
+    //make puzzles that can be finished in 2 transformations, but can also allow up to 3 max transformations
+    //make puzzles where user has to connect 3 dark blocks (don't have too many of those yet) (including 2+ colors)
+    //3 adjacent above and two adjacent below (or 1)
 
-    //successfully connected to python website (skim the volley docs for a general overview)
-        //consider setting up request queue as a singleton that lives for duration of application (so that can add http requests anytime in code)
-        //responses can be strings or json objects (which will probably be more useful)
-        //is a POST request necessary for sending data to the server?? Or is a GET with parameters (encrypted) enough
-            //what's the difference between POST and GET again???
-        //encrypt payload (access token and user facebook id) on mobile app side
-        //use Volley to send payload to web server
-        //decrypt payload on web server side before verifying user
+    //start views offscreen and animate them in
 
+    //seems like Facebook graph API documenation with javascript is better than python
+        //set up nodejs/expressjs backend and host on heroku (write in Typescript)
+        //send access token, user id, app id? over https to web server
+        //make Graph API call to verify access token, user_id, and app id is all correct before allowing user to update database
 
     //clear a puzzle automatically transitions back to puzzle select screen after animation is done playing (after clearPulse()) function
         //need to clean up the function queue system (currently using a ton of flags to determine which function to queue/call)
@@ -23,32 +19,11 @@
         //this should also be combined with the undo queue system.
         //all commands go through this queue - no more separate systems
 
-    //seems to be a problem with setting permission and logging in (it's doing it twice)
-        //push facebook login button passes the baton to CallbackManager which has user login with name/avatar permission
-        // then comes back and executes my code in setButtonListener (which adds email permission)
-        //this causes facebook to go back to login page with name/avatar/email permission
-            //might need to see the other option for loggin in on the documentation and not rely on CallbackManager
-
-    //build a quick and dirty implementation of the steps below:
-        //get fb_user_id and access_token on android (both strings)
-            //I have the access_token - how to get fb_user_name?
-        //send http request to webserver to authenticate user (by issuing Graph API request using fb_user_name and access_token sent to from android device)
-            //let's use Nodejs, express and TypeScript to set up web server - no need for html/css since we only need to send http requests with two parameters
-            //web server has two forms - fb_user_id, and access_token.  use curl to send http request to Graph API with this
-        //if fb_user_id and access_token verified, 'log in' to the server database using fb_user_name (and now can alter database entries for this user)
-        //when user solves a puzzle/saves data, write data (such as transformations taken to solve puzzles) to database
-
-    //start views offscreen and animate them in
 
     //have bubbles of friends who cleared the current puzzle appear by the transformation box they completed it in
         //have a ring (or other indicator) showing completion, and the same ring appears on user bubble after clearing a puzzle
         //if more than two friends, have a bubble showing a "+12" (number of other friends).  Pushing this bubble shows a list of other friends that user can look at
             //clicking on friend bubble shows the first move transformation that player did as a hint
-
-    //complete puzzle set 6: similar to set 3, make a few variations of puzzles - can mix them up later
-    //make puzzles that can be finished in 2 transformations, but can also allow up to 3 max transformations
-    //make puzzles where user has to connect 3 dark blocks (don't have too many of those yet) (including 2+ colors)
-    //3 adjacent above and two adjacent below (or 1)
 
 
     //instead of a tutorial system, allow players to see first move of friend's solution
@@ -139,6 +114,7 @@ import com.facebook.*
 
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
+import org.json.JSONObject
 
 class MainActivity: AppCompatActivity() {
     private lateinit var mSquaresSurfaceView: SquaresSurfaceView
@@ -148,6 +124,7 @@ class MainActivity: AppCompatActivity() {
     private lateinit var mLogo: ImageView
     private lateinit var mCallbackManager: CallbackManager
     private lateinit var mProfileTracker: ProfileTracker
+    private lateinit var mTestButton: Button
 
     public override fun onCreate(savedInstanceState: Bundle?) {
 //        setTheme(R.style.SplashScreen)
@@ -159,7 +136,13 @@ class MainActivity: AppCompatActivity() {
         mSkipButton = findViewById(R.id.skip_button)
         mLoginButton = findViewById(R.id.login_button)
         mLogo = findViewById(R.id.logo)
+        mTestButton = findViewById(R.id.test_button)
 
+        mTestButton.setOnClickListener {
+            if(Profile.getCurrentProfile() != null) {
+                processProfile()
+            }
+        }
 
         //login to facebook
         mLoginButton.setOnClickListener {
@@ -174,8 +157,6 @@ class MainActivity: AppCompatActivity() {
                 Log.d("facebooktest", "success")
                 if(Profile.getCurrentProfile() == null) {
                     mProfileTracker = MyProfileTracker()
-                }else {
-                    processProfile(Profile.getCurrentProfile())
                 }
             }
             override fun onCancel() {
@@ -194,38 +175,28 @@ class MainActivity: AppCompatActivity() {
 
     }
 
-    companion object {
-        fun processProfile(profile: Profile) {
-            Log.d("facebooktest", profile.id.toString())
-            /*
-            var text: String
-            //settting up queue for http requests
-            val queue = Volley.newRequestQueue(this)
-            val url = "https://graph.facebook.com/" //user id goes here
-            val fields = "?fields=name&access_token=" //access token goes here
+    private fun processProfile() {
+        val accessToken: AccessToken? = AccessToken.getCurrentAccessToken()
 
-            val accessToken: AccessToken? = AccessToken.getCurrentAccessToken()
-            val isLoggedIn = accessToken != null && !accessToken.isExpired
-            if(accessToken != null) Log.d("facebooktest", "access token: $accessToken")
-            Log.d("facebooktest", isLoggedIn.toString())
-            //val completeUrl = url + user.toString() + fields + accessToken.toString()
-            val requestString = StringRequest(Request.Method.GET, completeUrl,
-                    { response->
-                        text = response.substring(0, 79)
-                        Log.d("facebooktest", text)
-                    },
-                    {
-                        text = "error with response"
-                        Log.d("facebooktest", text)
-                    })
+        if(accessToken == null || accessToken.isExpired) return
 
-            queue.add(requestString)*/
-        }
+        Log.d("facebooktest", accessToken.toString())
+
+        val request: GraphRequest = GraphRequest.newMeRequest(accessToken, object: GraphRequest.GraphJSONObjectCallback {
+            override fun onCompleted(obj: JSONObject, response: GraphResponse) {
+                Log.d("facebooktest", obj.toString())
+            }
+        })
+
+        val parameters = Bundle()
+        parameters.putString("field", "name, id")
+        request.parameters = parameters
+        request.executeAsync()
+
     }
 
     class MyProfileTracker : ProfileTracker() {
         override fun onCurrentProfileChanged(oldProfile: Profile?, currentProfile: Profile?) {
-            processProfile(currentProfile!!)
             stopTracking()
         }
     }
@@ -246,6 +217,11 @@ class MainActivity: AppCompatActivity() {
             interpolator = AccelerateDecelerateInterpolator()
             start()
         }
+        ObjectAnimator.ofFloat(mTestButton, "translationX", -900f).apply {
+            duration = 400
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
     }
 
     private fun moveMenuOnScreen() {
@@ -260,6 +236,11 @@ class MainActivity: AppCompatActivity() {
             start()
         }
         ObjectAnimator.ofFloat(mSkipButton, "translationX", 0f).apply {
+            duration = 400
+            interpolator = AccelerateDecelerateInterpolator()
+            start()
+        }
+        ObjectAnimator.ofFloat(mTestButton, "translationX", 0f).apply {
             duration = 400
             interpolator = AccelerateDecelerateInterpolator()
             start()
