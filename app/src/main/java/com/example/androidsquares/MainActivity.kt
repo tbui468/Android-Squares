@@ -1,13 +1,6 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
-    //pulse by queuing up a ton of pulse commands in renderer
-    //add pulse commands to the mCommandQueue.
-
-    //onDrawFrame is a bit of a clusterfuck right now
-        //get rid of clearPulse flag
-        //get rid of clearSplit flag
-        //best way to get rid of these is to make the command queue take a function with optional parameters
     ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -29,8 +22,6 @@
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
     //////////////////////////////////////CONTENT///////////////////////////////////////////
     //add fifth column to puzzle sets 1 - 6
     //look through puzzles and reorder them
@@ -41,7 +32,6 @@
     //////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
-    //bug: on clearing a puzzle, if the fractal is a 4x4, it only splits to 2x2 (not the 1x1 it's supposed to split to )
 
     //not a big fan of the zooming in and out now
         //doesn't fit the flat aesthetic.  May look better to just have squares slide in/out when selecting puzzles
@@ -53,13 +43,8 @@
         //this is to provide feedback and also keep visual style consistent
         //also provides visual feedback when waiting for a double tap (rather than just showing no animation)
 
-    //dark color is a bit hard to see
-        //idea: make them the same color, but make the anchor points invisible in the middle
-        //clearing a puzzle 'fills' in the anchor points
-
     //bug: can see undo bar in the far distance when at main/set menu (also don't really like the undo bar having empty middles - it draws the eyes too much)
     //bug: undo bar can still be seen with 0 transformations (to the left)
-
 
     //clear a puzzle automatically transitions back to puzzle select screen after animation is done playing (after clearPulse()) function
         //need to clean up the function queue system (currently using a ton of flags to determine which function to queue/call)

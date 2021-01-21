@@ -626,7 +626,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         if (splitList.isEmpty()) return false
 
         for (f in splitList) {
-            val newFractals = split(f, null, FractalData(f.mIndex, f.mSize))
+            val conditions = Array<FractalData>(f.mSize * f.mSize){FractalData(f.mIndex, f.mSize)}.also {
+                for(i in 0 until (f.mSize * f.mSize)) {
+                    it[i] = FractalData(intArrayOf(i % f.mSize, i / f.mSize), 1)
+                }
+            }
+            val newFractals = split(f, conditions, FractalData(f.mIndex, f.mSize))
             for (newF in newFractals) {
                 newF.moveTo(
                         calculateFractalPos(
