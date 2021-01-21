@@ -4,6 +4,7 @@ package com.example.androidsquares
 import android.opengl.Matrix
 import android.opengl.GLES20
 import java.nio.FloatBuffer
+import android.util.Log
 
 
 class Square(setPos: FloatArray, squareIndex: Int, locked: Boolean, cleared: Boolean) : Entity(calculateSquarePosition(setPos, squareIndex), floatArrayOf(1f, 1f, 1f), 1){
@@ -68,8 +69,7 @@ class Square(setPos: FloatArray, squareIndex: Int, locked: Boolean, cleared: Boo
         val puzzleDim = getElementsDim(elements)
         for(i in elements.indices) {
             if(elements[i] != FractalType.Empty) {
-                val index = intArrayOf(i % 4, i / 4)
-                //list.add(Fractal(arrayOf(elements[i]), 1, index, calculateInitFractalPos(index, pos, puzzleDim)))
+                val index = intArrayOf(i % MAX_PUZZLE_WIDTH, i / MAX_PUZZLE_WIDTH)
                 list.add(Fractal(arrayOf(elements[i]), 1, index, calculateFractalPos(index, 1, pos, puzzleDim)))
             }
         }

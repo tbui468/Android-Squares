@@ -17,6 +17,10 @@ const val FLOAT_SIZE = 4
 const val SHORT_SIZE = 2
 const val FLOATS_PER_QUAD = 4 * 5 //four vertices, and 5 floats per vertex
 
+const val MAX_PUZZLE_WIDTH = 5
+const val MAX_PUZZLE_HEIGHT = 6
+
+
 enum class CollisionBox {
     None,
     Center,
@@ -272,8 +276,8 @@ fun getElementsDim(elements: Array<FractalType>): IntArray {
     var row: Int
     for(i in elements.indices) {
         if(elements[i] != FractalType.Empty) {
-            col = i % 4
-            row = i / 4
+            col = i % MAX_PUZZLE_WIDTH
+            row = i / MAX_PUZZLE_WIDTH
             if (col + 1 > width) width = col + 1
             if (row + 1 > height) height = row + 1
         }
@@ -292,8 +296,8 @@ fun getPuzzleDim(setIndex: Int, puzzleIndex: Int): IntArray {
 //if smaller than 4x6 need to shift right and down to center it
 //to keep things simple, make all puzzles top-left start at col 0 and row 0.
 fun calculatePuzzleOffset(width: Int, height: Int): FloatArray {
-    val halfWidth = 3 * .35f / 2f
-    val halfHeight = 5 * .35f / 2f
+    val halfWidth = (width - 1) * .35f / 2f
+    val halfHeight = (height - 1) * .35f / 2f
 
     val myHalfWidth = (width - 1) * .35f / 2f
     val myHalfHeight = (height - 1) * .35f / 2f
@@ -311,8 +315,8 @@ fun calculateFractalPos(index: IntArray, size: Int, squareCenter: FloatArray, pu
 
     val belowCenter = .2f
     val puzzleCenter = floatArrayOf(squareCenter[0] + offset[0], squareCenter[1] - offset[1] - belowCenter, squareCenter[2])
-    val topLeftX = puzzleCenter[0] - SPACING * (3)/2f + SPACING * index[0]
-    val topLeftY = puzzleCenter[1] + SPACING * (5)/2f - SPACING * index[1]
+    val topLeftX = puzzleCenter[0] - SPACING * (puzzleDim[0] - 1)/2f + SPACING * index[0]
+    val topLeftY = puzzleCenter[1] + SPACING * (puzzleDim[1] - 1)/2f - SPACING * index[1]
     val halfWidth = (size - 1) * SPACING / 2f
     return floatArrayOf(topLeftX + halfWidth, topLeftY - halfWidth, puzzleCenter[2])
 }

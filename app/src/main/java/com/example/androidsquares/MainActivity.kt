@@ -2,9 +2,6 @@
 
 
     //////////////////////////////////////CONTENT///////////////////////////////////////////
-    //how about making the puzzles 5x6 instead??? It would be a bit more crowded, but at least the puzzles would be more varied
-        //comment out puzzles and try a 5x6
-
     //complete puzzle set 7: similar to set 3, make a few variations of puzzles - can mix them up later
     //make puzzles that can be finished in 2 transformations, but can also allow up to 3 max transformations
     //make puzzles where user has to connect 3 dark blocks (don't have too many of those yet) (including 2+ colors)

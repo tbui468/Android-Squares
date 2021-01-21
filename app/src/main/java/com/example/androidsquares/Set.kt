@@ -63,7 +63,7 @@ class Set(pos: FloatArray, index: Int, locked: Boolean, cleared: Boolean): Entit
 
     fun spawnSquares(): MutableList<Square>{
         return mutableListOf<Square>().also {
-            for(i in 0 until 16) {
+            for(i in appData.setData[mIndex].puzzleData.indices) {
                 if(appData.setData[mIndex].puzzleData[i] != null) {
                     it.add(Square(pos, i, appData.setData[mIndex].puzzleData[i]!!.isLocked, appData.setData[mIndex].puzzleData[i]!!.isCleared))
                 }

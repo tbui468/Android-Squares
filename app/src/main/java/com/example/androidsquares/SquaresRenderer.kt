@@ -302,7 +302,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     //////////////helper functions for commands//////////////////////////////////////////
     private fun getFractal(index: IntArray): Fractal? {
-        if (index[0] < 0 || index[0] >= 4 || index[1] < 0 || index[1] >= 6) return null
+        if (index[0] < 0 || index[0] >= MAX_PUZZLE_WIDTH || index[1] < 0 || index[1] >= MAX_PUZZLE_HEIGHT) return null
 
         for (fractal in mFractals) {
             if (fractal.mIndex[0] == index[0] && fractal.mIndex[1] == index[1]) return fractal
@@ -322,7 +322,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             for (col in 0 until size) {
                 //elements[col + row * size] = puzzleData[cubeIndex][squareIndex][index[0] + col + (index[1] + row) * 4]
                 elements[col + row * size] =
-                    appData.setData[cubeIndex].puzzleData[squareIndex]!!.elements[index[0] + col + (index[1] + row) * 4]
+                    appData.setData[cubeIndex].puzzleData[squareIndex]!!.elements[index[0] + col + (index[1] + row) * MAX_PUZZLE_WIDTH]
             }
         }
         return elements
@@ -346,7 +346,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         for (row in 0 until size) {
             for (col in 0 until size) {
                 //puzzleData[cubeIndex][squareIndex][index[0] + col + (index[1] + row) * 4] = elements[col + row * size]
-                appData.setData[cubeIndex].puzzleData[squareIndex]!!.elements[index[0] + col + (index[1] + row) * 4] =
+                appData.setData[cubeIndex].puzzleData[squareIndex]!!.elements[index[0] + col + (index[1] + row) * MAX_PUZZLE_WIDTH] =
                     elements[col + row * size]
             }
         }
@@ -598,12 +598,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         if (!undo) {
             if (puzzleCleared(
-                    appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements,
-                    intArrayOf(4, 6)
-                )
+                            appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements,
+                            intArrayOf(MAX_PUZZLE_WIDTH, MAX_PUZZLE_HEIGHT)
+                //            getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
+                    )
             ) {
                 appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.isCleared =
-                    true
+                        true
                 unlockAdjacentPuzzles(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
                 if (setCleared(getOpenSet()!!)) {
                     appData.setData[getOpenSet()!!.mIndex].isCleared = true
@@ -628,12 +629,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             val newFractals = split(f, null, FractalData(f.mIndex, f.mSize))
             for (newF in newFractals) {
                 newF.moveTo(
-                    calculateFractalPos(
-                        newF.mIndex,
-                        newF.mSize,
-                        getOpenSquare()!!.pos,
-                        getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
-                    )
+                        calculateFractalPos(
+                                newF.mIndex,
+                                newF.mSize,
+                                getOpenSquare()!!.pos,
+                                getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
+                        )
                 )
             }
             mFractals.remove(f)
@@ -650,10 +651,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         var type: FractalType
         for (fractal in mFractals) {
             type = getElements(
-                getOpenSet()!!.mIndex,
-                getOpenSquare()!!.mIndex,
-                fractal.mIndex,
-                fractal.mSize
+                    getOpenSet()!!.mIndex,
+                    getOpenSquare()!!.mIndex,
+                    fractal.mIndex,
+                    fractal.mSize
             )[0]
             if (type != FractalType.Normal && type != FractalType.NormalB) {
                 val scale = fractal.scale[0] * 2f
@@ -665,9 +666,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun resizeRequired(
-        transformation: Transformation,
-        index: IntArray,
-        size: Int
+            transformation: Transformation,
+            index: IntArray,
+            size: Int
     ): Boolean {
         val fractal = getFractal(index) ?: return true
 
@@ -678,26 +679,26 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         when (transformation) {
             Transformation.TranslatePosX -> {
                 swappedFractal =
-                    getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1]))
-                        ?: return true
+                        getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1]))
+                                ?: return true
                 if (swappedFractal.mSize != size) return true
             }
             Transformation.TranslateNegX -> {
                 swappedFractal =
-                    getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, fractal.mIndex[1]))
-                        ?: return true
+                        getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, fractal.mIndex[1]))
+                                ?: return true
                 if (swappedFractal.mSize != size) return true
             }
             Transformation.TranslatePosY -> {
                 swappedFractal =
-                    getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize))
-                        ?: return true
+                        getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize))
+                                ?: return true
                 if (swappedFractal.mSize != size) return true
             }
             Transformation.TranslateNegY -> {
                 swappedFractal =
-                    getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
-                        ?: return true
+                        getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
+                                ?: return true
                 if (swappedFractal.mSize != size) return true
             }
         }
@@ -710,26 +711,26 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val conditions = when (transformation) {
             Transformation.TranslatePosX -> {
                 arrayOf(
-                    FractalData(index, size),
-                    FractalData(intArrayOf(index[0] + size, index[1]), size)
+                        FractalData(index, size),
+                        FractalData(intArrayOf(index[0] + size, index[1]), size)
                 )
             }
             Transformation.TranslateNegX -> {
                 arrayOf(
-                    FractalData(index, size),
-                    FractalData(intArrayOf(index[0] - size, index[1]), size)
+                        FractalData(index, size),
+                        FractalData(intArrayOf(index[0] - size, index[1]), size)
                 )
             }
             Transformation.TranslatePosY -> {
                 arrayOf(
-                    FractalData(index, size),
-                    FractalData(intArrayOf(index[0], index[1] + size), size)
+                        FractalData(index, size),
+                        FractalData(intArrayOf(index[0], index[1] + size), size)
                 )
             }
             Transformation.TranslateNegY -> {
                 arrayOf(
-                    FractalData(index, size),
-                    FractalData(intArrayOf(index[0], index[1] - size), size)
+                        FractalData(index, size),
+                        FractalData(intArrayOf(index[0], index[1] - size), size)
                 )
             }
             else -> {
@@ -766,31 +767,31 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         for (f in mFractals) {
             if (insideFractal(f, conditions[0].index, conditions[0].size)) {
                 f.moveTo(
-                    calculateFractalPosForTarget(
-                        f.mIndex,
-                        f.mSize,
-                        conditions[0].index,
-                        conditions[0].size,
-                        getOpenSquare()!!.pos,
-                        puzzleDim
-                    )
+                        calculateFractalPosForTarget(
+                                f.mIndex,
+                                f.mSize,
+                                conditions[0].index,
+                                conditions[0].size,
+                                getOpenSquare()!!.pos,
+                                puzzleDim
+                        )
                 )
                 insideListA.add(f)
             } else if (conditions.size == 2 && insideFractal(
-                    f,
-                    conditions[1].index,
-                    conditions[1].size
-                )
+                            f,
+                            conditions[1].index,
+                            conditions[1].size
+                    )
             ) {
                 f.moveTo(
-                    calculateFractalPosForTarget(
-                        f.mIndex,
-                        f.mSize,
-                        conditions[1].index,
-                        conditions[1].size,
-                        getOpenSquare()!!.pos,
-                        puzzleDim
-                    )
+                        calculateFractalPosForTarget(
+                                f.mIndex,
+                                f.mSize,
+                                conditions[1].index,
+                                conditions[1].size,
+                                getOpenSquare()!!.pos,
+                                puzzleDim
+                        )
                 )
                 insideListB.add(f)
             } else {
@@ -815,16 +816,16 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun swap(fractal0: Fractal, fractal1: Fractal) {
         //update data
         val elements0 = getElements(
-            getOpenSet()!!.mIndex,
-            getOpenSquare()!!.mIndex,
-            fractal0.mIndex,
-            fractal0.mSize
+                getOpenSet()!!.mIndex,
+                getOpenSquare()!!.mIndex,
+                fractal0.mIndex,
+                fractal0.mSize
         )
         val elements1 = getElements(
-            getOpenSet()!!.mIndex,
-            getOpenSquare()!!.mIndex,
-            fractal1.mIndex,
-            fractal1.mSize
+                getOpenSet()!!.mIndex,
+                getOpenSquare()!!.mIndex,
+                fractal1.mIndex,
+                fractal1.mSize
         )
         setElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal0.mIndex, elements1)
         setElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal1.mIndex, elements0)
@@ -837,10 +838,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun rotateCW(fractal: Fractal) {
         val elements = getElements(
-            getOpenSet()!!.mIndex,
-            getOpenSquare()!!.mIndex,
-            fractal.mIndex,
-            fractal.mSize
+                getOpenSet()!!.mIndex,
+                getOpenSquare()!!.mIndex,
+                fractal.mIndex,
+                fractal.mSize
         )
 
         //rotate elements clockwise
@@ -886,10 +887,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun rotateCCW(fractal: Fractal) {
         val elements = getElements(
-            getOpenSet()!!.mIndex,
-            getOpenSquare()!!.mIndex,
-            fractal.mIndex,
-            fractal.mSize
+                getOpenSet()!!.mIndex,
+                getOpenSquare()!!.mIndex,
+                fractal.mIndex,
+                fractal.mSize
         )
 
         //rotate elements ccw
@@ -930,8 +931,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         setElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, elements)
         fractal.rotateTo(
-            90f,
-            floatArrayOf(0f, 0f, 1f)
+                90f,
+                floatArrayOf(0f, 0f, 1f)
         ) //should recreate on animation end to keep things simple
         mRecreateFractal = fractal
     }
@@ -939,16 +940,16 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun reflectX(fractal: Fractal, topPushed: Boolean) {
         //update data
         val elements = getElements(
-            getOpenSet()!!.mIndex,
-            getOpenSquare()!!.mIndex,
-            fractal.mIndex,
-            fractal.mSize
+                getOpenSet()!!.mIndex,
+                getOpenSquare()!!.mIndex,
+                fractal.mIndex,
+                fractal.mSize
         )
         val elemCopy = elements.copyOf()
         for (row in 0 until fractal.mSize) {
             for (col in 0 until fractal.mSize) {
                 elements[col + row * fractal.mSize] =
-                    elemCopy[col + (fractal.mSize - 1 - row) * fractal.mSize]
+                        elemCopy[col + (fractal.mSize - 1 - row) * fractal.mSize]
             }
         }
         setElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, elements)
@@ -961,16 +962,16 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun reflectY(fractal: Fractal, leftPushed: Boolean) {
         //update data
         val elements = getElements(
-            getOpenSet()!!.mIndex,
-            getOpenSquare()!!.mIndex,
-            fractal.mIndex,
-            fractal.mSize
+                getOpenSet()!!.mIndex,
+                getOpenSquare()!!.mIndex,
+                fractal.mIndex,
+                fractal.mSize
         )
         val elemCopy = elements.copyOf()
         for (row in 0 until fractal.mSize) {
             for (col in 0 until fractal.mSize) {
                 elements[col + row * fractal.mSize] =
-                    elemCopy[(fractal.mSize - 1 - col) + row * fractal.mSize]
+                        elemCopy[(fractal.mSize - 1 - col) + row * fractal.mSize]
             }
         }
         setElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, elements)
@@ -1008,9 +1009,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun split(
-        fractal: Fractal,
-        conditions: Array<FractalData>?,
-        ogFractal: FractalData
+            fractal: Fractal,
+            conditions: Array<FractalData>?,
+            ogFractal: FractalData
     ): MutableList<Fractal> {
         val squarePos = getOpenSquare()!!.pos
 
@@ -1019,22 +1020,22 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         val elements0 = getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, index, newSize)
         val elements1 = getElements(
-            getOpenSet()!!.mIndex,
-            getOpenSquare()!!.mIndex,
-            intArrayOf(index[0] + newSize, index[1]),
-            newSize
+                getOpenSet()!!.mIndex,
+                getOpenSquare()!!.mIndex,
+                intArrayOf(index[0] + newSize, index[1]),
+                newSize
         )
         val elements2 = getElements(
-            getOpenSet()!!.mIndex,
-            getOpenSquare()!!.mIndex,
-            intArrayOf(index[0], index[1] + newSize),
-            newSize
+                getOpenSet()!!.mIndex,
+                getOpenSquare()!!.mIndex,
+                intArrayOf(index[0], index[1] + newSize),
+                newSize
         )
         val elements3 = getElements(
-            getOpenSet()!!.mIndex,
-            getOpenSquare()!!.mIndex,
-            intArrayOf(index[0] + newSize, index[1] + newSize),
-            newSize
+                getOpenSet()!!.mIndex,
+                getOpenSquare()!!.mIndex,
+                intArrayOf(index[0] + newSize, index[1] + newSize),
+                newSize
         )
 
         val retList = mutableListOf<Fractal>()
@@ -1043,52 +1044,52 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
 
         val corners = arrayOf(
-            Fractal(
-                elements0, newSize, index, //top left
-                calculateFractalPosForTarget(
-                    index,
-                    newSize,
-                    ogFractal.index,
-                    ogFractal.size,
-                    squarePos,
-                    puzzleDim
+                Fractal(
+                        elements0, newSize, index, //top left
+                        calculateFractalPosForTarget(
+                                index,
+                                newSize,
+                                ogFractal.index,
+                                ogFractal.size,
+                                squarePos,
+                                puzzleDim
+                        )
+                ),
+                Fractal(
+                        elements1, newSize, intArrayOf(index[0] + newSize, index[1]), //top right
+                        calculateFractalPosForTarget(
+                                intArrayOf(index[0] + newSize, index[1]),
+                                newSize,
+                                ogFractal.index,
+                                ogFractal.size,
+                                squarePos,
+                                puzzleDim
+                        )
+                ),
+                Fractal(
+                        elements2, newSize, intArrayOf(index[0], index[1] + newSize), //bottom left
+                        calculateFractalPosForTarget(
+                                intArrayOf(index[0], index[1] + newSize),
+                                newSize,
+                                ogFractal.index,
+                                ogFractal.size,
+                                squarePos,
+                                puzzleDim
+                        )
+                ),
+                Fractal(
+                        elements3,
+                        newSize,
+                        intArrayOf(index[0] + newSize, index[1] + newSize), //bottom righ
+                        calculateFractalPosForTarget(
+                                intArrayOf(index[0] + newSize, index[1] + newSize),
+                                newSize,
+                                ogFractal.index,
+                                ogFractal.size,
+                                squarePos,
+                                puzzleDim
+                        )
                 )
-            ),
-            Fractal(
-                elements1, newSize, intArrayOf(index[0] + newSize, index[1]), //top right
-                calculateFractalPosForTarget(
-                    intArrayOf(index[0] + newSize, index[1]),
-                    newSize,
-                    ogFractal.index,
-                    ogFractal.size,
-                    squarePos,
-                    puzzleDim
-                )
-            ),
-            Fractal(
-                elements2, newSize, intArrayOf(index[0], index[1] + newSize), //bottom left
-                calculateFractalPosForTarget(
-                    intArrayOf(index[0], index[1] + newSize),
-                    newSize,
-                    ogFractal.index,
-                    ogFractal.size,
-                    squarePos,
-                    puzzleDim
-                )
-            ),
-            Fractal(
-                elements3,
-                newSize,
-                intArrayOf(index[0] + newSize, index[1] + newSize), //bottom righ
-                calculateFractalPosForTarget(
-                    intArrayOf(index[0] + newSize, index[1] + newSize),
-                    newSize,
-                    ogFractal.index,
-                    ogFractal.size,
-                    squarePos,
-                    puzzleDim
-                )
-            )
         )
 
         mFractals.remove(fractal)
@@ -1102,11 +1103,11 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     if (onFractalEdge(splitF, c.index, c.size)) {
                         splitAgain = true
                         retList.addAll(
-                            split(
-                                splitF,
-                                arrayOf(FractalData(c.index, c.size)),
-                                ogFractal
-                            )
+                                split(
+                                        splitF,
+                                        arrayOf(FractalData(c.index, c.size)),
+                                        ogFractal
+                                )
                         )
                         break
                     }
@@ -1152,14 +1153,14 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         for (c in fractals) {
             c.moveTo(
-                calculateFractalPosForTarget(
-                    c.mIndex,
-                    c.mSize,
-                    targetIndex,
-                    targetSize,
-                    getOpenSquare()!!.pos,
-                    puzzleDim
-                )
+                    calculateFractalPosForTarget(
+                            c.mIndex,
+                            c.mSize,
+                            targetIndex,
+                            targetSize,
+                            getOpenSquare()!!.pos,
+                            puzzleDim
+                    )
             )
         }
     }
@@ -1169,14 +1170,14 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val newSize = getFractalSize(fractals)
         val newIndex = getFractalIndex(fractals)
         val elements =
-            getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, newIndex, newSize)
+                getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, newIndex, newSize)
         val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
 
         return Fractal(
-            elements,
-            newSize,
-            newIndex,
-            calculateFractalPos(newIndex, newSize, getOpenSquare()!!.pos, puzzleDim)
+                elements,
+                newSize,
+                newIndex,
+                calculateFractalPos(newIndex, newSize, getOpenSquare()!!.pos, puzzleDim)
         )
     }
 
@@ -1212,8 +1213,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         //determine which corner it's in
         val screenCoords = closestFractal.getScreenCoords()
         val fractalCoords = floatArrayOf(
-            (screenCoords[0] + screenCoords[2]) / 2f,
-            (screenCoords[1] + screenCoords[3]) / 2f
+                (screenCoords[0] + screenCoords[2]) / 2f,
+                (screenCoords[1] + screenCoords[3]) / 2f
         )
 
         if (x < fractalCoords[0]) {
@@ -1269,9 +1270,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 if (touchType == TouchType.Tap) {
                     for (square in mSquares) {
                         if (square.centerCollision(
-                                x,
-                                y
-                            ) && !appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.isLocked
+                                        x,
+                                        y
+                                ) && !appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.isLocked
                         ) {
                             openSquare(square)
                             return true
@@ -1288,9 +1289,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             }
             Screen.Fractal -> {
                 if (getTransformationsRemaining(
-                        getOpenSet()!!.mIndex,
-                        getOpenSquare()!!.mIndex
-                    ) > 0
+                                getOpenSet()!!.mIndex,
+                                getOpenSquare()!!.mIndex
+                        ) > 0
                 ) {
                     for (fractal in mFractals) {
                         when (touchType) {
@@ -1299,18 +1300,18 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                     transform(fractal, Transformation.RotateCCW, false)
                                     return true
                                 } else if (fractal.bottomCollision(
-                                        x,
-                                        y
-                                    ) && fractal.mSize > 1
+                                                x,
+                                                y
+                                        ) && fractal.mSize > 1
                                 ) { //rotate cw
                                     transform(fractal, Transformation.RotateCW, false)
                                     return true
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                     val swappedFractal: Fractal? = getFractal(
-                                        intArrayOf(
-                                            fractal.mIndex[0] - fractal.mSize,
-                                            fractal.mIndex[1]
-                                        )
+                                            intArrayOf(
+                                                    fractal.mIndex[0] - fractal.mSize,
+                                                    fractal.mIndex[1]
+                                            )
                                     )
                                     if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                         transform(fractal, Transformation.TranslateNegX, false)
@@ -1323,18 +1324,18 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                     transform(fractal, Transformation.RotateCW, false)
                                     return true
                                 } else if (fractal.bottomCollision(
-                                        x,
-                                        y
-                                    ) && fractal.mSize > 1
+                                                x,
+                                                y
+                                        ) && fractal.mSize > 1
                                 ) { //rotate cw
                                     transform(fractal, Transformation.RotateCCW, false)
                                     return true
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                     val swappedFractal: Fractal? = getFractal(
-                                        intArrayOf(
-                                            fractal.mIndex[0] + fractal.mSize,
-                                            fractal.mIndex[1]
-                                        )
+                                            intArrayOf(
+                                                    fractal.mIndex[0] + fractal.mSize,
+                                                    fractal.mIndex[1]
+                                            )
                                     )
                                     if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                         transform(fractal, Transformation.TranslatePosX, false)
@@ -1347,18 +1348,18 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                     transform(fractal, Transformation.RotateCW, false)
                                     return true
                                 } else if (fractal.rightCollision(
-                                        x,
-                                        y
-                                    ) && fractal.mSize > 1
+                                                x,
+                                                y
+                                        ) && fractal.mSize > 1
                                 ) { //rotate cw
                                     transform(fractal, Transformation.RotateCCW, false)
                                     return true
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                     val swappedFractal: Fractal? = getFractal(
-                                        intArrayOf(
-                                            fractal.mIndex[0],
-                                            fractal.mIndex[1] - fractal.mSize
-                                        )
+                                            intArrayOf(
+                                                    fractal.mIndex[0],
+                                                    fractal.mIndex[1] - fractal.mSize
+                                            )
                                     )
                                     if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                         transform(fractal, Transformation.TranslateNegY, false)
@@ -1371,18 +1372,18 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                     transform(fractal, Transformation.RotateCCW, false)
                                     return true
                                 } else if (fractal.rightCollision(
-                                        x,
-                                        y
-                                    ) && fractal.mSize > 1
+                                                x,
+                                                y
+                                        ) && fractal.mSize > 1
                                 ) { //rotate cw
                                     transform(fractal, Transformation.RotateCW, false)
                                     return true
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
                                     val swappedFractal: Fractal? = getFractal(
-                                        intArrayOf(
-                                            fractal.mIndex[0],
-                                            fractal.mIndex[1] + fractal.mSize
-                                        )
+                                            intArrayOf(
+                                                    fractal.mIndex[0],
+                                                    fractal.mIndex[1] + fractal.mSize
+                                            )
                                     )
                                     if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                         transform(fractal, Transformation.TranslatePosY, false)
@@ -1412,23 +1413,23 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
                 for (fractal in mFractals) {
                     if (touchType == TouchType.DoubleTap && fractal.pointCollision(
-                            x,
-                            y
-                        ) && fractal.mSize > 1
+                                    x,
+                                    y
+                            ) && fractal.mSize > 1
                     ) {
                         val newFractals =
-                            split(fractal, null, FractalData(fractal.mIndex, fractal.mSize))
+                                split(fractal, null, FractalData(fractal.mIndex, fractal.mSize))
 
                         val puzzleDim =
-                            getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
+                                getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
                         for (newFractal in newFractals) {
                             newFractal.moveTo(
-                                calculateFractalPos(
-                                    newFractal.mIndex,
-                                    newFractal.mSize,
-                                    getOpenSquare()!!.pos,
-                                    puzzleDim
-                                )
+                                    calculateFractalPos(
+                                            newFractal.mIndex,
+                                            newFractal.mSize,
+                                            getOpenSquare()!!.pos,
+                                            puzzleDim
+                                    )
                             )
                             mFractals.add(newFractal)
                         }
@@ -1439,8 +1440,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
                 if (touchType == TouchType.DoubleTap) {
                     val cornerFractals = getCornerFractals(
-                        x,
-                        y
+                            x,
+                            y
                     ) //checks for blocks in this function and returns null if ANY fractal is a block
                     if (cornerFractals != null) {
                         moveToMerge(cornerFractals.toMutableList())
@@ -1460,12 +1461,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     //if undo stack is not empty
                     if (!appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.undoStack.empty()) {
                         val undoData =
-                            appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.undoStack.pop()
+                                appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.undoStack.pop()
                         if (resizeRequired(
-                                undoData.transformation,
-                                undoData.index,
-                                undoData.size
-                            )
+                                        undoData.transformation,
+                                        undoData.index,
+                                        undoData.size
+                                )
                         ) {
                             undoResize(undoData.transformation, undoData.index, undoData.size)
                             mCommandQueue.add(undoData)
@@ -1516,15 +1517,15 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         //recreate at end of animation (to reduce complexity by not having to save angle state, mostly)
         if (mRecreateFractal != null) {
             mFractals.add(
-                Fractal(
-                    getElements(
-                        getOpenSet()!!.mIndex,
-                        getOpenSquare()!!.mIndex,
-                        mRecreateFractal!!.mIndex,
-                        mRecreateFractal!!.mSize
-                    ),
-                    mRecreateFractal!!.mSize, mRecreateFractal!!.mIndex, mRecreateFractal!!.pos
-                )
+                    Fractal(
+                            getElements(
+                                    getOpenSet()!!.mIndex,
+                                    getOpenSquare()!!.mIndex,
+                                    mRecreateFractal!!.mIndex,
+                                    mRecreateFractal!!.mSize
+                            ),
+                            mRecreateFractal!!.mSize, mRecreateFractal!!.mIndex, mRecreateFractal!!.pos
+                    )
             )
             mFractals.remove(mRecreateFractal!!)
             mRecreateFractal = null
@@ -1611,17 +1612,17 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT)
 
         Matrix.setLookAtM(
-            mViewMatrix,
-            0,
-            mCamera.pos[0],
-            mCamera.pos[1],
-            mCamera.pos[2],
-            mCamera.pos[0],
-            mCamera.pos[1],
-            0f,
-            0f,
-            1f,
-            0f
+                mViewMatrix,
+                0,
+                mCamera.pos[0],
+                mCamera.pos[1],
+                mCamera.pos[2],
+                mCamera.pos[0],
+                mCamera.pos[1],
+                0f,
+                0f,
+                1f,
+                0f
         )
         Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0)
 
@@ -1725,7 +1726,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun stringToElements(string: String?): Array<FractalType> {
         if(string == null) {
-            return Array(24){FractalType.Normal}
+            return Array(MAX_PUZZLE_WIDTH * MAX_PUZZLE_HEIGHT){FractalType.Normal}
         }
         val elements = Array(string.length){FractalType.Normal}
         for(i in string.indices) {
@@ -1791,9 +1792,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             for(j in appData.setData[i].puzzleData.indices) {
                 if(appData.setData[i].puzzleData[j] != null) {
                     appData.setData[i].puzzleData[j]!!.isCleared = sharedPref.getBoolean(i.toString() + j.toString() + "isCleared",
-                        defaultAppData.setData[i].puzzleData[j]!!.isCleared)
+                            defaultAppData.setData[i].puzzleData[j]!!.isCleared)
                     appData.setData[i].puzzleData[j]!!.elements = stringToElements(sharedPref.getString(i.toString() + j.toString() + "elements",
-                        elementsToString(defaultAppData.setData[i].puzzleData[j]!!.elements)))
+                            elementsToString(defaultAppData.setData[i].puzzleData[j]!!.elements)))
 
                     //read undo stack
                     appData.setData[i].puzzleData[j]!!.undoStack.clear()
