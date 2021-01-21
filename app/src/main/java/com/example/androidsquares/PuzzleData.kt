@@ -508,14 +508,80 @@ val p67 = PuzzleData(arrayOf( //can be easily solved in 4 transformations
         FractalType.RedB, FractalType.Empty, FractalType.GreenB, FractalType.Empty),
         Stack<UndoData>(), 3, false, false)
 
+val p70 = PuzzleData(arrayOf( //can be solved in 3.  give players 4
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.BlueB, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Green, FractalType.Normal, FractalType.BlueB,
+        FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.Blue, FractalType.Empty,
+        FractalType.GreenB, FractalType.Normal, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.GreenB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 3, false, false)
+
+val p71 = PuzzleData(arrayOf( //can be solved in 2.  Give players 4
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.GreenB, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Green, FractalType.Green,
+        FractalType.Empty, FractalType.Empty, FractalType.GreenB, FractalType.Normal, FractalType.Normal,
+        FractalType.GreenB, FractalType.Green, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Green, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 3, false, false)
+val p72 = PuzzleData(arrayOf( //solved in 3
+        FractalType.Empty, FractalType.Normal, FractalType.Red, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Normal, FractalType.Red, FractalType.RedB, FractalType.Empty,
+        FractalType.Red, FractalType.Normal, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Red, FractalType.Normal, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Normal, FractalType.Red, FractalType.RedB, FractalType.Empty,
+        FractalType.Empty, FractalType.Normal, FractalType.Red, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 3, false, false)
+val p73 = PuzzleData(arrayOf( //can be solved in 2.  Give players 4
+        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Blue, FractalType.Normal, FractalType.Normal, FractalType.GreenB,
+        FractalType.Empty, FractalType.Green, FractalType.Normal, FractalType.Green, FractalType.Empty,
+        FractalType.BlueB, FractalType.Blue, FractalType.Blue, FractalType.Green, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.GreenB, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 3, false, false)
+val p74 = PuzzleData(arrayOf( //easy 2 moves.  Put in tutorial
+        FractalType.BlueB, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Normal, FractalType.Blue, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.BlueB, FractalType.RedB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Red, FractalType.Normal, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.RedB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 3, false, false)
+val p75 = PuzzleData(arrayOf( //easy 3 moves. put in tutorial
+        FractalType.Empty, FractalType.Blue, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.BlueB, FractalType.Normal, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Normal, FractalType.Blue, FractalType.Empty,
+        FractalType.BlueB, FractalType.Normal, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Blue, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 3, false, false)
+val p76 = PuzzleData(arrayOf( //solve in 3
+        FractalType.Green, FractalType.Green, FractalType.GreenB, FractalType.Empty, FractalType.Empty,
+        FractalType.Normal, FractalType.Normal, FractalType.Blue, FractalType.BlueB, FractalType.Empty,
+        FractalType.GreenB, FractalType.Green, FractalType.Normal, FractalType.Normal, FractalType.Empty,
+        FractalType.Empty, FractalType.BlueB, FractalType.Blue, FractalType.Blue, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 3, false, false)
+val p77 = PuzzleData(arrayOf( //2 moves (can't really be solved in a reasonale number of move higher than that)
+        FractalType.Empty, FractalType.Empty, FractalType.GreenB, FractalType.Empty, FractalType.RedB,
+        FractalType.Empty, FractalType.Red, FractalType.Red, FractalType.Red, FractalType.Red,
+        FractalType.GreenB, FractalType.Red, FractalType.Normal, FractalType.Normal, FractalType.Normal,
+        FractalType.Empty, FractalType.Red, FractalType.Normal, FractalType.Green, FractalType.Green,
+        FractalType.RedB, FractalType.Red, FractalType.Normal, FractalType.Green, FractalType.Normal,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 3, false, false)
+
 //temp placeholder puzzle
 val p = PuzzleData(arrayOf(
-        FractalType.Red, FractalType.Empty, FractalType.Empty, FractalType.Empty,
-        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
-        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
-        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
-        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
-        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
         Stack<UndoData>(), 3, false, false)
 
 
@@ -533,9 +599,9 @@ val set5 = SetData(arrayOf(p50, p51, p52, p53, p54, p55, p56, p57,
         null, null, null, null, null, null, null, null), false, false, floatArrayOf(8f, 7f, 0f))
 val set6 = SetData(arrayOf(p60, p61, p62, p63, p64, p65, p66, p67,
         null, null, null, null, null, null, null, null), false, false, floatArrayOf(8f, -7f, 0f))
-val set7 = SetData(arrayOf(p, null, null, null, null, null, null, null,
-        null, null, null, null, null, null, null, null), true, false, floatArrayOf(8f, -21f, 0f))
+val set7 = SetData(arrayOf(p70, p71, p72, p73, p74, p75, p76, p77,
+        null, null, null, null, null, null, null, null), false, false, floatArrayOf(8f, -21f, 0f))
 
 //val defaultAppData = AppData(arrayOf(set0, set1, set2, set3, set4, set5, set6, set7))
-val defaultAppData = AppData(arrayOf(set0))
+val defaultAppData = AppData(arrayOf(set0, set7))
 var appData = defaultAppData.copy()

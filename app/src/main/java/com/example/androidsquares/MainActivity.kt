@@ -28,6 +28,12 @@
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
+    //have clearPUzzle animation stagger the pulsing
+        //set pulse parameters that tell entitiy what domain in t is pulsed (eg, split time animation time into 6 parts, and pulse this fractal at part 2)
+        //will have to rewrite some animation code
+
+    //bug: on clearing a puzzle, if the fractal is a 4x4, it only splits to 2x2 (not the 1x1 it's supposed to split to )
+
     //not a big fan of the zooming in and out now
         //doesn't fit the flat aesthetic.  May look better to just have squares slide in/out when selecting puzzles
         //idea: clicking a set makes all other sets move off screen (horizontally or vertically)
