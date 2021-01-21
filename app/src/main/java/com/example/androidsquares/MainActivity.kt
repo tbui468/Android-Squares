@@ -1,5 +1,36 @@
 //get a complete vertical slice with two puzzle cubes
 
+
+    //////////////////////////////////////CONTENT///////////////////////////////////////////
+    //how about making the puzzles 5x6 instead??? It would be a bit more crowded, but at least the puzzles would be more varied
+        //comment out puzzles and try a 5x6
+
+    //complete puzzle set 7: similar to set 3, make a few variations of puzzles - can mix them up later
+    //make puzzles that can be finished in 2 transformations, but can also allow up to 3 max transformations
+    //make puzzles where user has to connect 3 dark blocks (don't have too many of those yet) (including 2+ colors)
+    //3 adjacent above and two adjacent below (or 1)
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////////NETWORKING////////////////////////////////////////////
+    //Hrku and postgresql Squares520468
+    //Set up a basic nodejs and express hello world.  Following Heroku tutorial on setting it up.
+        //set it up with MySQL - since MySQL is easier than Postgresql, stick with MySQL for now
+        //keep in mind that I want to use facebook_id in one column, and then puzzle data in the other columns
+
+    //seems like Facebook graph API documenation with javascript is better than python
+    //set up nodejs/expressjs backend and host on heroku (write in Typescript)
+    //send access token, user id, app id? over https to web server
+    //make Graph API call to verify access token, user_id, and app id is all correct before allowing user to update database
+
+    //have bubbles of friends who cleared the current puzzle appear by the transformation box they completed it in
+    //have a ring (or other indicator) showing completion, and the same ring appears on user bubble after clearing a puzzle
+    //if more than two friends, have a bubble showing a "+12" (number of other friends).  Pushing this bubble shows a list of other friends that user can look at
+    //clicking on friend bubble shows the first move transformation that player did as a hint
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
     //not a big fan of the zooming in and out now
         //doesn't fit the flat aesthetic.  May look better to just have squares slide in/out when selecting puzzles
         //idea: clicking a set makes all other sets move off screen (horizontally or vertically)
@@ -17,10 +48,6 @@
     //bug: can see undo bar in the far distance when at main/set menu (also don't really like the undo bar having empty middles - it draws the eyes too much)
     //bug: undo bar can still be seen with 0 transformations (to the left)
 
-    //seems like Facebook graph API documenation with javascript is better than python
-        //set up nodejs/expressjs backend and host on heroku (write in Typescript)
-        //send access token, user id, app id? over https to web server
-        //make Graph API call to verify access token, user_id, and app id is all correct before allowing user to update database
 
     //clear a puzzle automatically transitions back to puzzle select screen after animation is done playing (after clearPulse()) function
         //need to clean up the function queue system (currently using a ton of flags to determine which function to queue/call)
@@ -28,16 +55,8 @@
         //this should also be combined with the undo queue system.
         //all commands go through this queue - no more separate systems
 
+    ////////////////////////////////////////////////////////////////////////////////////
 
-    //have bubbles of friends who cleared the current puzzle appear by the transformation box they completed it in
-        //have a ring (or other indicator) showing completion, and the same ring appears on user bubble after clearing a puzzle
-        //if more than two friends, have a bubble showing a "+12" (number of other friends).  Pushing this bubble shows a list of other friends that user can look at
-            //clicking on friend bubble shows the first move transformation that player did as a hint
-
-    //complete puzzle set 7: similar to set 3, make a few variations of puzzles - can mix them up later
-    //make puzzles that can be finished in 2 transformations, but can also allow up to 3 max transformations
-    //make puzzles where user has to connect 3 dark blocks (don't have too many of those yet) (including 2+ colors)
-    //3 adjacent above and two adjacent below (or 1)
 
     //instead of a tutorial system, allow players to see first move of friend's solution
     //put in first touch of my solutions for tutorial puzzles
