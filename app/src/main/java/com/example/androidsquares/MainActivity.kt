@@ -33,6 +33,8 @@
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
 
+    //bug: undo bar can still be seen with 0 transformations (to the left)
+
     //not a big fan of the zooming in and out now
         //doesn't fit the flat aesthetic.  May look better to just have squares slide in/out when selecting puzzles
         //idea: clicking a set makes all other sets move off screen (horizontally or vertically)
@@ -44,13 +46,6 @@
         //also provides visual feedback when waiting for a double tap (rather than just showing no animation)
 
     //bug: can see undo bar in the far distance when at main/set menu (also don't really like the undo bar having empty middles - it draws the eyes too much)
-    //bug: undo bar can still be seen with 0 transformations (to the left)
-
-    //clear a puzzle automatically transitions back to puzzle select screen after animation is done playing (after clearPulse()) function
-        //need to clean up the function queue system (currently using a ton of flags to determine which function to queue/call)
-        //need to make it generalized (either queue functions with parameters together, or queue functions and parameters separately and combine at call time)
-        //this should also be combined with the undo queue system.
-        //all commands go through this queue - no more separate systems
 
     ////////////////////////////////////////////////////////////////////////////////////
 

@@ -13,6 +13,8 @@ data class CoordinatePair(val x: Float, val y: Float)
 
 data class InputData(val touchType: TouchType, val x: Float, val y: Float, var life: Float)
 
+val SKIP_ANIMATION = 1000f
+typealias AnimationSpeed = Float
 const val FLOAT_SIZE = 4
 const val SHORT_SIZE = 2
 const val FLOATS_PER_QUAD = 4 * 5 //four vertices, and 5 floats per vertex
