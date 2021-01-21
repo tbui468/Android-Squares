@@ -39,10 +39,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mInputQueue = InputQueue()
     private var mMergeFractals: Array<MutableList<Fractal>>? = null
     private var mRecreateFractal: Fractal? = null
-    private var mCommandQueue: Deque<UndoData> =
-        ArrayDeque() //only used for two step undo data for now
-    private var mClearSplitFlag = false
-    private var mClearPulseFlag = false
+    private var mCommandQueue: Deque<() -> Boolean> = ArrayDeque()
+    private var mUndoQueue: Deque<UndoData> = ArrayDeque()
 
     private var mScreenWidth = 0
     private var mScreenHeight = 0
@@ -610,7 +608,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     appData.setData[getOpenSet()!!.mIndex].isCleared = true
                     unlockAdjacentSets(getOpenSet()!!.mIndex)
                 }
-                mClearSplitFlag = true
+                //mClearSplitFlag = true
+                mCommandQueue.add(::clearSplit)
+                mCommandQueue.add(::clearPulse)
             }
         }
 
@@ -647,7 +647,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     //pulse all colored fractals white
     //fade out non-colored fractals????
-    private fun clearPulse() {
+    private fun clearPulse(): Boolean{
         var type: FractalType
         for (fractal in mFractals) {
             type = getElements(
@@ -663,6 +663,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 //fractal.alphaPulse(0f)
             }
         }
+        return true
     }
 
     private fun resizeRequired(
@@ -1469,7 +1470,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                                 )
                         ) {
                             undoResize(undoData.transformation, undoData.index, undoData.size)
-                            mCommandQueue.add(undoData)
+                            mUndoQueue.add(undoData)
                         } else {
                             undoTransform(undoData.transformation, undoData.index, undoData.size)
                         }
@@ -1561,16 +1562,14 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
 
         if (mAnimationParameter >= 1f) {
-            if (mClearPulseFlag) {
-                clearPulse()
-                startAnimation(.5f)
-                mClearPulseFlag = false
-            } else if (mClearSplitFlag) {
-                val split: Boolean = clearSplit()
-                if (split) startAnimation(1f) //skip animation is no fractals are split
-                mClearSplitFlag = false
-                mClearPulseFlag = true
-            } else if (mCommandQueue.isEmpty()) {
+            if(!mCommandQueue.isEmpty()) {
+                val result = mCommandQueue.removeFirst()()
+                if (result) startAnimation(1f)
+            }else if(!mUndoQueue.isEmpty()) {
+                val undoData = mUndoQueue.removeFirst()
+                undoTransform(undoData.transformation, undoData.index, undoData.size)
+                startAnimation(1f)
+            }else{
                 var touchRegistered = false
                 while (!mInputQueue.isEmpty() && !touchRegistered) { //loops until valid command is found or no more inputs
                     val data = mInputQueue.getNextInput()
@@ -1578,17 +1577,14 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     touchRegistered = dispatchCommand(data.touchType, pair.x, pair.y)
                 }
                 if (touchRegistered) startAnimation(1f)
-            } else {
-                val undoData = mCommandQueue.removeFirst()
-                undoTransform(undoData.transformation, undoData.index, undoData.size)
-                startAnimation(1f)
             }
         }
 
 
-        val sigmoid = sigmoid(mAnimationParameter)
 
         ////////////////////////////////////////////update////////////////////////////////
+        val sigmoid = sigmoid(mAnimationParameter)
+
         mInputQueue.onUpdate(deltaTime)
 
         mCamera.onUpdate(sigmoid)

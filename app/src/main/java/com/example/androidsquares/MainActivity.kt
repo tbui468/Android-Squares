@@ -1,13 +1,15 @@
 //get a complete vertical slice with two puzzle cubes
 
+    ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
+    //pulse by queuing up a ton of pulse commands in renderer
+    //add pulse commands to the mCommandQueue.
 
-    //////////////////////////////////////CONTENT///////////////////////////////////////////
-    //complete puzzle set 7: similar to set 3, make a few variations of puzzles - can mix them up later
-    //make puzzles that can be finished in 2 transformations, but can also allow up to 3 max transformations
-    //make puzzles where user has to connect 3 dark blocks (don't have too many of those yet) (including 2+ colors)
-    //3 adjacent above and two adjacent below (or 1)
+    //onDrawFrame is a bit of a clusterfuck right now
+        //get rid of clearPulse flag
+        //get rid of clearSplit flag
+        //best way to get rid of these is to make the command queue take a function with optional parameters
+    ///////////////////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////NETWORKING////////////////////////////////////////////
     //Hrku and postgresql Squares520468
@@ -27,11 +29,18 @@
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
-    //have clearPUzzle animation stagger the pulsing
-        //set pulse parameters that tell entitiy what domain in t is pulsed (eg, split time animation time into 6 parts, and pulse this fractal at part 2)
-        //will have to rewrite some animation code
 
+
+    //////////////////////////////////////CONTENT///////////////////////////////////////////
+    //add fifth column to puzzle sets 1 - 6
+    //look through puzzles and reorder them
+    //difficulty (whether rotations/reflections/large swaps are necesssary
+    //mark puzzles (using comments) with minimum number of transformations needed to solve AND max number of transformations I will give people
+    //look at shapes of puzzles and remove /change any duplicate shapes
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
     //bug: on clearing a puzzle, if the fractal is a 4x4, it only splits to 2x2 (not the 1x1 it's supposed to split to )
 
     //not a big fan of the zooming in and out now
