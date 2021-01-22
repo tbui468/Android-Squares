@@ -5,7 +5,7 @@ import android.opengl.GLES20
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 
-class Box(pos: FloatArray, dark: Boolean) : Entity(pos, floatArrayOf(.15f, .15f, .1f), 1) {
+class Box(pos: FloatArray, dark: Boolean) : Entity(pos, floatArrayOf(3f, 3f, 3f), 1) {
 
     init {
         if(!dark) {

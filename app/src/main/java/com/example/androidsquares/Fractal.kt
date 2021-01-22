@@ -9,7 +9,9 @@ import java.nio.ShortBuffer
 import android.opengl.Matrix
 import android.opengl.GLES20
 
-class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, pos: FloatArray): Entity(pos, floatArrayOf(.25f, .25f, .25f), size) {
+val FRACTAL_SIZE = 5.5f
+
+class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, pos: FloatArray): Entity(pos, floatArrayOf(FRACTAL_SIZE, FRACTAL_SIZE, FRACTAL_SIZE), size) {
 
     val mIndexCount: Int //for rendering
     private var mVertexBuffer: FloatBuffer

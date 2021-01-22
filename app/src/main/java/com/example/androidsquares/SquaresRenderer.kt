@@ -27,8 +27,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     var mSets = mutableListOf<Set>()
     var mSquares = mutableListOf<Square>()
     var mFractals = mutableListOf<Fractal>()
-    private val mUndoButtonOffset =
-        floatArrayOf(0f, .95f, -3.6f) //offset amount from camera to remain in top left corner
     lateinit var mUndoButton: UndoButton
     lateinit var mCamera: Camera
     private val mProjectionMatrix = FloatArray(16)
@@ -112,21 +110,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mTextureHandle = loadTexture(mContext, R.drawable.fractal_colors)
         mProgram = compileShaders()
 
-
         mSets = spawnSets()
 
-
         mCamera = Camera(floatArrayOf(0f, 0f, 98f))
-        //mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
-        //moving button offscreen for main screen
-        mUndoButton = UndoButton(
-            3, 0,
-            floatArrayOf(
-                mCamera.pos[0] + mUndoButtonOffset[0],
-                mCamera.pos[1] + mUndoButtonOffset[1] + 1f,
-                98f + mUndoButtonOffset[2]
-            )
-        )
+        mUndoButton = UndoButton(3, 0, floatArrayOf(0f, 100f, 0f))
         startAnimation(.5f)
     }
 
@@ -174,51 +161,37 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun openSet(set: Set): AnimationSpeed {
         for (s in mSets) {
-            s.fadeTo(0f)
+            val offset = if (s.mIndex % 2 == 0) -35f
+            else 35f
+            s.moveTo(floatArrayOf(s.pos[0] + offset, s.pos[1], s.pos[2]))
         }
         set.mIsOpen = true
-        mCamera.moveTo(floatArrayOf(set.pos[0], set.pos[1], 15f))
         mSquares = set.spawnSquares()
         for (square in mSquares) {
             square.setAlphaData(0f)
             square.fadeTo(1f)
         }
 
-        return 1f
+        return .5f
     }
 
     private fun closeSet(set: Set): AnimationSpeed {
         for (s in mSets) {
-            s.fadeTo(1f)
+            s.moveTo(appData.setData[s.mIndex].pos)
         }
         set.mIsOpen = false
-        mCamera.moveTo(floatArrayOf(0f, 0f, 98f))
         mSquares.clear()
 
-        return 1f
+        return .5f
     }
 
     private fun openSquare(square: Square): AnimationSpeed {
-        mCamera.moveTo(floatArrayOf(square.pos[0], square.pos[1], 4.5f))
         val maxTransformations =
             appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.maxTransformations
         val transformationCount =
             appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.undoStack.size
-        mUndoButton = UndoButton(
-            maxTransformations, transformationCount, //<--put puzzle data in here
-            floatArrayOf(
-                mCamera.pos[0] + mUndoButtonOffset[0],
-                mCamera.pos[1] + mUndoButtonOffset[1] + 1f,
-                mCamera.pos[2] + mUndoButtonOffset[2]
-            )
-        )
-        mUndoButton.moveTo(
-            floatArrayOf(
-                square.pos[0] + mUndoButtonOffset[0],
-                square.pos[1] + mUndoButtonOffset[1],
-                4.5f + mUndoButtonOffset[2]
-            )
-        )
+        mUndoButton = UndoButton(maxTransformations, transformationCount, floatArrayOf(0f, 100f, 0f))
+        mUndoButton.moveTo(floatArrayOf(0f, 28f, 0f))
 
 
         mFractals =
@@ -263,12 +236,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 )
             )
         }
-        mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1], 15f))
+        //mCamera.moveTo(floatArrayOf(cubePos[0], cubePos[1], 15f))
         mUndoButton.moveTo(
             floatArrayOf(
-                cubePos[0] + mUndoButtonOffset[0],
-                cubePos[1] + mUndoButtonOffset[1] + 1f,
-                15f + mUndoButtonOffset[2]
+                    0f, 100f, 0f
             )
         )
         mUndoButton.fadeTo(0f)
@@ -1634,6 +1605,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         GLES20.glUniform1i(mTexUniform, 0)
 
         //////////////////////draw////////////////////////////////////
+
+
+        mUndoButton.draw(mVPMatrix)
+
         if (getScreenState() == Screen.Fractal) {
             for (fractal in mFractals) {
                 fractal.draw(mVPMatrix)
@@ -1645,14 +1620,11 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 square.draw(mVPMatrix)
             }
         }
-        if (getScreenState() == Screen.Set) {
-            for(set in mSets)
-            {
-                set.draw(mVPMatrix)
-            }
+        for(set in mSets)
+        {
+            set.draw(mVPMatrix)
         }
 
-        mUndoButton.draw(mVPMatrix)
 
         //////////////////////draw cleanup/////////////////////////////
         GLES20.glDisableVertexAttribArray(mPosAttrib)

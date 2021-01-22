@@ -3,7 +3,6 @@
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////
 
-
     //////////////////////////////////////////////NETWORKING////////////////////////////////////////////
     //look at SquaresServer project for the serverside
         //having trouble playing with postgreSQL (password issues)
@@ -21,7 +20,6 @@
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////CONTENT///////////////////////////////////////////
-    //add fifth column to puzzle sets 1 - 6
     //look through puzzles and reorder them
     //difficulty (whether rotations/reflections/large swaps are necesssary
     //mark puzzles (using comments) with minimum number of transformations needed to solve AND max number of transformations I will give people
@@ -30,6 +28,9 @@
     //////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
+    //how should squares and fractals animate on/offscreen?
+        //idea: have them spawn overlapped with parent object (sets for squares, and squares for fractals)
+        //and then they animate to final positions
 
     //could have a separate queue for pulsing fractals
     //this queue takes in fractal list and pulse duration,
@@ -37,12 +38,6 @@
         //??? think this through a little more
 
     //bug: undo bar can still be seen with 0 transformations (to the left)
-
-    //not a big fan of the zooming in and out now
-        //doesn't fit the flat aesthetic.  May look better to just have squares slide in/out when selecting puzzles
-        //idea: clicking a set makes all other sets move off screen (horizontally or vertically)
-            //all the individual squares spawn on set (make them the same size as sets) and then slide off
-        //keep the flat theme
 
         //also, need a way to differentiate between sets, puzzles, and fractals
 
