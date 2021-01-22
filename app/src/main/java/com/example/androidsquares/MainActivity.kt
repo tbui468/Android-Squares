@@ -5,10 +5,8 @@
 
 
     //////////////////////////////////////////////NETWORKING////////////////////////////////////////////
-    //Hrku and postgresql Squares520468
-    //Set up a basic nodejs and express hello world.  Following Heroku tutorial on setting it up.
-        //set it up with MySQL - since MySQL is easier than Postgresql, stick with MySQL for now
-        //keep in mind that I want to use facebook_id in one column, and then puzzle data in the other columns
+    //look at SquaresServer project for the serverside
+        //having trouble playing with postgreSQL (password issues)
 
     //seems like Facebook graph API documenation with javascript is better than python
     //set up nodejs/expressjs backend and host on heroku (write in Typescript)
@@ -33,6 +31,11 @@
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
 
+    //could have a separate queue for pulsing fractals
+    //this queue takes in fractal list and pulse duration,
+        //it then calls the pulse commands in sequence (where each pulse may be multiple fractals since there could be multiple colors)
+        //??? think this through a little more
+
     //bug: undo bar can still be seen with 0 transformations (to the left)
 
     //not a big fan of the zooming in and out now
@@ -41,11 +44,15 @@
             //all the individual squares spawn on set (make them the same size as sets) and then slide off
         //keep the flat theme
 
+        //also, need a way to differentiate between sets, puzzles, and fractals
+
     //when user clicks on fractal, create a semi transparent circle expand from that point (like how android framework does it)
         //this is to provide feedback and also keep visual style consistent
         //also provides visual feedback when waiting for a double tap (rather than just showing no animation)
 
     //bug: can see undo bar in the far distance when at main/set menu (also don't really like the undo bar having empty middles - it draws the eyes too much)
+
+    //create main logo (how can it keep with the same simple theme of the rest of the game)
 
     ////////////////////////////////////////////////////////////////////////////////////
 
@@ -59,9 +66,6 @@
         //this will also allow user to choose the next puzzle, giving them more agency and choice
 
     //Back button is normal to have in the app - keep it there since it's better to have an in-app way to go back (but include android back button functionality too)
-
-    //bug - a 4x4 doesn't split apart to 1x1s when puzzle is cleared (it splits only to 1x1s)
-        //also refactor puzzle clear code - it's very messy
 
     //make all the puzzles solvable within 2, 3 or 4 moves.  But give player 1, 2, or 3 extra moves.  Don't tell players how many moves puzzles can be completed in
         //then connect to social media and show a pictures of friends who completed it and the number of moves it took them
