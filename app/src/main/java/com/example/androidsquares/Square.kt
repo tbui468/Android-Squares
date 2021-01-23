@@ -67,10 +67,13 @@ class Square(pos: FloatArray, squareIndex: Int, locked: Boolean, cleared: Boolea
     fun spawnFractals(elements: Array<FractalType>): MutableList<Fractal> {
         val list = mutableListOf<Fractal>()
         val puzzleDim = getElementsDim(elements)
+        var fractal: Fractal
         for(i in elements.indices) {
             if(elements[i] != FractalType.Empty) {
                 val index = intArrayOf(i % MAX_PUZZLE_WIDTH, i / MAX_PUZZLE_WIDTH)
-                list.add(Fractal(arrayOf(elements[i]), 1, index, calculateFractalPos(index, 1, pos, puzzleDim)))
+                fractal = Fractal(arrayOf(elements[i]), 1, index, pos) //temp: creating fractals right on top of square for now
+                fractal.moveTo(calculateFractalPos(index, 1, pos, puzzleDim))
+                list.add(fractal)
             }
         }
         return list

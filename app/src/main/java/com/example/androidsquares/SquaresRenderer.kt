@@ -178,7 +178,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             s.moveTo(appData.setData[s.mIndex].pos)
         }
         set.mIsOpen = false
-        mSquares.clear()
+
+        mCommandQueue.add(::clearSquares)
+
+        for(s in mSquares) {
+            s.moveTo(set.pos)
+        }
 
         return .5f
     }
@@ -213,14 +218,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         square.mIsOpen = true
 
         for (s in mSquares) {
-            s.fadeTo(0f)
+            s.moveTo(getOpenSet()!!.pos)
         }
 
         return 1f
     }
 
     private fun closeSquare(): AnimationSpeed {
-        val cubePos = appData.setData[getOpenSet()!!.mIndex].pos
         val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
         for (fractal in mFractals) {
             fractal.moveTo(
@@ -244,9 +248,23 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         mSquares = getOpenSet()!!.spawnSquares()
 
-        mFractals.clear()
+        mCommandQueue.add(::clearFractals)
+
+        for(f in mFractals) {
+            f.moveTo(getOpenSet()!!.pos) //temp: moving to set position for now
+        }
 
         return 1f
+    }
+
+    fun clearSquares(): AnimationSpeed {
+        mSquares.clear()
+        return SKIP_ANIMATION
+    }
+
+    fun clearFractals(): AnimationSpeed {
+        mFractals.clear()
+        return SKIP_ANIMATION
     }
 
     fun getScreenState(): Screen {
@@ -588,11 +606,21 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 mCommandQueue.add(::clearSplit)
                 mCommandQueue.add(::clearPulse)
                 mCommandQueue.add(::closeSquare)
+                mCommandQueue.add(::animateClearPuzzle)
+                mCommandQueue.add(::animateUnlockPuzzles)
             }
         }
 
         return 1f
 
+    }
+
+    private fun animateClearPuzzle(): AnimationSpeed {
+        return 1f
+    }
+
+    private fun animateUnlockPuzzles(): AnimationSpeed {
+        return 1f
     }
 
     //split all fractals on clear
@@ -1607,16 +1635,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         mUndoButton.draw(mVPMatrix)
 
-        if (getScreenState() == Screen.Fractal) {
-            for (fractal in mFractals) {
-                fractal.draw(mVPMatrix)
-            }
+        for (fractal in mFractals) {
+            fractal.draw(mVPMatrix)
         }
 
-        if (getScreenState() == Screen.Square) {
-            for (square in mSquares) {
-                square.draw(mVPMatrix)
-            }
+        for (square in mSquares) {
+            square.draw(mVPMatrix)
         }
         for(set in mSets)
         {

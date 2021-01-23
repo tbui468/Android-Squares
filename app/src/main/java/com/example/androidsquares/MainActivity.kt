@@ -1,6 +1,23 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
+    //implement these two functions.  think of way to integrate setCleared(..) and unlockAdjacentPuzzles(...) functions
+        //since we don't really need an 'animate' version of the function (animating and setting states should all happend in the same function
+        //the main problem of integrating them is the input parameters since mCommandQueue only takes functions with 0 parameters and AnimationSpeed return value
+    /*
+        private fun animateClearPuzzle(): AnimationSpeed {
+            return 1f
+        }
+
+    private fun animateUnlockPuzzles(): AnimationSpeed {
+        return 1f
+    }*/
+//when clearing a puzzle, queue multiple commands:
+        //clearSplit
+        //clearPulse
+        //closeSquare
+        //animate clearing of that puzzle
+        //animate unlocking of adjacent puzzles
     ///////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////NETWORKING////////////////////////////////////////////
@@ -33,6 +50,8 @@
     //////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
+    //add a little wigglyness to the squares when moving (squishing and stretching based on how user interacts with it)
+
     //how should squares and fractals animate on/offscreen?
         //idea: have them spawn overlapped with parent object (sets for squares, and squares for fractals)
         //and then they animate to final positions
@@ -43,8 +62,6 @@
         //??? think this through a little more
 
     //bug: undo bar can still be seen with 0 transformations (to the left)
-
-    //bug: corners of quads are transparent, but when they overlap bad visual artifacts
 
     //also, need a way to differentiate between sets, puzzles, and fractals
 
