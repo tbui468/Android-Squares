@@ -95,15 +95,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
         GLES20.glClearColor(0.0f, 0.167f, .212f, 1f)
         GLES20.glEnable(GLES20.GL_BLEND)
-        GLES20.glBlendFunc(
-            GLES20.GL_SRC_ALPHA,
-            GLES20.GL_ONE_MINUS_SRC_ALPHA
-        ) //SRC was from the texture (in my case)
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 //        GLES20.glBlendFunc(GLES20.GL_CONSTANT_ALPHA, GLES20.GL_ONE_MINUS_CONSTANT_ALPHA)
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST)
-        GLES20.glDepthFunc(GLES20.GL_LESS)
+        GLES20.glDisable(GLES20.GL_DEPTH_TEST)
+//        GLES20.glEnable(GLES20.GL_DEPTH_TEST)
+ //       GLES20.glDepthFunc(GLES20.GL_LESS)
 //        GLES20.glEnable(GLES20.GL_CULL_FACE)
-        //       GLES20.glCullFace(GLES20.GL_BACK)
+        //GLES20.glCullFace(GLES20.GL_BACK)
 
         readSaveData()
 

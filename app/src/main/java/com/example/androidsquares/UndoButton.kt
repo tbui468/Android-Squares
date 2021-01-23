@@ -107,8 +107,6 @@ class UndoButton(private val mMaxTransformations: Int, private var mTransformati
 
     fun draw(vpMatrix: FloatArray) {
 
-        GLES20.glDisable(GLES20.GL_DEPTH_TEST)
-
         for(box in mDarkBoxes) {
             box!!.draw(vpMatrix)
         }
@@ -118,8 +116,6 @@ class UndoButton(private val mMaxTransformations: Int, private var mTransformati
                 box!!.draw(vpMatrix)
             }
         }
-
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST)
 
     }
 }

@@ -63,9 +63,14 @@ class Set(pos: FloatArray, index: Int, locked: Boolean, cleared: Boolean): Entit
 
     fun spawnSquares(): MutableList<Square>{
         return mutableListOf<Square>().also {
+            var finalPos: FloatArray
+            var square: Square
             for(i in appData.setData[mIndex].puzzleData.indices) {
                 if(appData.setData[mIndex].puzzleData[i] != null) {
-                    it.add(Square(pos, i, appData.setData[mIndex].puzzleData[i]!!.isLocked, appData.setData[mIndex].puzzleData[i]!!.isCleared))
+                    finalPos = calculateSquarePosition(pos, i)
+                    square = Square(pos, i, appData.setData[mIndex].puzzleData[i]!!.isLocked, appData.setData[mIndex].puzzleData[i]!!.isCleared)
+                    square.moveTo(finalPos)
+                    it.add(square)
                 }
             }
         }

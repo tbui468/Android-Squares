@@ -7,7 +7,7 @@ import java.nio.FloatBuffer
 import android.util.Log
 
 
-class Square(setPos: FloatArray, squareIndex: Int, locked: Boolean, cleared: Boolean) : Entity(calculateSquarePosition(setPos, squareIndex), floatArrayOf(8f, 8f, 8f), 1){
+class Square(pos: FloatArray, squareIndex: Int, locked: Boolean, cleared: Boolean) : Entity(pos, floatArrayOf(8f, 8f, 8f), 1){
     private val mIndexCount = indices1.size
     private var mVertexBuffer: FloatBuffer
     private var mIndexBuffer = createShortBuffer(indices1.copyOf())

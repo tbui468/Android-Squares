@@ -4,13 +4,18 @@
     ///////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////NETWORKING////////////////////////////////////////////
-    //look at SquaresServer project for the serverside
-        //having trouble playing with postgreSQL (password issues)
+    //look at SquaresServer project for the serverside stuff
+
+    //should just save user_id, and moves it took to solve a particular puzzle
+        //attributes: user_id, p00, p01, ..., p77 (a tuple has 65 attributes)
 
     //seems like Facebook graph API documenation with javascript is better than python
     //set up nodejs/expressjs backend and host on heroku (write in Typescript)
     //send access token, user id, app id? over https to web server
     //make Graph API call to verify access token, user_id, and app id is all correct before allowing user to update database
+
+    //for now, just use facebook (and maybe google) as a way to verify users
+        //since I don't want randos who aren't using my app to post to the database
 
     //have bubbles of friends who cleared the current puzzle appear by the transformation box they completed it in
     //have a ring (or other indicator) showing completion, and the same ring appears on user bubble after clearing a puzzle
@@ -39,7 +44,9 @@
 
     //bug: undo bar can still be seen with 0 transformations (to the left)
 
-        //also, need a way to differentiate between sets, puzzles, and fractals
+    //bug: corners of quads are transparent, but when they overlap bad visual artifacts
+
+    //also, need a way to differentiate between sets, puzzles, and fractals
 
     //when user clicks on fractal, create a semi transparent circle expand from that point (like how android framework does it)
         //this is to provide feedback and also keep visual style consistent
