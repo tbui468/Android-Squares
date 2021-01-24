@@ -42,10 +42,9 @@
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////CONTENT///////////////////////////////////////////
-    //look through puzzles and reorder them
-    //difficulty (whether rotations/reflections/large swaps are necesssary
-    //mark puzzles (using comments) with minimum number of transformations needed to solve AND max number of transformations I will give people
-    //look at shapes of puzzles and remove /change any duplicate shapes
+    //write 8 more set 1 puzzles
+        //minimum is 2 transformations, but allow up to 3 (or 4)
+        //recall that set 1 is teaching reflection/rotation of up to size 2x2
 
     //////////////////////////////////////////////////////////////////////////////////////////
 

@@ -616,11 +616,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun animateClearPuzzle(): AnimationSpeed {
-        return 1f
+        //change from grey to yellow
+        return SKIP_ANIMATION
     }
 
     private fun animateUnlockPuzzles(): AnimationSpeed {
-        return 1f
+        //change from dark grey (currently hollow grey) to light grey
+        return SKIP_ANIMATION
     }
 
     //split all fractals on clear
