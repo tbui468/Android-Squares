@@ -652,8 +652,11 @@ val p = PuzzleData(arrayOf(
         Stack<UndoData>(), 3, false, false)
 
 
-val set0 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puzzle05, puzzle06, puzzle07,
-        p08, p09, p010, p011, p012, p013, p014, p015), false, false, floatArrayOf(-8f, 21f, 0f))
+//val set0 = SetData(arrayOf(puzzle00, puzzle01, puzzle02, puzzle03, puzzle04, puzzle05, puzzle06, puzzle07,
+ //       p08, p09, p010, p011, p012, p013, p014, p015), false, false, floatArrayOf(-8f, 21f, 0f))
+val set0 = SetData(arrayOf(puzzle00, puzzle01, null, null, null, null, null, null,
+        null, null, null, null, null, null, null, null
+), false, false, floatArrayOf(-8f, 21f, 0f))
 val set1 = SetData(arrayOf(puzzle10, puzzle11, puzzle12, puzzle13, puzzle14, puzzle15, puzzle16, puzzle17,
         null, null, null, null, null, null, null, null), false, false, floatArrayOf(-8f, 7f, 0f))
 val set2 = SetData(arrayOf(p20, p21, p22, p23, p24, p25, p26, p27,

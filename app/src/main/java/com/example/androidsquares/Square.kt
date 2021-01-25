@@ -4,7 +4,6 @@ package com.example.androidsquares
 import android.opengl.Matrix
 import android.opengl.GLES20
 import java.nio.FloatBuffer
-import android.util.Log
 
 
 class Square(pos: FloatArray, squareIndex: Int, locked: Boolean, cleared: Boolean) : Entity(pos, floatArrayOf(8f, 8f, 8f), 1){

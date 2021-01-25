@@ -1,23 +1,7 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
-    //implement these two functions.  think of way to integrate setCleared(..) and unlockAdjacentPuzzles(...) functions
-        //since we don't really need an 'animate' version of the function (animating and setting states should all happend in the same function
-        //the main problem of integrating them is the input parameters since mCommandQueue only takes functions with 0 parameters and AnimationSpeed return value
-    /*
-        private fun animateClearPuzzle(): AnimationSpeed {
-            return 1f
-        }
-
-    private fun animateUnlockPuzzles(): AnimationSpeed {
-        return 1f
-    }*/
-//when clearing a puzzle, queue multiple commands:
-        //clearSplit
-        //clearPulse
-        //closeSquare
-        //animate clearing of that puzzle
-        //animate unlocking of adjacent puzzles
+    //test animation queue for clearing puzzles and sets
     ///////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////NETWORKING////////////////////////////////////////////
