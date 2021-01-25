@@ -1,7 +1,6 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
-    //test animation queue for clearing puzzles and sets
     ///////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////NETWORKING////////////////////////////////////////////
@@ -27,22 +26,27 @@
 
     //////////////////////////////////////CONTENT///////////////////////////////////////////
     //write 8 more set 1 puzzles
-        //minimum is 2 transformations, but allow up to 3 (or 4)
-        //recall that set 1 is teaching reflection/rotation of up to size 2x2
-
+    //minimum is 2 transformations, but allow up to 3 (or 4)
+    //recall that set 1 is teaching reflection/rotation of up to size 2x2
     //////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
+    //each fractal pules in turn, but it would look smoother if the animations overlapped instead of being play one after another
+
+    //finalize animation for clearing and unlocking sets and puzzles
+        //make unlocks adjacent (top, left, right, bottom) of cleared puzzle AND set
+        //current temporary animation is just pulsing, with no color change
+        //need art for locked/clear/unlocked and not cleared puzzles ana sets
+        //maybe implement wigglyness????
+
+    //add Geometry Wars style glow shaders
+
     //add a little wigglyness to the squares when moving (squishing and stretching based on how user interacts with it)
 
     //how should squares and fractals animate on/offscreen?
         //idea: have them spawn overlapped with parent object (sets for squares, and squares for fractals)
         //and then they animate to final positions
 
-    //could have a separate queue for pulsing fractals
-    //this queue takes in fractal list and pulse duration,
-        //it then calls the pulse commands in sequence (where each pulse may be multiple fractals since there could be multiple colors)
-        //??? think this through a little more
 
     //bug: undo bar can still be seen with 0 transformations (to the left)
 

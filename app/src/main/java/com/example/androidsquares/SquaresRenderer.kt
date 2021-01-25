@@ -14,6 +14,8 @@ import java.util.Stack
 import java.util.Deque
 import java.util.ArrayDeque
 
+import android.util.Log
+
 import android.opengl.GLSurfaceView
 import android.opengl.GLES20
 import android.opengl.Matrix
@@ -38,6 +40,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private var mRecreateFractal: Fractal? = null
     private var mAnimationQueue: Deque<() -> Float> = ArrayDeque()
     private var mUndoQueue: Deque<UndoData> = ArrayDeque()
+    private var mPulseFractals = Stack<MutableList<Fractal>>()
+    private var mPulseIndices = Stack<MutableList<IntArray>>()
     private var mClearedPuzzleIndex  = -1
     private var mClearedSetIndex = -1
 
@@ -345,17 +349,41 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun puzzleCleared(elements: Array<FractalType>, dim: IntArray): Boolean {
-        if (!colorCleared(elements, dim, FractalType.Red)) return false
-        if (!colorCleared(elements, dim, FractalType.Green)) return false
-        if (!colorCleared(elements, dim, FractalType.Blue)) return false
+        val redList: MutableList<IntArray> = mutableListOf()
+        val greenList: MutableList<IntArray> = mutableListOf()
+        val blueList: MutableList<IntArray> = mutableListOf()
+        if (!colorCleared(elements, dim, FractalType.Red, redList)) return false
+        if (!colorCleared(elements, dim, FractalType.Green, greenList)) return false
+        if (!colorCleared(elements, dim, FractalType.Blue, blueList)) return false
+
+        var chainLength = if(redList.size > greenList.size) redList.size else greenList.size
+        if(blueList.size > chainLength) chainLength = blueList.size
+
+        mPulseIndices.clear()
+
+
+        for(i in 0 until chainLength) {
+            val group: MutableList<IntArray> = mutableListOf()
+            if(i < redList.size) {
+                group.add(redList[i])
+            }
+            if(i < greenList.size) {
+                group.add(greenList[i])
+            }
+            if(i < blueList.size) {
+                group.add(blueList[i])
+            }
+            if(group.isNotEmpty()) {
+                mPulseIndices.push(group)
+            }
+        }
+
         return true
     }
 
-    private fun colorCleared(
-        elements: Array<FractalType>,
-        dim: IntArray,
-        fractalType: FractalType
-    ): Boolean {
+    //how about this?  colorCleared returns a mutableList of Fractals (in order they how up in DFS) if that color is cleared
+    //otherwise it returns an empty list
+    private fun colorCleared(elements: Array<FractalType>, dim: IntArray, fractalType: FractalType, indexList: MutableList<IntArray>): Boolean {
         val targetColor0: FractalType
         val targetColor1: FractalType
 
@@ -372,10 +400,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             return true //if not one of the colors to check, just ignore it and return true
         }
 
-        //find first occurrence of normal or dark color
+        //find first occurrence of block
         var rootIndex = intArrayOf(-1, -1)
         for (i in elements.indices) {
-            if (elements[i] == targetColor0 || elements[i] == targetColor1) {
+            if (elements[i] == targetColor1) {
                 rootIndex = intArrayOf(i % dim[0], i / dim[0])
                 break
             }
@@ -384,7 +412,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         if (rootIndex[0] == -1) return true
 
         val visited = BooleanArray(elements.size) { false }
-        DFS(elements, visited, dim, rootIndex, arrayOf(targetColor0, targetColor1))
+        DFS(elements, visited, dim, rootIndex, arrayOf(targetColor0, targetColor1), indexList)
 
         //check if all elements of given target colors are marked true
         for (i in elements.indices) {
@@ -395,40 +423,35 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return true
     }
 
-    private fun DFS(
-        elements: Array<FractalType>,
-        visited: BooleanArray,
-        dim: IntArray,
-        rootIndex: IntArray,
-        targetColors: Array<FractalType>
-    ) {
-        //mark root as visited
+    private fun DFS(elements: Array<FractalType>, visited: BooleanArray, dim: IntArray, rootIndex: IntArray, targetColors: Array<FractalType>, indexList: MutableList<IntArray>) {
+        //mark root as visited and add that fractal to list
         visited[rootIndex[0] + rootIndex[1] * dim[0]] = true
+        indexList.add(rootIndex) //problem here is due to not all fractals being sized 1x1
 
         //check the four adjacent indices.  If not visited and of proper color, call DFS on them.  If visited, skip
         //top
         var col = rootIndex[0]
         var row = rootIndex[1] - 1
         if (row >= 0 && !visited[col + row * dim[0]] && (elements[col + row * dim[0]] == targetColors[0] || elements[col + row * dim[0]] == targetColors[1]))
-            DFS(elements, visited, dim, intArrayOf(col, row), targetColors)
+            DFS(elements, visited, dim, intArrayOf(col, row), targetColors, indexList)
 
         //bottom
         col = rootIndex[0]
         row = rootIndex[1] + 1
         if (row < dim[1] && !visited[col + row * dim[0]] && (elements[col + row * dim[0]] == targetColors[0] || elements[col + row * dim[0]] == targetColors[1]))
-            DFS(elements, visited, dim, intArrayOf(col, row), targetColors)
+            DFS(elements, visited, dim, intArrayOf(col, row), targetColors, indexList)
 
         //left
         col = rootIndex[0] - 1
         row = rootIndex[1]
         if (col >= 0 && !visited[col + row * dim[0]] && (elements[col + row * dim[0]] == targetColors[0] || elements[col + row * dim[0]] == targetColors[1]))
-            DFS(elements, visited, dim, intArrayOf(col, row), targetColors)
+            DFS(elements, visited, dim, intArrayOf(col, row), targetColors, indexList)
 
         //right
         col = rootIndex[0] + 1
         row = rootIndex[1]
         if (col < dim[0] && !visited[col + row * dim[0]] && (elements[col + row * dim[0]] == targetColors[0] || elements[col + row * dim[0]] == targetColors[1]))
-            DFS(elements, visited, dim, intArrayOf(col, row), targetColors)
+            DFS(elements, visited, dim, intArrayOf(col, row), targetColors, indexList)
     }
 
     private fun unlockAdjacentPuzzles(setIndex: Int, puzzleIndex: Int) {
@@ -577,7 +600,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 mClearedPuzzleIndex = getOpenSquare()!!.mIndex
                 appData.setData[getOpenSet()!!.mIndex].puzzleData[mClearedPuzzleIndex]!!.isCleared = true
                 mAnimationQueue.add(::clearSplit)
-                mAnimationQueue.add(::clearPulse)
+                mAnimationQueue.add(::clearPushPulseFractals)
                 mAnimationQueue.add(::closeSquare)
                 mAnimationQueue.add(::clearPuzzle)
                 if (setCleared(getOpenSet()!!)) {
@@ -608,23 +631,41 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun clearSet(): AnimationSpeed {
         //animate clearing here
+        for(set in mSets) {
+            if(set.mIndex == mClearedSetIndex) {
+                set.scalePulse(floatArrayOf(set.scale[0] * 2f, set.scale[1] * 2f, 1f))
+            }
+        }
         return 1f
     }
 
     private fun unlockSets(): AnimationSpeed {
         //animate unlocking here
-        mClearedSetIndex = -1
+        for(set in mSets) {
+            if(set.mIndex - 1 == mClearedSetIndex) {
+                set.scalePulse(floatArrayOf(set.scale[0] * 2f, set.scale[1] * 2f, 1f))
+            }
+        }
         return 1f
     }
 
     private fun clearPuzzle(): AnimationSpeed {
         //animate clearing puzzle here
+        for(puzzle in mSquares) {
+            if(puzzle.mIndex == mClearedPuzzleIndex) {
+                puzzle.scalePulse(floatArrayOf(puzzle.scale[0] * 2f, puzzle.scale[1] * 2f, 1f))
+            }
+        }
         return 1f
     }
 
     private fun unlockPuzzles(): AnimationSpeed {
         //animate unlocking puzzles here
-        mClearedPuzzleIndex = -1
+        for(puzzle in mSquares) {
+            if(puzzle.mIndex -1 == mClearedPuzzleIndex) { //temp: just unlocking the next puzzle in linear order for now
+                puzzle.scalePulse(floatArrayOf(puzzle.scale[0] * 2f, puzzle.scale[1] * 2f, 1f))
+            }
+        }
         return 1f
     }
 
@@ -662,25 +703,28 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return 1f
     }
 
-    //pulse all colored fractals white
-    //fade out non-colored fractals????
-    private fun clearPulse(): AnimationSpeed {
-        var type: FractalType
-        for (fractal in mFractals) {
-            type = getElements(
-                    getOpenSet()!!.mIndex,
-                    getOpenSquare()!!.mIndex,
-                    fractal.mIndex,
-                    fractal.mSize
-            )[0]
-            if (type != FractalType.Normal && type != FractalType.NormalB) {
-                val scale = fractal.scale[0] * 2f
-                fractal.scalePulse(floatArrayOf(scale, scale, 1f))
-            } else {
-                //fractal.alphaPulse(0f)
+
+    private fun clearPushPulseFractals(): AnimationSpeed {
+        mPulseFractals.clear()
+        while(mPulseIndices.isNotEmpty()) {
+            val group = mPulseIndices.pop()
+            val list: MutableList<Fractal> = mutableListOf()
+            for(index in group) {
+                list.add(getFractal(index)!!)
             }
+            mPulseFractals.push(list)
         }
-        return .5f
+        return SKIP_ANIMATION
+    }
+
+
+    private fun pulseFractals(): AnimationSpeed {
+        val group = mPulseFractals.pop()
+        for (f in group) {
+            f.scalePulse(floatArrayOf(f.scale[0] * 2f, f.scale[1] * 2f, 1f))
+            Log.d("ttt", f.mIndex[0].toString() + ", " + f.mIndex[1].toString())
+        }
+        return 1.5f
     }
 
     private fun resizeRequired(
@@ -1562,7 +1606,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
 
         if (mAnimationParameter >= 1f) {
-            if(!mAnimationQueue.isEmpty()) {
+            if(!mPulseFractals.isEmpty()) {
+                val result = pulseFractals()
+                startAnimation(result)
+            }else if(!mAnimationQueue.isEmpty()) {
                 val result: AnimationSpeed = mAnimationQueue.removeFirst()()
                 startAnimation(result)
             }else if(!mUndoQueue.isEmpty()) {
