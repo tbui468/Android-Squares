@@ -14,8 +14,6 @@ import java.util.Stack
 import java.util.Deque
 import java.util.ArrayDeque
 
-import android.util.Log
-
 import android.opengl.GLSurfaceView
 import android.opengl.GLES20
 import android.opengl.Matrix
@@ -132,14 +130,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             pos = appData.setData[puzzleIndex].pos
             val offset = if (puzzleIndex % 2 == 0) -35f
             else 35f
-            list.add(
-                Set(
-                    floatArrayOf(pos[0] + offset, pos[1], pos[2]),
-                    puzzleIndex,
-                    appData.setData[puzzleIndex].isLocked,
-                    appData.setData[puzzleIndex].isCleared
-                )
-            )
+            list.add(Set(floatArrayOf(pos[0] + offset, pos[1], pos[2]), puzzleIndex, appData.setData[puzzleIndex].isLocked, appData.setData[puzzleIndex].isCleared))
         }
         return list
     }
@@ -342,11 +333,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return true
     }
 
-    private fun unlockAdjacentSets(setIndex: Int) {
-        if (setIndex < appData.setData.size - 1) { //temp: unlock the next set if not already last set
-            appData.setData[setIndex + 1].isLocked = false
-        }
-    }
 
     private fun puzzleCleared(elements: Array<FractalType>, dim: IntArray): Boolean {
         val redList: MutableList<IntArray> = mutableListOf()
@@ -455,26 +441,26 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun unlockAdjacentPuzzles(setIndex: Int, puzzleIndex: Int) {
-        val col = puzzleIndex % 4
-        val row = puzzleIndex / 4
+        val col = puzzleIndex % PUZZLE_GRID_WIDTH
+        val row = puzzleIndex / PUZZLE_GRID_WIDTH
         //to the right
-        val rightIndex = col + 1 + row * 4
-        if (col + 1 < 4 && rightIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[rightIndex] != null) {
+        val rightIndex = col + 1 + row * PUZZLE_GRID_WIDTH
+        if (col + 1 < PUZZLE_GRID_WIDTH && rightIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[rightIndex] != null) {
             appData.setData[setIndex].puzzleData[rightIndex]!!.isLocked = false
         }
         //to the left
-        val leftIndex = col - 1 + row * 4
+        val leftIndex = col - 1 + row * PUZZLE_GRID_WIDTH
         if (col - 1 >= 0 && leftIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[leftIndex] != null) {
             appData.setData[setIndex].puzzleData[leftIndex]!!.isLocked = false
         }
         //to the top
-        val topIndex = col + (row - 1) * 4
+        val topIndex = col + (row - 1) * PUZZLE_GRID_WIDTH
         if (row - 1 >= 0 && topIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[topIndex] != null) {
             appData.setData[setIndex].puzzleData[topIndex]!!.isLocked = false
         }
         //to the bottom
-        val bottomIndex = col + (row + 1) * 4
-        if (row + 1 < 4 && bottomIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[bottomIndex] != null) {
+        val bottomIndex = col + (row + 1) * PUZZLE_GRID_WIDTH
+        if (row + 1 < PUZZLE_GRID_HEIGHT && bottomIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[bottomIndex] != null) {
             appData.setData[setIndex].puzzleData[bottomIndex]!!.isLocked = false
         }
     }
@@ -593,30 +579,14 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             }
         }
 
-
         if (!undo) {
             if (puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(MAX_PUZZLE_WIDTH, MAX_PUZZLE_HEIGHT))) {
-                unlockAdjacentPuzzles(getOpenSet()!!.mIndex, mClearedPuzzleIndex)
                 mClearedPuzzleIndex = getOpenSquare()!!.mIndex
-                appData.setData[getOpenSet()!!.mIndex].puzzleData[mClearedPuzzleIndex]!!.isCleared = true
                 mAnimationQueue.add(::clearSplit)
                 mAnimationQueue.add(::clearPushPulseFractals)
                 mAnimationQueue.add(::closeSquare)
                 mAnimationQueue.add(::clearPuzzle)
-                if (setCleared(getOpenSet()!!)) {
-                    appData.setData[getOpenSet()!!.mIndex].isCleared = true
-                    unlockAdjacentSets(getOpenSet()!!.mIndex)
-                    mClearedSetIndex = getOpenSet()!!.mIndex
-                    mAnimationQueue.add(::closeSet)
-                    mAnimationQueue.add(::clearSet)
-                    if(gameCleared()) {
-                        mAnimationQueue.add(::clearGame)
-                    }else {
-                        mAnimationQueue.add(::unlockSets)
-                    }
-                }else {
-                    mAnimationQueue.add(::unlockPuzzles)
-                }
+                mAnimationQueue.add(::unlockPuzzles)
             }
         }
 
@@ -630,42 +600,86 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun clearSet(): AnimationSpeed {
-        //animate clearing here
         for(set in mSets) {
             if(set.mIndex == mClearedSetIndex) {
                 set.scalePulse(floatArrayOf(set.scale[0] * 2f, set.scale[1] * 2f, 1f))
+                set.clear()
             }
         }
         return 1f
     }
 
-    private fun unlockSets(): AnimationSpeed {
-        //animate unlocking here
-        for(set in mSets) {
-            if(set.mIndex - 1 == mClearedSetIndex) {
-                set.scalePulse(floatArrayOf(set.scale[0] * 2f, set.scale[1] * 2f, 1f))
+    private fun unlockAdjacentSets(setIndex: Int) {
+        for(index in appData.setData.indices) {
+            if (isAdjacent(setIndex, index, SET_GRID_WIDTH, SET_GRID_HEIGHT)) {
+                appData.setData[index].isLocked = false
             }
         }
+    }
+
+    private fun unlockSets(): AnimationSpeed {
+        unlockAdjacentSets(mClearedSetIndex)
+        for(set in mSets) {
+            if(isAdjacent(mClearedSetIndex, set.mIndex, SET_GRID_WIDTH, SET_GRID_HEIGHT) && set.mIsLocked) {
+                set.scalePulse(floatArrayOf(set.scale[0] * 2f, set.scale[1] * 2f, 1f))
+                set.unlock()
+            }
+        }
+
+        if(gameCleared()) {
+            mAnimationQueue.add(::clearGame)
+            return SKIP_ANIMATION
+        }
+
         return 1f
     }
 
     private fun clearPuzzle(): AnimationSpeed {
-        //animate clearing puzzle here
+        appData.setData[getOpenSet()!!.mIndex].puzzleData[mClearedPuzzleIndex]!!.isCleared = true
         for(puzzle in mSquares) {
             if(puzzle.mIndex == mClearedPuzzleIndex) {
                 puzzle.scalePulse(floatArrayOf(puzzle.scale[0] * 2f, puzzle.scale[1] * 2f, 1f))
+                puzzle.clear()
             }
         }
         return 1f
     }
 
+    private fun isAdjacent(index1: Int, index2: Int, gridWidth: Int, gridHeight: Int): Boolean {
+        //convert to rows and cols and then compare (delta in one dimension should be zero, and the other one -1 or 1)
+        val col1 = index1 % gridWidth
+        val row1 = index1 / gridWidth
+        val col2 = index2 % gridWidth
+        val row2 = index2 / gridWidth
+
+        //use index 1 as base.  Shift in each cardinal direction and compare to index 2
+        if(col1 + 1 == col2 && row1 == row2) return true
+        if(col1 - 1 == col2 && row1 == row2) return true
+        if(col1 == col2 && row1 + 1 == row2) return true
+        if(col1 == col2 && row1 - 1 == row2) return true
+
+        return false
+    }
+
     private fun unlockPuzzles(): AnimationSpeed {
-        //animate unlocking puzzles here
+        unlockAdjacentPuzzles(getOpenSet()!!.mIndex, mClearedPuzzleIndex) //need this bc it's called when when loading data
+
         for(puzzle in mSquares) {
-            if(puzzle.mIndex -1 == mClearedPuzzleIndex) { //temp: just unlocking the next puzzle in linear order for now
+            if(isAdjacent(mClearedPuzzleIndex, puzzle.mIndex, PUZZLE_GRID_WIDTH, PUZZLE_GRID_HEIGHT) && puzzle.mIsLocked) {
                 puzzle.scalePulse(floatArrayOf(puzzle.scale[0] * 2f, puzzle.scale[1] * 2f, 1f))
+                puzzle.unlock()
             }
         }
+
+        if (setCleared(getOpenSet()!!)) {
+            mClearedSetIndex = getOpenSet()!!.mIndex
+            mAnimationQueue.add(::closeSet)
+            mAnimationQueue.add(::clearSet)
+            mAnimationQueue.add(::unlockSets)
+
+            return SKIP_ANIMATION
+        }
+
         return 1f
     }
 
@@ -704,6 +718,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
 
+    //map the indices stored during DFS to the fractals in mFractals
     private fun clearPushPulseFractals(): AnimationSpeed {
         mPulseFractals.clear()
         while(mPulseIndices.isNotEmpty()) {
@@ -722,7 +737,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val group = mPulseFractals.pop()
         for (f in group) {
             f.scalePulse(floatArrayOf(f.scale[0] * 2f, f.scale[1] * 2f, 1f))
-            Log.d("ttt", f.mIndex[0].toString() + ", " + f.mIndex[1].toString())
         }
         return 1.5f
     }

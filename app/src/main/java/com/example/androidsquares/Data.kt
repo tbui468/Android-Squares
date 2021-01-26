@@ -21,6 +21,10 @@ const val FLOATS_PER_QUAD = 4 * 5 //four vertices, and 5 floats per vertex
 
 const val MAX_PUZZLE_WIDTH = 5
 const val MAX_PUZZLE_HEIGHT = 6
+const val PUZZLE_GRID_WIDTH = 4
+const val PUZZLE_GRID_HEIGHT = 4
+const val SET_GRID_WIDTH = 2
+const val SET_GRID_HEIGHT = 4
 
 
 enum class CollisionBox {

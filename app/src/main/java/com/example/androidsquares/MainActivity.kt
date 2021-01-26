@@ -1,6 +1,13 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
+    //unlockAdjacentPuzzles()  and unlockPuzzle() are two separate functions that do similar things...
+        //should reorganize this
+    //finalize animation for clearing and unlocking sets and puzzles
+        //make unlocks adjacent (top, left, right, bottom) of cleared puzzle AND set
+        //current temporary animation is just pulsing, with no color change
+        //need art for locked/clear/unlocked and not cleared puzzles ana sets
+        //maybe implement wigglyness????
     ///////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////NETWORKING////////////////////////////////////////////
@@ -33,11 +40,6 @@
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
     //each fractal pules in turn, but it would look smoother if the animations overlapped instead of being play one after another
 
-    //finalize animation for clearing and unlocking sets and puzzles
-        //make unlocks adjacent (top, left, right, bottom) of cleared puzzle AND set
-        //current temporary animation is just pulsing, with no color change
-        //need art for locked/clear/unlocked and not cleared puzzles ana sets
-        //maybe implement wigglyness????
 
     //add Geometry Wars style glow shaders
 

@@ -10,14 +10,17 @@ class Square(pos: FloatArray, squareIndex: Int, locked: Boolean, cleared: Boolea
     private val mIndexCount = indices1.size
     private var mVertexBuffer: FloatBuffer
     private var mIndexBuffer = createShortBuffer(indices1.copyOf())
+
+    private var mLockVertexBuffer: FloatBuffer //can reuse index buffer and index buffer count
+
     private var mModelMatrix = FloatArray(16)
     var mIndex = squareIndex
     var mIsOpen = false
+    var mIsLocked = locked
 
     init {
         val vertices = vertices1.copyOf()
-        //change texture if depending on lock status (setting cleared to green)
-        if(cleared) {
+        if(cleared) { //yellow
             //bottom left
             vertices[3] = 0f
             vertices[4] = .5f
@@ -31,34 +34,39 @@ class Square(pos: FloatArray, squareIndex: Int, locked: Boolean, cleared: Boolea
             vertices[18] = 0f
             vertices[19] = .25f
         }
-        else if(!locked) {
-            //bottom left
-            vertices[3] = 0f
-            vertices[4] = .25f
-            //bottom right
-            vertices[8] = .25f
-            vertices[9] = .25f
-            //top right
-            vertices[13] = .25f
-            vertices[14] = 0f
-            //top left
-            vertices[18] = 0f
-            vertices[19] = 0f
-        }else { //locked and not cleared
-            //bottom left
-            vertices[3] = .5f
-            vertices[4] = .25f
-            //bottom right
-            vertices[8] = .75f
-            vertices[9] = .25f
-            //top right
-            vertices[13] = .75f
-            vertices[14] = 0f
-            //top left
-            vertices[18] = .5f
-            vertices[19] = 0f
-        }
 
+        val lockVertices = vertices.copyOf()
+        lockVertices[3] = 0f
+        lockVertices[4] = .75f
+        lockVertices[8] = .25f
+        lockVertices[9] = .75f
+        lockVertices[13] = .25f
+        lockVertices[14] = .5f
+        lockVertices[18] = 0f
+        lockVertices[19] = .5f
+
+        mLockVertexBuffer = createFloatBuffer(lockVertices)
+        mVertexBuffer = createFloatBuffer(vertices)
+    }
+
+    fun unlock() {
+        mIsLocked = false
+    }
+
+    fun clear() {
+        val vertices = vertices1.copyOf()
+        //bottom left
+        vertices[3] = 0f
+        vertices[4] = .5f
+        //bottom right
+        vertices[8] = .25f
+        vertices[9] = .5f
+        //top right
+        vertices[13] = .25f
+        vertices[14] = .25f
+        //top left
+        vertices[18] = 0f
+        vertices[19] = .25f
         mVertexBuffer = createFloatBuffer(vertices)
     }
 
@@ -85,20 +93,22 @@ class Square(pos: FloatArray, squareIndex: Int, locked: Boolean, cleared: Boolea
         Matrix.multiplyMM(mvpMatrix, 0, vpMatrix, 0, mModelMatrix, 0)
 
         ///////////////////////set data and draw //////////////////////////
-
         mVertexBuffer.position(0)
         GLES20.glVertexAttribPointer(SquaresRenderer.mPosAttrib, 3, GLES20.GL_FLOAT, false, 5 * FLOAT_SIZE, mVertexBuffer)
-
         mVertexBuffer.position(3)
         GLES20.glVertexAttribPointer(SquaresRenderer.mTexCoordAttrib, 2, GLES20.GL_FLOAT, false, 5 * FLOAT_SIZE, mVertexBuffer)
-
         GLES20.glUniformMatrix4fv(SquaresRenderer.mModelUniform, 1, false, mvpMatrix, 0)
-
-//        GLES20.glBlendColor(1f, 1f, 1f, alpha)
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexCount, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
- //       GLES20.glBlendColor(1f, 1f, 1f, 1f)
 
-
+        if(mIsLocked) {
+            mLockVertexBuffer.position(0)
+            GLES20.glVertexAttribPointer(SquaresRenderer.mPosAttrib, 3, GLES20.GL_FLOAT, false, 5 * FLOAT_SIZE, mLockVertexBuffer)
+            mLockVertexBuffer.position(3)
+            GLES20.glVertexAttribPointer(SquaresRenderer.mTexCoordAttrib, 2, GLES20.GL_FLOAT, false, 5 * FLOAT_SIZE, mLockVertexBuffer)
+            GLES20.glUniformMatrix4fv(SquaresRenderer.mModelUniform, 1, false, mvpMatrix, 0)
+            mIndexBuffer.position(0)
+            GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexCount, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
+        }
     }
 
 
