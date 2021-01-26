@@ -224,6 +224,81 @@ val puzzle17 = PuzzleData(arrayOf(
         FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
         FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
         Stack<UndoData>(), 3, true, false)
+//new reflection only 2 transformation puzzles
+val p18 = PuzzleData(arrayOf(
+        FractalType.Empty, FractalType.Empty, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Blue, FractalType.Normal, FractalType.Blue, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.BlueB, FractalType.Empty,
+        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 2, false, false)
+val p19 = PuzzleData(arrayOf(
+        FractalType.Empty, FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Blue, FractalType.Normal, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Blue, FractalType.Normal, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 2, false, false)
+val p110 = PuzzleData(arrayOf(
+        FractalType.Empty, FractalType.RedB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.RedB, FractalType.Normal, FractalType.Red, FractalType.Empty, FractalType.Empty,
+        FractalType.Normal, FractalType.Normal, FractalType.Blue, FractalType.Empty, FractalType.Empty,
+        FractalType.Normal, FractalType.Normal, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 2, false, false)
+val p111 = PuzzleData(arrayOf(
+        FractalType.Empty, FractalType.RedB, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Blue, FractalType.Normal, FractalType.Red, FractalType.Empty,
+        FractalType.Normal, FractalType.Blue, FractalType.Red, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.RedB, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 2, false, false)
+val p112 = PuzzleData(arrayOf(
+        FractalType.Empty, FractalType.Blue, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Normal, FractalType.Normal, FractalType.Normal, FractalType.Empty,
+        FractalType.BlueB, FractalType.Blue, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 2, false, false)
+val p113 = PuzzleData(arrayOf(
+        FractalType.Empty, FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Blue, FractalType.Blue, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Normal, FractalType.Normal, FractalType.BlueB, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.BlueB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 2, false, false)
+val p114 = PuzzleData(arrayOf(
+        FractalType.BlueB, FractalType.Blue, FractalType.Blue, FractalType.Normal, FractalType.BlueB,
+        FractalType.Empty, FractalType.Blue, FractalType.Normal, FractalType.Normal, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 2, false, false)
+val p115 = PuzzleData(arrayOf(
+        FractalType.Empty, FractalType.GreenB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Green, FractalType.Normal, FractalType.Green, FractalType.Empty, FractalType.Empty,
+        FractalType.Normal, FractalType.Normal, FractalType.Normal, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.GreenB, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty,
+        FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty, FractalType.Empty),
+        Stack<UndoData>(), 2, false, false)
+/*
+val puzzle112 = PuzzleData(arrayOf(
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E),
+        Stack<UndoData>(), 2, false, false)*/
 
 
 val p20 = PuzzleData(arrayOf(
@@ -658,7 +733,7 @@ val set0 = SetData(arrayOf(puzzle00, puzzle01, null, null, null, null, null, nul
         null, null, null, null, null, null, null, null
 ), false, false, floatArrayOf(-8f, 21f, 0f))
 val set1 = SetData(arrayOf(puzzle10, puzzle11, puzzle12, puzzle13, puzzle14, puzzle15, puzzle16, puzzle17,
-        null, null, null, null, null, null, null, null), true, false, floatArrayOf(8f, 21f, 0f))
+        p18, p19, p110, p111, p112, p113, p114, p115), false, false, floatArrayOf(8f, 21f, 0f))
 val set2 = SetData(arrayOf(p20, p21, p22, p23, p24, p25, p26, p27,
         null, null, null, null, null, null, null, null), true, false, floatArrayOf(-8f, 7f, 0f))
 val set3 = SetData(arrayOf(p30, p31, p32, p33, p34, p35, p36, p37,

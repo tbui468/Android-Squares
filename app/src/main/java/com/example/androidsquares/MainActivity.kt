@@ -1,16 +1,11 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
-    //unlockAdjacentPuzzles()  and unlockPuzzle() are two separate functions that do similar things...
-        //should reorganize this
-    //finalize animation for clearing and unlocking sets and puzzles
-        //make unlocks adjacent (top, left, right, bottom) of cleared puzzle AND set
-        //current temporary animation is just pulsing, with no color change
-        //need art for locked/clear/unlocked and not cleared puzzles ana sets
-        //maybe implement wigglyness????
     ///////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////NETWORKING////////////////////////////////////////////
+    //how about just having hints from players who completed the puzzle (give user the first move)
+
     //look at SquaresServer project for the serverside stuff
 
     //should just save user_id, and moves it took to solve a particular puzzle
@@ -32,14 +27,22 @@
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////CONTENT///////////////////////////////////////////
-    //write 8 more set 1 puzzles
-    //minimum is 2 transformations, but allow up to 3 (or 4)
-    //recall that set 1 is teaching reflection/rotation of up to size 2x2
+    //change FractalType enum to something simpler such as FT.R, FT.Rb, FT.N, FT.Nb, FT.Bb, or even just F.R and F.Rb for Red and RedBlocks
+        //or alias them just to allow faster puzzle iteration
+
+    //write 8 more set 2 puzzles
+    //2 transformations
+    //introduce 2x2 translations
     //////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
-    //each fractal pules in turn, but it would look smoother if the animations overlapped instead of being play one after another
+    //make sure that empty Sets and Puzzles (null) should still work
+        //will need to rework how set positions are stored since having > 2x4 sets will allow more unlocking options
 
+    //high chance that independent animation that can be fired off and forgotten will be needed (for non-essential/non-sequential animations)
+        //find a way to implement this without breaking too much stuff
+
+    //each fractal pules in turn, but it would look smoother if the animations overlapped instead of being play one after another
 
     //add Geometry Wars style glow shaders
 
