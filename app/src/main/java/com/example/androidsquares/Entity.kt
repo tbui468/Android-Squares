@@ -53,6 +53,11 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
         scale = floatArrayOf(fromScale[0] + (toScale[0] - fromScale[0]) * newT, fromScale[1] + (toScale[1] - fromScale[1]) * newT, fromScale[2] + (toScale[2] - fromScale[2]) * newT)
     }
 
+    fun setScaleData(newScale: FloatArray) {
+        scale = newScale
+        fromScale = newScale
+        toScale = newScale
+    }
 
     fun setPosData(newPos: FloatArray) {
         pos = newPos

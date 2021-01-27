@@ -1,8 +1,5 @@
 package com.example.androidsquares
 
-import android.opengl.GLES20
-
-
 class UndoButton(private val mMaxTransformations: Int, private var mTransformationCount: Int, pos: FloatArray) : Entity(pos, floatArrayOf(40f, 5.5f, .1f), 1) {
 
     private val mSpacing = 4f
@@ -27,9 +24,11 @@ class UndoButton(private val mMaxTransformations: Int, private var mTransformati
         for(i in mLightBoxes.indices) {
             if(i < mTransformationCount) {
                 mLightBoxes[i]!!.setPosData(floatArrayOf(pos[0] - mOffset + (i) * mSpacing, pos[1], pos[2]))
-                mLightBoxes[i]!!.setAlphaData(1f)
             }else {
                 mLightBoxes[i]!!.setPosData(floatArrayOf(pos[0] - mOffset + (mTransformationCount - 1) * mSpacing, pos[1], pos[2]))
+            }
+            if(mTransformationCount == 0) {
+                mLightBoxes[i]!!.setScaleData(floatArrayOf(0f, 3f, 3f))
             }
         }
     }
@@ -60,11 +59,10 @@ class UndoButton(private val mMaxTransformations: Int, private var mTransformati
 
     fun decrement() {
         for(i in mLightBoxes.indices) {
-            if(i >= (mTransformationCount - 1)) {
-                mLightBoxes[i]!!.moveTo(floatArrayOf(pos[0] - mOffset + (mTransformationCount - 2) * mSpacing, pos[1], pos[2]))
-                if(i == (mTransformationCount - 1)) {
-                    mLightBoxes[i]!!.fadeTo(0f)
-                }
+            if(i < mTransformationCount - 1) continue
+            mLightBoxes[i]!!.moveTo(floatArrayOf(pos[0] - mOffset + (mTransformationCount - 2) * mSpacing, pos[1], pos[2]))
+            if(mTransformationCount == 1) {
+                mLightBoxes[i]!!.scaleTo(floatArrayOf(0f, 3f, 3f))
             }
         }
 
@@ -73,11 +71,10 @@ class UndoButton(private val mMaxTransformations: Int, private var mTransformati
 
     fun increment() {
         for(i in mLightBoxes.indices) {
-            if(i >= mTransformationCount) {
-                mLightBoxes[i]!!.moveTo(floatArrayOf(pos[0] - mOffset + (mTransformationCount) * mSpacing, pos[1], pos[2]))
-                if(i == mTransformationCount) {
-                    mLightBoxes[i]!!.fadeTo(1f)
-                }
+            if(i < mTransformationCount) continue
+            mLightBoxes[i]!!.moveTo(floatArrayOf(pos[0] - mOffset + (mTransformationCount) * mSpacing, pos[1], pos[2]))
+            if(mTransformationCount == 0) {
+                mLightBoxes[i]!!.scaleTo(floatArrayOf(3f, 3f, 3f))
             }
         }
 
@@ -111,10 +108,8 @@ class UndoButton(private val mMaxTransformations: Int, private var mTransformati
             box!!.draw(vpMatrix)
         }
 
-        if(mTransformationCount != 0) {
-            for (box in mLightBoxes) {
-                box!!.draw(vpMatrix)
-            }
+        for (box in mLightBoxes) {
+            box!!.draw(vpMatrix)
         }
 
     }

@@ -1,9 +1,6 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
-    //write 8 more set 2 puzzles
-    //2 transformations
-    //introduce 2x2 translations
     ///////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////SOCIAL FEATURES////////////////////////////////////////////
@@ -16,9 +13,14 @@
     //background music - placeholder is fine (set up resource files that can be loaded in on app start)
     //sound effects - placeholders are fine (set up resource files that can be loaded in on app start)
 
-
     //create main logo (how can it keep with the same simple theme of the rest of the game)
         //add glow effects to simulate how final design should look
+
+    //write 8 more set 3 puzzles
+    //3 transformations
+    //up to three colors - try to have puzzles that take advantage of 5x6 grid
+    //add puzzles with 4 and 5 transformations too
+    //once all 8 extra sets are complete, reorganize and cut the similar ones and reorder the ones kept
 
     ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -29,11 +31,6 @@
         //find a way to implement this without breaking too much stuff
 
     //each fractal pules in turn, but it would look smoother if the animations overlapped instead of being play one after another
-
-    //bug: undo bar can still be seen with 0 transformations (to the left)
-    //create all undo light boxes at edge and scale x to 0
-    //on incrementing, scale to 1 (in the x direction) and move to center of dark square
-    //this is only for first transformation, all others can remain the same
 
     //add a small amount of camera sway to make it more visually interestin (or at least animating background)
 
