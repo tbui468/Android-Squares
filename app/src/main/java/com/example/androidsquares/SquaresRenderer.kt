@@ -292,8 +292,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return null
     }
 
-    private fun getElements(cubeIndex: Int, squareIndex: Int, index: IntArray, size: Int): Array<FractalType> {
-        val elements = Array(size * size) { FractalType.Normal }
+    private fun getElements(cubeIndex: Int, squareIndex: Int, index: IntArray, size: Int): Array<F> {
+        val elements = Array(size * size) { F.N }
         for (row in 0 until size) {
             for (col in 0 until size) {
                 elements[col + row * size] = appData.setData[cubeIndex].puzzleData[squareIndex]!!.elements[index[0] + col + (index[1] + row) * MAX_PUZZLE_WIDTH]
@@ -302,7 +302,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return elements
     }
 
-    private fun setElements(cubeIndex: Int, squareIndex: Int, index: IntArray, elements: Array<FractalType>) {
+    private fun setElements(cubeIndex: Int, squareIndex: Int, index: IntArray, elements: Array<F>) {
         val size = when (elements.size) {
             1 -> 1
             4 -> 2
@@ -334,13 +334,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
 
-    private fun puzzleCleared(elements: Array<FractalType>, dim: IntArray): Boolean {
+    private fun puzzleCleared(elements: Array<F>, dim: IntArray): Boolean {
         val redList: MutableList<IntArray> = mutableListOf()
         val greenList: MutableList<IntArray> = mutableListOf()
         val blueList: MutableList<IntArray> = mutableListOf()
-        if (!colorCleared(elements, dim, FractalType.Red, redList)) return false
-        if (!colorCleared(elements, dim, FractalType.Green, greenList)) return false
-        if (!colorCleared(elements, dim, FractalType.Blue, blueList)) return false
+        if (!colorCleared(elements, dim, F.R, redList)) return false
+        if (!colorCleared(elements, dim, F.G, greenList)) return false
+        if (!colorCleared(elements, dim, F.B, blueList)) return false
 
         var chainLength = if(redList.size > greenList.size) redList.size else greenList.size
         if(blueList.size > chainLength) chainLength = blueList.size
@@ -369,19 +369,19 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     //how about this?  colorCleared returns a mutableList of Fractals (in order they how up in DFS) if that color is cleared
     //otherwise it returns an empty list
-    private fun colorCleared(elements: Array<FractalType>, dim: IntArray, fractalType: FractalType, indexList: MutableList<IntArray>): Boolean {
-        val targetColor0: FractalType
-        val targetColor1: FractalType
+    private fun colorCleared(elements: Array<F>, dim: IntArray, fractalType: F, indexList: MutableList<IntArray>): Boolean {
+        val targetColor0: F
+        val targetColor1: F
 
-        if (fractalType == FractalType.Red || fractalType == FractalType.RedB) {
-            targetColor0 = FractalType.Red
-            targetColor1 = FractalType.RedB
-        } else if (fractalType == FractalType.Green || fractalType == FractalType.GreenB) {
-            targetColor0 = FractalType.Green
-            targetColor1 = FractalType.GreenB
-        } else if (fractalType == FractalType.Blue || fractalType == FractalType.BlueB) {
-            targetColor0 = FractalType.Blue
-            targetColor1 = FractalType.BlueB
+        if (fractalType == F.R || fractalType == F.RB) {
+            targetColor0 = F.R
+            targetColor1 = F.RB
+        } else if (fractalType == F.G || fractalType == F.GB) {
+            targetColor0 = F.G
+            targetColor1 = F.GB
+        } else if (fractalType == F.B || fractalType == F.BB) {
+            targetColor0 = F.B
+            targetColor1 = F.BB
         } else {
             return true //if not one of the colors to check, just ignore it and return true
         }
@@ -409,7 +409,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return true
     }
 
-    private fun DFS(elements: Array<FractalType>, visited: BooleanArray, dim: IntArray, rootIndex: IntArray, targetColors: Array<FractalType>, indexList: MutableList<IntArray>) {
+    private fun DFS(elements: Array<F>, visited: BooleanArray, dim: IntArray, rootIndex: IntArray, targetColors: Array<F>, indexList: MutableList<IntArray>) {
         //mark root as visited and add that fractal to list
         visited[rootIndex[0] + rootIndex[1] * dim[0]] = true
         indexList.add(rootIndex) //problem here is due to not all fractals being sized 1x1
@@ -1760,41 +1760,41 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return textureHandle[0]
     }
 
-    private fun elementsToString(elements: Array<FractalType>): String {
+    private fun elementsToString(elements: Array<F>): String {
         var string = ""
         for(e in elements) {
             when(e) {
-                FractalType.Red -> string += "r"
-                FractalType.RedB -> string += "R"
-                FractalType.Green -> string += "g"
-                FractalType.GreenB -> string += "G"
-                FractalType.Blue -> string += "b"
-                FractalType.BlueB -> string += "B"
-                FractalType.Normal -> string += "n"
-                FractalType.NormalB -> string += "N"
-                FractalType.Empty -> string += "e"
+                F.R -> string += "r"
+                F.RB -> string += "R"
+                F.G -> string += "g"
+                F.GB -> string += "G"
+                F.B -> string += "b"
+                F.BB -> string += "B"
+                F.N -> string += "n"
+                F.NB -> string += "N"
+                F.E -> string += "e"
             }
         }
         return string
     }
 
-    private fun stringToElements(string: String?): Array<FractalType> {
+    private fun stringToElements(string: String?): Array<F> {
         if(string == null) {
-            return Array(MAX_PUZZLE_WIDTH * MAX_PUZZLE_HEIGHT){FractalType.Normal}
+            return Array(MAX_PUZZLE_WIDTH * MAX_PUZZLE_HEIGHT){F.N}
         }
-        val elements = Array(string.length){FractalType.Normal}
+        val elements = Array(string.length){F.N}
         for(i in string.indices) {
             elements[i] = when(string[i]) {
-                'r' -> FractalType.Red
-                'R' -> FractalType.RedB
-                'g' -> FractalType.Green
-                'G' -> FractalType.GreenB
-                'b' -> FractalType.Blue
-                'B' -> FractalType.BlueB
-                'n' -> FractalType.Normal
-                'N' -> FractalType.NormalB
-                'e' -> FractalType.Empty
-                else -> FractalType.Normal
+                'r' -> F.R
+                'R' -> F.RB
+                'g' -> F.G
+                'G' -> F.GB
+                'b' -> F.B
+                'B' -> F.BB
+                'n' -> F.N
+                'N' -> F.NB
+                'e' -> F.E
+                else -> F.N
             }
         }
         return elements

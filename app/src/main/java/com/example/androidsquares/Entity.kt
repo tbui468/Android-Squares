@@ -218,13 +218,13 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
 
 
     //note: texture coords start from top left corner, whereas vertex coords start from lower left (going ccw as index increases)
-    fun setTexture(vertices: FloatArray, size: Int, col: Int, row: Int, type: FractalType) {
+    fun setTexture(vertices: FloatArray, size: Int, col: Int, row: Int, type: F) {
         val textureIndex = IntArray(4)
         for(i in 0 until 4) {
             textureIndex[i] = (row * size + col) * FLOATS_PER_QUAD + 3 + i * 5
         }
         when (type) {
-            FractalType.Normal -> {
+            F.N -> {
                 vertices[textureIndex[0]] = 0f
                 vertices[textureIndex[0] + 1] = .25f
                 vertices[textureIndex[1]] = .25f
@@ -234,7 +234,7 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
                 vertices[textureIndex[3]] = 0f
                 vertices[textureIndex[3] + 1] = 0f
             }
-            FractalType.Red -> {
+            F.R -> {
                 vertices[textureIndex[0]] = .25f
                 vertices[textureIndex[0] + 1] = .25f
                 vertices[textureIndex[1]] = .5f
@@ -244,7 +244,7 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
                 vertices[textureIndex[3]] = .25f
                 vertices[textureIndex[3] + 1] = 0f
             }
-            FractalType.Green -> {
+            F.G -> {
                 vertices[textureIndex[0]] = 0f
                 vertices[textureIndex[0] + 1] = .5f
                 vertices[textureIndex[1]] = .25f
@@ -254,7 +254,7 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
                 vertices[textureIndex[3]] = 0f
                 vertices[textureIndex[3] + 1] = .25f
             }
-            FractalType.Blue -> {
+            F.B -> {
                 vertices[textureIndex[0]] = .25f
                 vertices[textureIndex[0] + 1] = .5f
                 vertices[textureIndex[1]] = .5f
@@ -264,7 +264,7 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
                 vertices[textureIndex[3]] = .25f
                 vertices[textureIndex[3] + 1] = .25f
             }
-            FractalType.NormalB -> {
+            F.NB -> {
                 vertices[textureIndex[0]] = .5f
                 vertices[textureIndex[0] + 1] = .25f
                 vertices[textureIndex[1]] = .75f
@@ -274,7 +274,7 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
                 vertices[textureIndex[3]] = .5f
                 vertices[textureIndex[3] + 1] = 0f
             }
-            FractalType.RedB -> {
+            F.RB -> {
                 vertices[textureIndex[0]] = .75f
                 vertices[textureIndex[0] + 1] = .25f
                 vertices[textureIndex[1]] = 1f
@@ -284,7 +284,7 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
                 vertices[textureIndex[3]] = .75f
                 vertices[textureIndex[3] + 1] = 0f
             }
-            FractalType.GreenB -> {
+            F.GB -> {
                 vertices[textureIndex[0]] = .5f
                 vertices[textureIndex[0] + 1] = .5f
                 vertices[textureIndex[1]] = .75f
@@ -294,7 +294,7 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
                 vertices[textureIndex[3]] = .5f
                 vertices[textureIndex[3] + 1] = .25f
             }
-            FractalType.BlueB -> {
+            F.BB -> {
                 vertices[textureIndex[0]] = .75f
                 vertices[textureIndex[0] + 1] = .5f
                 vertices[textureIndex[1]] = 1f
@@ -304,16 +304,16 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
                 vertices[textureIndex[3]] = .75f
                 vertices[textureIndex[3] + 1] = .25f
             }
-            FractalType.Empty -> {
+            F.E -> {
                 //do nothing
             }
         }
     }
 
-    fun findEmptyFractalCount(elements: Array<FractalType>): Int {
+    fun findEmptyFractalCount(elements: Array<F>): Int {
         var count = 0
         for(element in elements) {
-            if(element == FractalType.Empty) count++
+            if(element == F.E) count++
         }
         return count
     }

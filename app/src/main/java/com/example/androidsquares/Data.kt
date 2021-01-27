@@ -68,8 +68,9 @@ enum class TouchType {
 }
 
 //Block types (postfixed with B) are darker than their non-block counterparts and cannot be transformed/split/merged
-enum class FractalType {
-    Red, Blue, Green, Normal, Empty, RedB, BlueB, GreenB, NormalB
+//shortening names to make iterating/designing puzzles faster
+enum class F {
+    R, B, G, N, E, RB, BB, GB, NB
 }
 
 //quads start at top left.  Left to right.  Top to bottom
@@ -276,13 +277,13 @@ fun calculateSquarePosition(setPos: FloatArray, squareIndex: Int): FloatArray {
 
 
 
-fun getElementsDim(elements: Array<FractalType>): IntArray {
+fun getElementsDim(elements: Array<F>): IntArray {
     var width = 0
     var height = 0
     var col: Int
     var row: Int
     for(i in elements.indices) {
-        if(elements[i] != FractalType.Empty) {
+        if(elements[i] != F.E) {
             col = i % MAX_PUZZLE_WIDTH
             row = i / MAX_PUZZLE_WIDTH
             if (col + 1 > width) width = col + 1

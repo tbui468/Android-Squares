@@ -11,7 +11,7 @@ import android.opengl.GLES20
 
 val FRACTAL_SIZE = 5.5f
 
-class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, pos: FloatArray): Entity(pos, floatArrayOf(FRACTAL_SIZE, FRACTAL_SIZE, FRACTAL_SIZE), size) {
+class Fractal(elements: Array<F>, size: Int, fractalIndex: IntArray, pos: FloatArray): Entity(pos, floatArrayOf(FRACTAL_SIZE, FRACTAL_SIZE, FRACTAL_SIZE), size) {
 
     private val mIndexCount: Int //for rendering
     private var mVertexBuffer: FloatBuffer
@@ -59,12 +59,12 @@ class Fractal(elements: Array<FractalType>, size: Int, fractalIndex: IntArray, p
                 col = index % mSize
                 row = index / mSize
                 when(element) {
-                    FractalType.RedB -> mIsBlock = true
-                    FractalType.GreenB -> mIsBlock = true
-                    FractalType.BlueB -> mIsBlock = true
-                    FractalType.NormalB -> mIsBlock = true
+                    F.RB -> mIsBlock = true
+                    F.GB -> mIsBlock = true
+                    F.BB -> mIsBlock = true
+                    F.NB -> mIsBlock = true
                 }
-                if (element != FractalType.Empty) {
+                if (element != F.E) {
                     setTexture(vertices, mSize, col, row, element)
                     vertices.copyInto(trimmedVertices, trimmedVerticesOffset, (row * mSize + col) * FLOATS_PER_QUAD, (row * mSize + col + 1) * FLOATS_PER_QUAD)
                     trimmedVerticesOffset += FLOATS_PER_QUAD

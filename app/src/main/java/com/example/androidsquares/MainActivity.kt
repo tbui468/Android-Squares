@@ -1,6 +1,7 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
+    //will need to rework how set positions are stored since having > 2x4 sets will allow more unlocking options
     ///////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////NETWORKING////////////////////////////////////////////
@@ -27,8 +28,6 @@
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////CONTENT///////////////////////////////////////////
-    //change FractalType enum to something simpler such as FT.R, FT.Rb, FT.N, FT.Nb, FT.Bb, or even just F.R and F.Rb for Red and RedBlocks
-        //or alias them just to allow faster puzzle iteration
 
     //write 8 more set 2 puzzles
     //2 transformations
@@ -36,8 +35,7 @@
     //////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
-    //make sure that empty Sets and Puzzles (null) should still work
-        //will need to rework how set positions are stored since having > 2x4 sets will allow more unlocking options
+    //add shaders that change theme as a prize at the end of each (or near the end) of each set
 
     //high chance that independent animation that can be fired off and forgotten will be needed (for non-essential/non-sequential animations)
         //find a way to implement this without breaking too much stuff

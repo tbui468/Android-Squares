@@ -71,12 +71,12 @@ class Square(pos: FloatArray, squareIndex: Int, locked: Boolean, cleared: Boolea
     }
 
     //all of size 1 - used when opening square for the first time
-    fun spawnFractals(elements: Array<FractalType>): MutableList<Fractal> {
+    fun spawnFractals(elements: Array<F>): MutableList<Fractal> {
         val list = mutableListOf<Fractal>()
         val puzzleDim = getElementsDim(elements)
         var fractal: Fractal
         for(i in elements.indices) {
-            if(elements[i] != FractalType.Empty) {
+            if(elements[i] != F.E) {
                 val index = intArrayOf(i % MAX_PUZZLE_WIDTH, i / MAX_PUZZLE_WIDTH)
                 fractal = Fractal(arrayOf(elements[i]), 1, index, pos) //temp: creating fractals right on top of square for now
                 fractal.moveTo(calculateFractalPos(index, 1, pos, puzzleDim))
