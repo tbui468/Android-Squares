@@ -13,7 +13,7 @@ data class CoordinatePair(val x: Float, val y: Float)
 
 data class InputData(val touchType: TouchType, val x: Float, val y: Float, var life: Float)
 
-val SKIP_ANIMATION = 1000f
+val SKIP_ANIMATION = 1000f //making this a large number so that it only takes 1 step for animation parameter to go from 0 to 1 (delta time is scaled by this value)
 typealias AnimationSpeed = Float
 const val FLOAT_SIZE = 4
 const val SHORT_SIZE = 2
@@ -23,7 +23,7 @@ const val MAX_PUZZLE_WIDTH = 5
 const val MAX_PUZZLE_HEIGHT = 6
 const val PUZZLE_GRID_WIDTH = 4
 const val PUZZLE_GRID_HEIGHT = 4
-const val SET_GRID_WIDTH = 2
+const val SET_GRID_WIDTH = 3
 const val SET_GRID_HEIGHT = 4
 
 
@@ -264,15 +264,26 @@ val indices4 = shortArrayOf(0, 1, 2, 0, 2, 3,
 
 
 
-
-//4 cols, and 6 rows
+//set position is set to 0 now that camera doesn't move
 fun calculateSquarePosition(setPos: FloatArray, squareIndex: Int): FloatArray {
-    val col = squareIndex % 4
-    val row = squareIndex / 4
-    val hOffset = -10f * 3f / 2
-    val vOffset = 10f * 3f / 2
-    //return floatArrayOf(hOffset + setPos[0] + 10f * col, vOffset + setPos[1] - 10f * row, setPos[2])
-    return floatArrayOf(hOffset + 10f * col, vOffset - 10f * row, 0f)
+    val margin = 10f
+    val col = squareIndex % PUZZLE_GRID_WIDTH
+    val row = squareIndex / PUZZLE_GRID_WIDTH
+    val hOffset = -margin * (PUZZLE_GRID_WIDTH - 1f) / 2
+    val vOffset = margin * (PUZZLE_GRID_HEIGHT - 1f) / 2
+
+    return floatArrayOf(hOffset + margin * col, vOffset - margin * row, 0f)
+}
+
+//-8 to 8, -21 to 21
+fun calculateSetPosition(setIndex: Int): FloatArray {
+    val margin = 10f
+    val col = setIndex % SET_GRID_WIDTH
+    val row = setIndex / SET_GRID_WIDTH
+    val hOffset = -margin * (SET_GRID_WIDTH - 1f) / 2
+    val vOffset = margin * (SET_GRID_HEIGHT - 1f) / 2
+
+    return floatArrayOf(hOffset + margin * col, vOffset - margin * row, 0f)
 }
 
 
@@ -295,7 +306,7 @@ fun getElementsDim(elements: Array<F>): IntArray {
 }
 
 fun getPuzzleDim(setIndex: Int, puzzleIndex: Int): IntArray {
-    val elements = appData.setData[setIndex].puzzleData[puzzleIndex]!!.elements
+    val elements = appData.setData[setIndex]!!.puzzleData[puzzleIndex]!!.elements
 
     return getElementsDim(elements)
 }

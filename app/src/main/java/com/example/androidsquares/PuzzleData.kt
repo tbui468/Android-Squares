@@ -6,8 +6,8 @@ data class UndoData(val transformation: Transformation, val index: IntArray, val
 data class FractalData(val index: IntArray, val size: Int)
 
 data class PuzzleData(var elements: Array<F>, val undoStack: Stack<UndoData>, val maxTransformations: Int, var isLocked: Boolean, var isCleared: Boolean)
-data class SetData(val puzzleData: Array<PuzzleData?>, var isLocked: Boolean, var isCleared: Boolean, val pos: FloatArray)
-data class AppData(val setData: Array<SetData>)
+data class SetData(val puzzleData: Array<PuzzleData?>, var isLocked: Boolean, var isCleared: Boolean)
+data class AppData(val setData: Array<SetData?>)
 
 val p00 = PuzzleData(arrayOf(
         F.E, F.E, F.E, F.BB, F.E,
@@ -736,22 +736,22 @@ val set0 = SetData(arrayOf(
         null, p02, null, null,
         p04, p03, p05, p06,
         null, null, p07, null
-), false, false, floatArrayOf(-8f, 21f, 0f))
+), false, false)
 val set1 = SetData(arrayOf(p10, p11, p12, p13, p14, p15, p16, p17,
-        p18, p19, p110, p111, p112, p113, p114, p115), false, false, floatArrayOf(8f, 21f, 0f))
+        p18, p19, p110, p111, p112, p113, p114, p115), false, false)
 val set2 = SetData(arrayOf(p20, p21, p22, p23, p24, p25, p26, p27,
-        null, null, null, null, null, null, null, null), true, false, floatArrayOf(-8f, 7f, 0f))
+        null, null, null, null, null, null, null, null), true, false)
 val set3 = SetData(arrayOf(p30, p31, p32, p33, p34, p35, p36, p37,
-        null, null, null, null, null, null, null, null), true, false, floatArrayOf(8f, 7f, 0f))
+        null, null, null, null, null, null, null, null), true, false)
 val set4 = SetData(arrayOf(p40, p41, p42, p43, p44, p45, p46, p47,
-        null, null, null, null, null, null, null, null), true, false, floatArrayOf(-8f, -7f, 0f))
+        null, null, null, null, null, null, null, null), true, false)
 val set5 = SetData(arrayOf(p50, p51, p52, p53, p54, p55, p56, p57,
-        null, null, null, null, null, null, null, null), true, false, floatArrayOf(8f, -7f, 0f))
+        null, null, null, null, null, null, null, null), true, false)
 val set6 = SetData(arrayOf(p60, p61, p62, p63, p64, p65, p66, p67,
-        null, null, null, null, null, null, null, null), true, false, floatArrayOf(-8f, -21f, 0f))
+        null, null, null, null, null, null, null, null), true, false)
 val set7 = SetData(arrayOf(p70, p71, p72, p73, p74, p75, p76, p77,
-        null, null, null, null, null, null, null, null), true, false, floatArrayOf(8f, -21f, 0f))
+        null, null, null, null, null, null, null, null), true, false)
 
 //val defaultAppData = AppData(arrayOf(set0, set1, set2, set3, set4, set5, set6, set7))
-val defaultAppData = AppData(arrayOf(set0, set1, set2, set3, set4, set5, set6, set7))
+val defaultAppData = AppData(arrayOf(set0, set1, null, set2, set3, set4, set5, set6, null, set7))
 var appData = defaultAppData.copy()

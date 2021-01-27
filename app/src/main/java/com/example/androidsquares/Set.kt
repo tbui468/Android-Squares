@@ -87,13 +87,12 @@ class Set(pos: FloatArray, index: Int, locked: Boolean, cleared: Boolean): Entit
         return mutableListOf<Square>().also {
             var finalPos: FloatArray
             var square: Square
-            for(i in appData.setData[mIndex].puzzleData.indices) {
-                if(appData.setData[mIndex].puzzleData[i] != null) {
-                    finalPos = calculateSquarePosition(pos, i)
-                    square = Square(pos, i, appData.setData[mIndex].puzzleData[i]!!.isLocked, appData.setData[mIndex].puzzleData[i]!!.isCleared)
-                    square.moveTo(finalPos)
-                    it.add(square)
-                }
+            for(i in appData.setData[mIndex]!!.puzzleData.indices) {
+                if(appData.setData[mIndex]!!.puzzleData[i] == null) continue
+                finalPos = calculateSquarePosition(pos, i)
+                square = Square(pos, i, appData.setData[mIndex]!!.puzzleData[i]!!.isLocked, appData.setData[mIndex]!!.puzzleData[i]!!.isCleared)
+                square.moveTo(finalPos)
+                it.add(square)
             }
         }
     }

@@ -126,18 +126,20 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun spawnSets(): MutableList<Set> {
         val list = mutableListOf<Set>()
         var pos: FloatArray
-        for (puzzleIndex in appData.setData.indices) {
-            pos = appData.setData[puzzleIndex].pos
-            val offset = if (puzzleIndex % 2 == 0) -35f
+        for (setIndex in appData.setData.indices) {
+            pos = calculateSetPosition(setIndex)
+            val offset = if (setIndex % 2 == 0) -35f //offset is only here to allow it to animate on/off screen
             else 35f
-            list.add(Set(floatArrayOf(pos[0] + offset, pos[1], pos[2]), puzzleIndex, appData.setData[puzzleIndex].isLocked, appData.setData[puzzleIndex].isCleared))
+            if(appData.setData[setIndex] != null) {
+                list.add(Set(floatArrayOf(pos[0] + offset, pos[1], pos[2]), setIndex, appData.setData[setIndex]!!.isLocked, appData.setData[setIndex]!!.isCleared))
+            }
         }
         return list
     }
 
     fun openGame() {
         for (set in mSets) {
-            set.moveTo(appData.setData[set.mIndex].pos)
+            set.moveTo(calculateSetPosition(set.mIndex))
         }
         startAnimation(.5f)
     }
@@ -145,7 +147,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     fun closeGame() {
         var pos: FloatArray
         for (set in mSets) {
-            pos = appData.setData[set.mIndex].pos
+            //pos = appData.setData[set.mIndex].pos
+            pos = calculateSetPosition(set.mIndex)
             val offset = if (set.mIndex % 2 == 0) -35f
             else 35f
             set.moveTo(floatArrayOf(pos[0] + offset, pos[1], pos[2]))
@@ -171,7 +174,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun closeSet(): AnimationSpeed {
         for (s in mSets) {
-            s.moveTo(appData.setData[s.mIndex].pos)
+            s.moveTo(calculateSetPosition(s.mIndex))
         }
         val set = getOpenSet()
         set!!.mIsOpen = false
@@ -186,13 +189,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun openSquare(square: Square): AnimationSpeed {
-        val maxTransformations = appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.maxTransformations
-        val transformationCount = appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.undoStack.size
+        val maxTransformations = appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[square.mIndex]!!.maxTransformations
+        val transformationCount = appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[square.mIndex]!!.undoStack.size
         mUndoButton = UndoButton(maxTransformations, transformationCount, floatArrayOf(0f, 100f, 0f))
         mUndoButton.moveTo(floatArrayOf(0f, 28f, 0f))
 
 
-        mFractals = square.spawnFractals(appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.elements) //temp: just grabbing first index
+        mFractals = square.spawnFractals(appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[square.mIndex]!!.elements) //temp: just grabbing first index
         val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, square.mIndex)
         for (fractal in mFractals) {
             fractal.setAlphaData(0f)
@@ -292,17 +295,17 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return null
     }
 
-    private fun getElements(cubeIndex: Int, squareIndex: Int, index: IntArray, size: Int): Array<F> {
+    private fun getElements(setIndex: Int, squareIndex: Int, index: IntArray, size: Int): Array<F> {
         val elements = Array(size * size) { F.N }
         for (row in 0 until size) {
             for (col in 0 until size) {
-                elements[col + row * size] = appData.setData[cubeIndex].puzzleData[squareIndex]!!.elements[index[0] + col + (index[1] + row) * MAX_PUZZLE_WIDTH]
+                elements[col + row * size] = appData.setData[setIndex]!!.puzzleData[squareIndex]!!.elements[index[0] + col + (index[1] + row) * MAX_PUZZLE_WIDTH]
             }
         }
         return elements
     }
 
-    private fun setElements(cubeIndex: Int, squareIndex: Int, index: IntArray, elements: Array<F>) {
+    private fun setElements(setIndex: Int, squareIndex: Int, index: IntArray, elements: Array<F>) {
         val size = when (elements.size) {
             1 -> 1
             4 -> 2
@@ -314,13 +317,13 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         for (row in 0 until size) {
             for (col in 0 until size) {
-                appData.setData[cubeIndex].puzzleData[squareIndex]!!.elements[index[0] + col + (index[1] + row) * MAX_PUZZLE_WIDTH] = elements[col + row * size]
+                appData.setData[setIndex]!!.puzzleData[squareIndex]!!.elements[index[0] + col + (index[1] + row) * MAX_PUZZLE_WIDTH] = elements[col + row * size]
             }
         }
     }
 
     private fun setCleared(set: Set): Boolean {
-        for (puzzleData in appData.setData[set.mIndex].puzzleData) {
+        for (puzzleData in appData.setData[set.mIndex]!!.puzzleData) {
             if (puzzleData != null && !puzzleData.isCleared) return false
         }
         return true
@@ -328,7 +331,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun gameCleared(): Boolean {
         for(set in appData.setData) {
-            if(!set.isCleared) return false
+            if(set != null && !set.isCleared) return false
         }
         return true
     }
@@ -445,29 +448,29 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val row = puzzleIndex / PUZZLE_GRID_WIDTH
         //to the right
         val rightIndex = col + 1 + row * PUZZLE_GRID_WIDTH
-        if (col + 1 < PUZZLE_GRID_WIDTH && rightIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[rightIndex] != null) {
-            appData.setData[setIndex].puzzleData[rightIndex]!!.isLocked = false
+        if (col + 1 < PUZZLE_GRID_WIDTH && rightIndex < appData.setData[setIndex]!!.puzzleData.size && appData.setData[setIndex]!!.puzzleData[rightIndex] != null) {
+            appData.setData[setIndex]!!.puzzleData[rightIndex]!!.isLocked = false
         }
         //to the left
         val leftIndex = col - 1 + row * PUZZLE_GRID_WIDTH
-        if (col - 1 >= 0 && leftIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[leftIndex] != null) {
-            appData.setData[setIndex].puzzleData[leftIndex]!!.isLocked = false
+        if (col - 1 >= 0 && leftIndex < appData.setData[setIndex]!!.puzzleData.size && appData.setData[setIndex]!!.puzzleData[leftIndex] != null) {
+            appData.setData[setIndex]!!.puzzleData[leftIndex]!!.isLocked = false
         }
         //to the top
         val topIndex = col + (row - 1) * PUZZLE_GRID_WIDTH
-        if (row - 1 >= 0 && topIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[topIndex] != null) {
-            appData.setData[setIndex].puzzleData[topIndex]!!.isLocked = false
+        if (row - 1 >= 0 && topIndex < appData.setData[setIndex]!!.puzzleData.size && appData.setData[setIndex]!!.puzzleData[topIndex] != null) {
+            appData.setData[setIndex]!!.puzzleData[topIndex]!!.isLocked = false
         }
         //to the bottom
         val bottomIndex = col + (row + 1) * PUZZLE_GRID_WIDTH
-        if (row + 1 < PUZZLE_GRID_HEIGHT && bottomIndex < appData.setData[setIndex].puzzleData.size && appData.setData[setIndex].puzzleData[bottomIndex] != null) {
-            appData.setData[setIndex].puzzleData[bottomIndex]!!.isLocked = false
+        if (row + 1 < PUZZLE_GRID_HEIGHT && bottomIndex < appData.setData[setIndex]!!.puzzleData.size && appData.setData[setIndex]!!.puzzleData[bottomIndex] != null) {
+            appData.setData[setIndex]!!.puzzleData[bottomIndex]!!.isLocked = false
         }
     }
 
 
     private fun getTransformationsRemaining(setIndex: Int, puzzleIndex: Int): Int {
-        return appData.setData[setIndex].puzzleData[puzzleIndex]!!.maxTransformations - appData.setData[setIndex].puzzleData[puzzleIndex]!!.undoStack.size
+        return appData.setData[setIndex]!!.puzzleData[puzzleIndex]!!.maxTransformations - appData.setData[setIndex]!!.puzzleData[puzzleIndex]!!.undoStack.size
     }
 
     private fun pushTransformation(setIndex: Int, puzzleIndex: Int, undoData: UndoData) {
@@ -475,7 +478,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 getTransformationsRemaining(setIndex, puzzleIndex) > 0,
                 "No transformations remaining"
         )
-        appData.setData[setIndex].puzzleData[puzzleIndex]!!.undoStack.push(undoData)
+        appData.setData[setIndex]!!.puzzleData[puzzleIndex]!!.undoStack.push(undoData)
         mUndoButton.increment()
     }
 
@@ -580,7 +583,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
 
         if (!undo) {
-            if (puzzleCleared(appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(MAX_PUZZLE_WIDTH, MAX_PUZZLE_HEIGHT))) {
+            if (puzzleCleared(appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(MAX_PUZZLE_WIDTH, MAX_PUZZLE_HEIGHT))) {
                 mClearedPuzzleIndex = getOpenSquare()!!.mIndex
                 mAnimationQueue.add(::clearSplit)
                 mAnimationQueue.add(::clearPushPulseFractals)
@@ -611,8 +614,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun unlockAdjacentSets(setIndex: Int) {
         for(index in appData.setData.indices) {
-            if (isAdjacent(setIndex, index, SET_GRID_WIDTH, SET_GRID_HEIGHT)) {
-                appData.setData[index].isLocked = false
+            if(appData.setData[index] != null && isAdjacent(setIndex, index, SET_GRID_WIDTH, SET_GRID_HEIGHT)) {
+                appData.setData[index]!!.isLocked = false
             }
         }
     }
@@ -635,7 +638,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     private fun clearPuzzle(): AnimationSpeed {
-        appData.setData[getOpenSet()!!.mIndex].puzzleData[mClearedPuzzleIndex]!!.isCleared = true
+        appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[mClearedPuzzleIndex]!!.isCleared = true
         for(puzzle in mSquares) {
             if(puzzle.mIndex == mClearedPuzzleIndex) {
                 puzzle.scalePulse(floatArrayOf(puzzle.scale[0] * 2f, puzzle.scale[1] * 2f, 1f))
@@ -1341,7 +1344,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             Screen.Set -> {
                 if (touchType == TouchType.Tap) {
                     for (set in mSets) {
-                        if (set.pointCollision(x, y) && !appData.setData[set.mIndex].isLocked) {
+                        if (set.pointCollision(x, y) && !appData.setData[set.mIndex]!!.isLocked) {
                             return openSet(set)
                         }
                     }
@@ -1350,11 +1353,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             Screen.Square -> {
                 if (touchType == TouchType.Tap) {
                     for (square in mSquares) {
-                        if (square.centerCollision(
-                                        x,
-                                        y
-                                ) && !appData.setData[getOpenSet()!!.mIndex].puzzleData[square.mIndex]!!.isLocked
-                        ) {
+                        if (square.centerCollision(x, y) && !appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[square.mIndex]!!.isLocked) {
                             return openSquare(square)
                         }
                     }
@@ -1366,29 +1365,16 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 }
             }
             Screen.Fractal -> {
-                if (getTransformationsRemaining(
-                                getOpenSet()!!.mIndex,
-                                getOpenSquare()!!.mIndex
-                        ) > 0
-                ) {
+                if (getTransformationsRemaining(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex) > 0) {
                     for (fractal in mFractals) {
                         when (touchType) {
                             TouchType.FlickLeft -> {
                                 if (fractal.topCollision(x, y) && fractal.mSize > 1) { //rotate ccw
                                     return transform(fractal, Transformation.RotateCCW, false)
-                                } else if (fractal.bottomCollision(
-                                                x,
-                                                y
-                                        ) && fractal.mSize > 1
-                                ) { //rotate cw
+                                } else if (fractal.bottomCollision(x, y) && fractal.mSize > 1) { //rotate cw
                                     return transform(fractal, Transformation.RotateCW, false)
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
-                                    val swappedFractal: Fractal? = getFractal(
-                                            intArrayOf(
-                                                    fractal.mIndex[0] - fractal.mSize,
-                                                    fractal.mIndex[1]
-                                            )
-                                    )
+                                    val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, fractal.mIndex[1]))
                                     if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                         return transform(fractal, Transformation.TranslateNegX, false)
                                     }
@@ -1397,19 +1383,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                             TouchType.FlickRight -> {
                                 if (fractal.topCollision(x, y) && fractal.mSize > 1) { //rotate ccw
                                     return transform(fractal, Transformation.RotateCW, false)
-                                } else if (fractal.bottomCollision(
-                                                x,
-                                                y
-                                        ) && fractal.mSize > 1
-                                ) { //rotate cw
+                                } else if (fractal.bottomCollision(x, y) && fractal.mSize > 1) { //rotate cw
                                     return transform(fractal, Transformation.RotateCCW, false)
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
-                                    val swappedFractal: Fractal? = getFractal(
-                                            intArrayOf(
-                                                    fractal.mIndex[0] + fractal.mSize,
-                                                    fractal.mIndex[1]
-                                            )
-                                    )
+                                    val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1]))
                                     if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                         return transform(fractal, Transformation.TranslatePosX, false)
                                     }
@@ -1418,19 +1395,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                             TouchType.FlickUp -> {
                                 if (fractal.leftCollision(x, y) && fractal.mSize > 1) { //rotate ccw
                                     return transform(fractal, Transformation.RotateCW, false)
-                                } else if (fractal.rightCollision(
-                                                x,
-                                                y
-                                        ) && fractal.mSize > 1
-                                ) { //rotate cw
+                                } else if (fractal.rightCollision(x, y) && fractal.mSize > 1) { //rotate cw
                                     return transform(fractal, Transformation.RotateCCW, false)
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
-                                    val swappedFractal: Fractal? = getFractal(
-                                            intArrayOf(
-                                                    fractal.mIndex[0],
-                                                    fractal.mIndex[1] - fractal.mSize
-                                            )
-                                    )
+                                    val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
                                     if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                         return transform(fractal, Transformation.TranslateNegY, false)
                                     }
@@ -1439,19 +1407,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                             TouchType.FlickDown -> {
                                 if (fractal.leftCollision(x, y) && fractal.mSize > 1) { //rotate ccw
                                     return transform(fractal, Transformation.RotateCCW, false)
-                                } else if (fractal.rightCollision(
-                                                x,
-                                                y
-                                        ) && fractal.mSize > 1
-                                ) { //rotate cw
+                                } else if (fractal.rightCollision(x, y) && fractal.mSize > 1) { //rotate cw
                                     return transform(fractal, Transformation.RotateCW, false)
                                 } else if (fractal.centerCollision(x, y) && !fractal.mIsBlock) {
-                                    val swappedFractal: Fractal? = getFractal(
-                                            intArrayOf(
-                                                    fractal.mIndex[0],
-                                                    fractal.mIndex[1] + fractal.mSize
-                                            )
-                                    )
+                                    val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize))
                                     if (swappedFractal != null && swappedFractal.mSize == fractal.mSize && !swappedFractal.mIsBlock) {
                                         return transform(fractal, Transformation.TranslatePosY, false)
                                     }
@@ -1474,37 +1433,20 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
 
                 for (fractal in mFractals) {
-                    if (touchType == TouchType.DoubleTap && fractal.pointCollision(
-                                    x,
-                                    y
-                            ) && fractal.mSize > 1
-                    ) {
-                        val newFractals =
-                                split(fractal, null, FractalData(fractal.mIndex, fractal.mSize))
-
-                        val puzzleDim =
-                                getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
+                    if (touchType == TouchType.DoubleTap && fractal.pointCollision(x, y) && fractal.mSize > 1) {
+                        val newFractals = split(fractal, null, FractalData(fractal.mIndex, fractal.mSize))
+                        val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex)
                         for (newFractal in newFractals) {
-                            newFractal.moveTo(
-                                    calculateFractalPos(
-                                            newFractal.mIndex,
-                                            newFractal.mSize,
-                                            getOpenSquare()!!.pos,
-                                            puzzleDim
-                                    )
-                            )
+                            newFractal.moveTo(calculateFractalPos(newFractal.mIndex, newFractal.mSize, getOpenSquare()!!.pos, puzzleDim))
                             mFractals.add(newFractal)
                         }
-
                         return 1f
                     }
                 }
 
+
                 if (touchType == TouchType.DoubleTap) {
-                    val cornerFractals = getCornerFractals(
-                            x,
-                            y
-                    ) //checks for blocks in this function and returns null if ANY fractal is a block
+                    val cornerFractals = getCornerFractals(x, y) //checks for blocks in this function and returns null if ANY fractal is a block
                     if (cornerFractals != null) {
                         mMergeFractals = arrayOf(cornerFractals.toMutableList())
                         return moveToMerge(cornerFractals.toMutableList())
@@ -1519,15 +1461,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
                 if (touchType == TouchType.FlickLeft && mUndoButton.centerCollision(x, y)) {
                     //if undo stack is not empty
-                    if (!appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.undoStack.empty()) {
-                        val undoData =
-                                appData.setData[getOpenSet()!!.mIndex].puzzleData[getOpenSquare()!!.mIndex]!!.undoStack.pop()
-                        if (resizeRequired(
-                                        undoData.transformation,
-                                        undoData.index,
-                                        undoData.size
-                                )
-                        ) {
+                    if (!appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[getOpenSquare()!!.mIndex]!!.undoStack.empty()) {
+                        val undoData = appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[getOpenSquare()!!.mIndex]!!.undoStack.pop()
+                        if (resizeRequired(undoData.transformation, undoData.index, undoData.size)) {
                             mUndoQueue.add(undoData)
                             return undoResize(undoData.transformation, undoData.index, undoData.size)
                         } else {
@@ -1575,17 +1511,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         //recreate at end of animation (to reduce complexity by not having to save angle state, mostly)
         if (mRecreateFractal != null) {
-            mFractals.add(
-                    Fractal(
-                            getElements(
-                                    getOpenSet()!!.mIndex,
-                                    getOpenSquare()!!.mIndex,
-                                    mRecreateFractal!!.mIndex,
-                                    mRecreateFractal!!.mSize
-                            ),
-                            mRecreateFractal!!.mSize, mRecreateFractal!!.mIndex, mRecreateFractal!!.pos
-                    )
-            )
+            mFractals.add(Fractal(getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, mRecreateFractal!!.mIndex, mRecreateFractal!!.mSize),
+                            mRecreateFractal!!.mSize, mRecreateFractal!!.mIndex, mRecreateFractal!!.pos))
             mFractals.remove(mRecreateFractal!!)
             mRecreateFractal = null
         }
@@ -1668,19 +1595,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT)
 
-        Matrix.setLookAtM(
-                mViewMatrix,
-                0,
-                mCamera.pos[0],
-                mCamera.pos[1],
-                mCamera.pos[2],
-                mCamera.pos[0],
-                mCamera.pos[1],
-                0f,
-                0f,
-                1f,
-                0f
-        )
+        Matrix.setLookAtM(mViewMatrix, 0, mCamera.pos[0], mCamera.pos[1], mCamera.pos[2], mCamera.pos[0], mCamera.pos[1], 0f, 0f, 1f, 0f)
         Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0)
 
         GLES20.glUseProgram(mProgram)
@@ -1805,32 +1720,33 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         val sharedPref = (mContext as AppCompatActivity).getPreferences(Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
             for(i in appData.setData.indices) {
-                for(j in appData.setData[i].puzzleData.indices) {
-                    if(appData.setData[i].puzzleData[j] != null) {
-                        putBoolean(i.toString() + j.toString() + "isCleared", appData.setData[i].puzzleData[j]!!.isCleared)
-                        putString(i.toString() + j.toString() + "elements", elementsToString(appData.setData[i].puzzleData[j]!!.elements))
+                if(appData.setData[i] == null) continue
+                for (j in appData.setData[i]!!.puzzleData.indices) {
+                    if(appData.setData[i]!!.puzzleData[j] == null) continue
 
-                        //copying into temp stack
-                        val tempStack = Stack<UndoData>()
-                        while(!appData.setData[i].puzzleData[j]!!.undoStack.isEmpty()) {
-                            tempStack.push(appData.setData[i].puzzleData[j]!!.undoStack.pop())
-                        }
-                        //writing stack to preferences and pushing them back into undostack
-                        for(k in 0 until appData.setData[i].puzzleData[j]!!.maxTransformations) {
-                            if(!tempStack.isEmpty()) {
-                                val undoData = tempStack.pop()
-                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "transformation", undoData.transformation.value)
-                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "col", undoData.index[0])
-                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "row", undoData.index[1])
-                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "size", undoData.size)
-                                //push back into appdata
-                                appData.setData[i].puzzleData[j]!!.undoStack.push(undoData)
-                            }else {
-                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "transformation", Transformation.None.value)
-                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "col", 0)
-                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "row", 0)
-                                putInt(i.toString() + j.toString() + "undo" + k.toString() + "size", 0)
-                            }
+                    putBoolean(i.toString() + j.toString() + "isCleared", appData.setData[i]!!.puzzleData[j]!!.isCleared)
+                    putString(i.toString() + j.toString() + "elements", elementsToString(appData.setData[i]!!.puzzleData[j]!!.elements))
+
+                    //copying into temp stack
+                    val tempStack = Stack<UndoData>()
+                    while (!appData.setData[i]!!.puzzleData[j]!!.undoStack.isEmpty()) {
+                        tempStack.push(appData.setData[i]!!.puzzleData[j]!!.undoStack.pop())
+                    }
+                    //writing stack to preferences and pushing them back into undostack
+                    for (k in 0 until appData.setData[i]!!.puzzleData[j]!!.maxTransformations) {
+                        if (!tempStack.isEmpty()) {
+                            val undoData = tempStack.pop()
+                            putInt(i.toString() + j.toString() + "undo" + k.toString() + "transformation", undoData.transformation.value)
+                            putInt(i.toString() + j.toString() + "undo" + k.toString() + "col", undoData.index[0])
+                            putInt(i.toString() + j.toString() + "undo" + k.toString() + "row", undoData.index[1])
+                            putInt(i.toString() + j.toString() + "undo" + k.toString() + "size", undoData.size)
+                            //push back into appdata
+                            appData.setData[i]!!.puzzleData[j]!!.undoStack.push(undoData)
+                        } else {
+                            putInt(i.toString() + j.toString() + "undo" + k.toString() + "transformation", Transformation.None.value)
+                            putInt(i.toString() + j.toString() + "undo" + k.toString() + "col", 0)
+                            putInt(i.toString() + j.toString() + "undo" + k.toString() + "row", 0)
+                            putInt(i.toString() + j.toString() + "undo" + k.toString() + "size", 0)
                         }
                     }
                 }
@@ -1843,28 +1759,28 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private fun readSaveData() {
         val sharedPref = (mContext as AppCompatActivity).getPreferences(Context.MODE_PRIVATE)
         for(i in appData.setData.indices) {
-            for(j in appData.setData[i].puzzleData.indices) {
-                if(appData.setData[i].puzzleData[j] != null) {
-                    appData.setData[i].puzzleData[j]!!.isCleared = sharedPref.getBoolean(i.toString() + j.toString() + "isCleared",
-                            defaultAppData.setData[i].puzzleData[j]!!.isCleared)
-                    appData.setData[i].puzzleData[j]!!.elements = stringToElements(sharedPref.getString(i.toString() + j.toString() + "elements",
-                            elementsToString(defaultAppData.setData[i].puzzleData[j]!!.elements)))
+            if(appData.setData[i] == null) continue
+            for(j in appData.setData[i]!!.puzzleData.indices) {
+                if(appData.setData[i]!!.puzzleData[j] == null) continue
+                appData.setData[i]!!.puzzleData[j]!!.isCleared = sharedPref.getBoolean(i.toString() + j.toString() + "isCleared",
+                        defaultAppData.setData[i]!!.puzzleData[j]!!.isCleared)
+                appData.setData[i]!!.puzzleData[j]!!.elements = stringToElements(sharedPref.getString(i.toString() + j.toString() + "elements",
+                        elementsToString(defaultAppData.setData[i]!!.puzzleData[j]!!.elements)))
 
-                    //read undo stack
-                    appData.setData[i].puzzleData[j]!!.undoStack.clear()
-                    for(k in 0 until appData.setData[i].puzzleData[j]!!.maxTransformations) {
-                        val transformation = Transformation.getByValue(sharedPref.getInt(i.toString() + j.toString() + "undo" + k.toString() + "transformation", 0))
-                        val col = sharedPref.getInt(i.toString() + j.toString() + "undo" + k.toString() + "col", 0)
-                        val row = sharedPref.getInt(i.toString() + j.toString() + "undo" + k.toString() + "row", 0)
-                        val size = sharedPref.getInt(i.toString() + j.toString() + "undo" + k.toString() + "size", 0)
+                //read undo stack
+                appData.setData[i]!!.puzzleData[j]!!.undoStack.clear()
+                for(k in 0 until appData.setData[i]!!.puzzleData[j]!!.maxTransformations) {
+                    val transformation = Transformation.getByValue(sharedPref.getInt(i.toString() + j.toString() + "undo" + k.toString() + "transformation", 0))
+                    val col = sharedPref.getInt(i.toString() + j.toString() + "undo" + k.toString() + "col", 0)
+                    val row = sharedPref.getInt(i.toString() + j.toString() + "undo" + k.toString() + "row", 0)
+                    val size = sharedPref.getInt(i.toString() + j.toString() + "undo" + k.toString() + "size", 0)
 
-                        //just check transformation since col row and size should be saved correctly if transformation is too
-                        if(transformation == null || transformation == Transformation.None) break
+                    //just check transformation since col row and size should be saved correctly if transformation is too
+                    if(transformation == null || transformation == Transformation.None) break
 
-                        appData.setData[i].puzzleData[j]!!.undoStack.push(UndoData(transformation, intArrayOf(col, row), size))
-                    }
-
+                    appData.setData[i]!!.puzzleData[j]!!.undoStack.push(UndoData(transformation, intArrayOf(col, row), size))
                 }
+
             }
         }
 
@@ -1873,23 +1789,26 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         var allPuzzlesCleared: Boolean
         for(setIndex in appData.setData.indices) {
             allPuzzlesCleared = true
-            for (puzzleIndex in appData.setData[setIndex].puzzleData.indices) {
-                if(appData.setData[setIndex].puzzleData[puzzleIndex] != null) {
-                    if (appData.setData[setIndex].puzzleData[puzzleIndex]!!.isCleared) {
-                        unlockAdjacentPuzzles(setIndex, puzzleIndex)
-                    } else {
-                        allPuzzlesCleared = false
-                    }
+            if(appData.setData[setIndex] == null) continue
+            for (puzzleIndex in appData.setData[setIndex]!!.puzzleData.indices) {
+                if(appData.setData[setIndex]!!.puzzleData[puzzleIndex] == null) continue
+
+                if (appData.setData[setIndex]!!.puzzleData[puzzleIndex]!!.isCleared) {
+                    unlockAdjacentPuzzles(setIndex, puzzleIndex)
+                } else {
+                    allPuzzlesCleared = false
                 }
             }
             if(allPuzzlesCleared) {
-                appData.setData[setIndex].isCleared = true
+                appData.setData[setIndex]!!.isCleared = true
             }
         }
 
         //loop through all sets.  If cleared, set adjacent sets to unlocked
         for(setIndex in appData.setData.indices) {
-            if(appData.setData[setIndex].isCleared) {
+            if(appData.setData[setIndex] == null) continue
+
+            if(appData.setData[setIndex]!!.isCleared) {
                 unlockAdjacentSets(setIndex)
             }
         }
