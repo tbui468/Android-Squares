@@ -1,37 +1,26 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
-    //allow null sets to give room for more interesting set shapes
-    ///////////////////////////////////////////////////////////////////////////////////
-
-    //////////////////////////////////////////////NETWORKING////////////////////////////////////////////
-    //how about just having hints from players who completed the puzzle (give user the first move)
-
-    //look at SquaresServer project for the serverside stuff
-
-    //should just save user_id, and moves it took to solve a particular puzzle
-        //attributes: user_id, p00, p01, ..., p77 (a tuple has 65 attributes)
-
-    //seems like Facebook graph API documenation with javascript is better than python
-    //set up nodejs/expressjs backend and host on heroku (write in Typescript)
-    //send access token, user id, app id? over https to web server
-    //make Graph API call to verify access token, user_id, and app id is all correct before allowing user to update database
-
-    //for now, just use facebook (and maybe google) as a way to verify users
-        //since I don't want randos who aren't using my app to post to the database
-
-    //have bubbles of friends who cleared the current puzzle appear by the transformation box they completed it in
-    //have a ring (or other indicator) showing completion, and the same ring appears on user bubble after clearing a puzzle
-    //if more than two friends, have a bubble showing a "+12" (number of other friends).  Pushing this bubble shows a list of other friends that user can look at
-    //clicking on friend bubble shows the first move transformation that player did as a hint
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //////////////////////////////////////CONTENT///////////////////////////////////////////
     //write 8 more set 2 puzzles
     //2 transformations
     //introduce 2x2 translations
-    //////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////////SOCIAL FEATURES////////////////////////////////////////////
+    //how about just having hints from players who completed the puzzle (give user the first move)
+
+    //look at SquaresServer project for the serverside stuff
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////CORE//////////////////////////////////////////////////////////
+    //background music - placeholder is fine (set up resource files that can be loaded in on app start)
+    //sound effects - placeholders are fine (set up resource files that can be loaded in on app start)
+
+
+    //create main logo (how can it keep with the same simple theme of the rest of the game)
+        //add glow effects to simulate how final design should look
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
     //add shaders that change theme as a prize at the end of each (or near the end) of each set
@@ -41,6 +30,13 @@
 
     //each fractal pules in turn, but it would look smoother if the animations overlapped instead of being play one after another
 
+    //bug: undo bar can still be seen with 0 transformations (to the left)
+    //create all undo light boxes at edge and scale x to 0
+    //on incrementing, scale to 1 (in the x direction) and move to center of dark square
+    //this is only for first transformation, all others can remain the same
+
+    //add a small amount of camera sway to make it more visually interestin (or at least animating background)
+
     //add Geometry Wars style glow shaders
 
     //add a little wigglyness to the squares when moving (squishing and stretching based on how user interacts with it)
@@ -49,87 +45,13 @@
         //idea: have them spawn overlapped with parent object (sets for squares, and squares for fractals)
         //and then they animate to final positions
 
-
-    //bug: undo bar can still be seen with 0 transformations (to the left)
-
     //also, need a way to differentiate between sets, puzzles, and fractals
 
     //when user clicks on fractal, create a semi transparent circle expand from that point (like how android framework does it)
         //this is to provide feedback and also keep visual style consistent
         //also provides visual feedback when waiting for a double tap (rather than just showing no animation)
 
-    //bug: can see undo bar in the far distance when at main/set menu (also don't really like the undo bar having empty middles - it draws the eyes too much)
-
-    //create main logo (how can it keep with the same simple theme of the rest of the game)
-
     ////////////////////////////////////////////////////////////////////////////////////
-
-
-    //instead of a tutorial system, allow players to see first move of friend's solution
-    //put in first touch of my solutions for tutorial puzzles
-    //could create an animation object that just animates, fades out, and dies
-    //so I could just create a bunch and not worry about destroying them
-
-    //reorder puzzles into more interesting format (instead of the rows and columns they are in now)
-        //this will also allow user to choose the next puzzle, giving them more agency and choice
-
-    //Back button is normal to have in the app - keep it there since it's better to have an in-app way to go back (but include android back button functionality too)
-
-    //make all the puzzles solvable within 2, 3 or 4 moves.  But give player 1, 2, or 3 extra moves.  Don't tell players how many moves puzzles can be completed in
-        //then connect to social media and show a pictures of friends who completed it and the number of moves it took them
-            //if playing offline, show the lowest possible number of moves
-
-            //how about instead of solution, show friend's touch inputs?? This would be a fun hint (just save transformations/merge/split instead of saving actual raw inputs)
-        //puzzles floating in the background also have friend's profile pics attached
-        //tap on friend's profile to request hint???
-        //sign into facebook to allow users to see friend's scores
-        //can use 'python anywhere' to save data for now (or find some free/easy deployment with nodejs)
-            //user facebook name: set, puzzle, number of transformations to solve
-            //save all to database on pythonanywhere website - for users to access
-
-    //when clearing a puzzle, should automatically transition out of current puzzle
-        //just transitioning out and highlighting the completed puzzle and highlighting the newly unlocked ones
-
-    //animation for clearing puzzles (queue both these commands)
-            //need to pulse colored fractals....
-            //all colored fractals pulse white
-
-    //tutorial for swap, pinch in, pinch out, rotate, reflect
-        //have a dot animate showing finger motion to perform certain action
-
-    //puzzle goal should be obvious when looking at a puzzle for the first time
-        //user should know exactly where the colored squares need to go to connect all the colors
-        //having a clear end goal will make the puzzle for interesting, and encourage users to start thinking about solutions
-
-    //problem - there isn't enough integration with current puzzles -
-        //it feels like a cluster of random colors (it should feel like I'm connection colors together into lines/trees
-        //could add more darks colors
-        //keep in mind that all the colors needs to connect on the surface of the cube
-
-    //allows swapping with difference sizes, with the condition being that IF the swapped fractal were the correct size the swap would be valid
-
-    //idea: have a shader that changes color theme inside each complete cube
-        //need this carrot for people who like visual flair
-    //idea from Ollie: show friend who completed puzzle the fastest (either set or individual puzzles??)
-        //or maybe show the number of transformations your friend took to finish it
-        //or show your friend's solution
-        //or request solution from a facebook friend, or send solution to a facebook friend
-
-        //or each puzzle set you complete gives you "points" to request help
-        //you can use these points directly or give them to facebook friends who need help with a puzzle
-
-    //holding finger down highlights what part of the cube you are touch (center, edge or corner) so that user learns where to touch to transform
-
-    //puzzles - get 2 sets done (combine first two current sets together into one set.  Finish reflection/rotation for second set)
-    //first set be 1x1s (of up to two colors)
-    //second set introduce reflections/rotations
-    //third set introduce translations (and a third color)
-    //fourth set up the number of transformations to 4 + introduce 4th color (also lengthen color connections to 3 to 4 colored blocks)
-    //fifth set introduce 4x4 fractals - up the length of chains
-    //sixth set - up the length of chains
-    //seventh - up the length of chains
-    //eighth - up the length of chains
-
 
 package com.example.androidsquares
 
