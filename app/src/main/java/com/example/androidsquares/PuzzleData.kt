@@ -504,6 +504,70 @@ val p37 = PuzzleData(arrayOf(
         F.N, F.R, F.B, F.N, F.E,
         F.RB, F.E, F.E, F.BB, F.E),
         Stack<UndoData>(), 3, false, false)
+val p38 = PuzzleData(arrayOf(
+        F.E, F.BB, F.E, F.BB, F.E,
+        F.B, F.N, F.E, F.N, F.B,
+        F.B, F.B, F.E, F.B, F.B,
+        F.E, F.N, F.B, F.N, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E),
+        Stack<UndoData>(), 4, false, false)
+val p39 = PuzzleData(arrayOf(
+        F.E, F.E, F.E, F.GB, F.E,
+        F.E, F.RB, F.E, F.N, F.GB,
+        F.RB, F.N, F.G, F.N, F.E,
+        F.E, F.E, F.R, F.B, F.E,
+        F.E, F.BB, F.N, F.E, F.E,
+        F.E, F.E, F.BB, F.E, F.E),
+        Stack<UndoData>(), 4, false, false)
+val p310 = PuzzleData(arrayOf(
+        F.E, F.E, F.E, F.RB, F.E,
+        F.E, F.B, F.N, F.B, F.B,
+        F.RB, F.B, F.N, F.N, F.N,
+        F.BB, F.R, F.N, F.N, F.N,
+        F.E, F.R, F.N, F.R, F.R,
+        F.E, F.E, F.E, F.BB, F.E),
+        Stack<UndoData>(), 4, false, false)
+val p311 = PuzzleData(arrayOf(
+        F.E, F.E, F.BB, F.E, F.E,
+        F.E, F.E, F.N, F.N, F.E,
+        F.E, F.RB, F.B, F.B, F.E,
+        F.R, F.N, F.BB, F.E, F.E,
+        F.R, F.N, F.E, F.E, F.E,
+        F.E, F.RB, F.E, F.E, F.E),
+        Stack<UndoData>(), 2, false, false)
+val p312 = PuzzleData(arrayOf(
+        F.E, F.BB, F.E, F.E, F.E,
+        F.E, F.B, F.N, F.B, F.E,
+        F.E, F.N, F.N, F.E, F.E,
+        F.E, F.N, F.N, F.E, F.E,
+        F.B, F.N, F.B, F.E, F.E,
+        F.E, F.BB, F.E, F.E, F.E),
+        Stack<UndoData>(), 4, false, false)
+val p313 = PuzzleData(arrayOf(
+        F.B, F.N, F.N, F.B, F.E,
+        F.E, F.N, F.N, F.E, F.E,
+        F.BB, F.N, F.N, F.BB, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E),
+        Stack<UndoData>(), 4, false, false)
+val p314 = PuzzleData(arrayOf(
+        F.E, F.N, F.N, F.N, F.N,
+        F.E, F.N, F.N, F.N, F.R,
+        F.E, F.N, F.R, F.E, F.E,
+        F.RB, F.N, F.N, F.RB, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E),
+        Stack<UndoData>(), 4, false, false)
+val p315 = PuzzleData(arrayOf(
+        F.E, F.BB, F.B, F.N, F.E,
+        F.RB, F.E, F.R, F.N, F.E,
+        F.N, F.B, F.B, F.N, F.E,
+        F.N, F.B, F.B, F.N, F.E,
+        F.RB, F.E, F.R, F.N, F.E,
+        F.E, F.BB, F.B, F.N, F.E),
+        Stack<UndoData>(), 4, false, false)
 
 
 //temp placeholder puzzle
@@ -798,7 +862,7 @@ val set1 = SetData(arrayOf(p10, p11, p12, p13, p14, p15, p16, p17,
 val set2 = SetData(arrayOf(p20, p21, p22, p23, p24, p25, p26, p27,
         p28, p29, p210, p211, p212, p213, p214, p215), false, false)
 val set3 = SetData(arrayOf(p30, p31, p32, p33, p34, p35, p36, p37,
-        null, null, null, null, null, null, null, null), true, false)
+        p38, p39, p310, p311, p312, p313, p314, p315), false, false)
 val set4 = SetData(arrayOf(p40, p41, p42, p43, p44, p45, p46, p47,
         null, null, null, null, null, null, null, null), true, false)
 val set5 = SetData(arrayOf(p50, p51, p52, p53, p54, p55, p56, p57,

@@ -1,12 +1,16 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
+    //write 8 more set 3 puzzles
+    //3 transformations
+    //up to three colors - try to have puzzles that take advantage of 5x6 grid
+    //add puzzles with 4 and 5 transformations too (later)
+    //once all 8 extra sets are complete, reorganize and cut the similar ones and reorder the ones kept
     ///////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////SOCIAL FEATURES////////////////////////////////////////////
-    //how about just having hints from players who completed the puzzle (give user the first move)
-
-    //look at SquaresServer project for the serverside stuff
+    //look at SquaresServer project (index.ts) for the serverside stuff
+    //idea: seed the database with bot data (set id to a negative number)
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////CORE//////////////////////////////////////////////////////////
@@ -15,12 +19,6 @@
 
     //create main logo (how can it keep with the same simple theme of the rest of the game)
         //add glow effects to simulate how final design should look
-
-    //write 8 more set 3 puzzles
-    //3 transformations
-    //up to three colors - try to have puzzles that take advantage of 5x6 grid
-    //add puzzles with 4 and 5 transformations too
-    //once all 8 extra sets are complete, reorganize and cut the similar ones and reorder the ones kept
 
     ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +30,7 @@
 
     //each fractal pules in turn, but it would look smoother if the animations overlapped instead of being play one after another
 
-    //add a small amount of camera sway to make it more visually interestin (or at least animating background)
+    //add a small amount of camera sway to make it more visually interesting (or at least animating background)
 
     //add Geometry Wars style glow shaders
 
@@ -104,7 +102,7 @@ class MainActivity: AppCompatActivity() {
             //need to add puzzle data I want to update on database here
             val data: JSONObject = JSONObject().also {
                 it.put("fb_id", Profile.getCurrentProfile().id)
-                it.put("access_token", accessToken.toString())
+                it.put("access_token", accessToken.token)
                 it.put("app_id", getString(R.string.facebook_app_id))
             }
 

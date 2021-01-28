@@ -14,6 +14,7 @@ data class CoordinatePair(val x: Float, val y: Float)
 data class InputData(val touchType: TouchType, val x: Float, val y: Float, var life: Float)
 
 val SKIP_ANIMATION = 1000f //making this a large number so that it only takes 1 step for animation parameter to go from 0 to 1 (delta time is scaled by this value)
+val NORMAL_ANIMATION = 1f
 typealias AnimationSpeed = Float
 const val FLOAT_SIZE = 4
 const val SHORT_SIZE = 2
@@ -333,7 +334,7 @@ fun calculateFractalPos(index: IntArray, size: Int, squareCenterOld: FloatArray,
 
     val offset = calculatePuzzleOffset(puzzleDim[0], puzzleDim[1])
 
-    val belowCenter = 0f
+    val belowCenter = 2.5f
     val puzzleCenter = floatArrayOf(squareCenter[0] + offset[0], squareCenter[1] - offset[1] - belowCenter, squareCenter[2])
     val topLeftX = puzzleCenter[0] - SPACING * (puzzleDim[0] - 1)/2f + SPACING * index[0]
     val topLeftY = puzzleCenter[1] + SPACING * (puzzleDim[1] - 1)/2f - SPACING * index[1]

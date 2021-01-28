@@ -593,13 +593,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             }
         }
 
-        return 1f
-
+        return NORMAL_ANIMATION
     }
 
     private fun clearGame(): AnimationSpeed {
         //final animation for clearing all puzzles
-        return 1f
+        return NORMAL_ANIMATION
     }
 
     private fun clearSet(): AnimationSpeed {
@@ -609,7 +608,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 set.clear()
             }
         }
-        return 1f
+        return NORMAL_ANIMATION
     }
 
     private fun unlockAdjacentSets(setIndex: Int) {
@@ -634,7 +633,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             return SKIP_ANIMATION
         }
 
-        return 1f
+        return NORMAL_ANIMATION
     }
 
     private fun clearPuzzle(): AnimationSpeed {
@@ -645,7 +644,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 puzzle.clear()
             }
         }
-        return 1f
+        return NORMAL_ANIMATION
     }
 
     private fun isAdjacent(index1: Int, index2: Int, gridWidth: Int, gridHeight: Int): Boolean {
@@ -683,7 +682,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             return SKIP_ANIMATION
         }
 
-        return 1f
+        return NORMAL_ANIMATION
     }
 
     //split all fractals on clear
@@ -717,7 +716,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         splitList.clear()
 
-        return 1f
+        return NORMAL_ANIMATION
     }
 
 
@@ -741,7 +740,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         for (f in group) {
             f.scalePulse(floatArrayOf(f.scale[0] * 2f, f.scale[1] * 2f, 1f))
         }
-        return 1.5f
+        return NORMAL_ANIMATION * 1.5f
     }
 
     private fun resizeRequired(
@@ -884,7 +883,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             mMergeFractals = arrayOf(insideListA, insideListB)
         }
 
-        return 1f
+        return NORMAL_ANIMATION
     }
 
     private fun undoTransform(transformation: Transformation, index: IntArray, size: Int): AnimationSpeed {
@@ -892,7 +891,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         transform(fractal!!, transformation, true)
         mUndoButton.decrement()
 
-        return 1f
+        return NORMAL_ANIMATION
     }
 
 
@@ -1247,7 +1246,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             )
         }
 
-        return 1f
+        return NORMAL_ANIMATION
     }
 
     private fun merge(fractals: MutableList<Fractal>): Fractal {
@@ -1440,7 +1439,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                             newFractal.moveTo(calculateFractalPos(newFractal.mIndex, newFractal.mSize, getOpenSquare()!!.pos, puzzleDim))
                             mFractals.add(newFractal)
                         }
-                        return 1f
+                        return NORMAL_ANIMATION
                     }
                 }
 
