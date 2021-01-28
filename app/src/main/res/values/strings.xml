@@ -2,4 +2,5 @@
     <string name="app_name">Android Squares</string>
     <string name="facebook_app_id">234845118173080</string>
     <string name="fb_login_protocol_scheme">fb234845118173080</string>
+    <string name="server_url">https://protected-hollows-08807.herokuapp.com</string>
 </resources>

@@ -63,6 +63,7 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import com.android.volley.Request
 import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.facebook.*
@@ -94,9 +95,20 @@ class MainActivity: AppCompatActivity() {
         mTestButton = findViewById(R.id.test_button)
 
         mTestButton.setOnClickListener {
-            if(Profile.getCurrentProfile() != null) {
-                processProfile()
+
+            if(Profile.getCurrentProfile() == null) return@setOnClickListener
+
+            val accessToken: AccessToken? = AccessToken.getCurrentAccessToken()
+            if(accessToken == null || accessToken.isExpired) return@setOnClickListener
+
+            //need to add puzzle data I want to update on database here
+            val data: JSONObject = JSONObject().also {
+                it.put("fb_id", Profile.getCurrentProfile().id)
+                it.put("access_token", accessToken.toString())
+                it.put("app_id", getString(R.string.facebook_app_id))
             }
+
+            postUserData(getString(R.string.server_url), data)
         }
 
         //login to facebook
@@ -130,12 +142,30 @@ class MainActivity: AppCompatActivity() {
 
     }
 
+    //send post request to server.  Currently does not contain puzzle data
+    private fun postUserData(url: String, data: JSONObject) {
+        val jsonObjectRequest = JsonObjectRequest(Request.Method.POST, url, data,
+                {
+                    Log.d("facebooktest", "response received")
+                },
+                {
+                    Log.d("facebooktest", "response error")
+                }
+        )
+
+        val queue = Volley.newRequestQueue(this)
+        queue.add(jsonObjectRequest)
+    }
+
+    /*
+    //was used to send request to facebook API, but now this will be done on the server
     private fun processProfile() {
         val accessToken: AccessToken? = AccessToken.getCurrentAccessToken()
 
         if(accessToken == null || accessToken.isExpired) return
 
-        Log.d("facebooktest", accessToken.toString())
+        Log.d("facebooktest", "Access token: " + accessToken.toString())
+        Log.d("facebooktest", "profile ID: " + Profile.getCurrentProfile().getId())
 
         val request: GraphRequest = GraphRequest.newMeRequest(accessToken, object: GraphRequest.GraphJSONObjectCallback {
             override fun onCompleted(obj: JSONObject, response: GraphResponse) {
@@ -147,8 +177,7 @@ class MainActivity: AppCompatActivity() {
         parameters.putString("field", "name, id")
         request.parameters = parameters
         request.executeAsync()
-
-    }
+    }*/
 
     class MyProfileTracker : ProfileTracker() {
         override fun onCurrentProfileChanged(oldProfile: Profile?, currentProfile: Profile?) {
