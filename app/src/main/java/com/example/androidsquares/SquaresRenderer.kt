@@ -1724,6 +1724,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     if(appData.setData[i]!!.puzzleData[j] == null) continue
 
                     putBoolean(i.toString() + j.toString() + "isCleared", appData.setData[i]!!.puzzleData[j]!!.isCleared)
+                    putFloat(i.toString() + j.toString() + "percentCleared", appData.setData[i]!!.puzzleData[j]!!.percentCleared)
                     putString(i.toString() + j.toString() + "elements", elementsToString(appData.setData[i]!!.puzzleData[j]!!.elements))
 
                     //copying into temp stack
@@ -1763,6 +1764,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 if(appData.setData[i]!!.puzzleData[j] == null) continue
                 appData.setData[i]!!.puzzleData[j]!!.isCleared = sharedPref.getBoolean(i.toString() + j.toString() + "isCleared",
                         defaultAppData.setData[i]!!.puzzleData[j]!!.isCleared)
+                appData.setData[i]!!.puzzleData[j]!!.percentCleared = sharedPref.getFloat(i.toString() + j.toString() + "percentCleared",
+                        defaultAppData.setData[i]!!.puzzleData[j]!!.percentCleared)
                 appData.setData[i]!!.puzzleData[j]!!.elements = stringToElements(sharedPref.getString(i.toString() + j.toString() + "elements",
                         elementsToString(defaultAppData.setData[i]!!.puzzleData[j]!!.elements)))
 

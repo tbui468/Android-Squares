@@ -1,11 +1,6 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
-    //write 8 more set 3 puzzles
-    //3 transformations
-    //up to three colors - try to have puzzles that take advantage of 5x6 grid
-    //add puzzles with 4 and 5 transformations too (later)
-    //once all 8 extra sets are complete, reorganize and cut the similar ones and reorder the ones kept
     ///////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////SOCIAL FEATURES////////////////////////////////////////////
@@ -20,9 +15,18 @@
     //create main logo (how can it keep with the same simple theme of the rest of the game)
         //add glow effects to simulate how final design should look
 
+
+    //write 4 more set 4 puzzles
+    //3 or 4  or 5 transformations (can reorder them later)
+    //up to three colors - try to have puzzles that take advantage of 5x6 grid
+    //add puzzles with 4 and 5 transformations too (later)
+    //once all 8 extra sets are complete, reorganize and cut the similar ones and reorder the ones kept
+
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
+    //when a puzzle is cleared for the first time, and after the pulse animations, create an animated white spark in the blocks
+        //this white spark should always be there to signify to use that this puzzle is already cleared (instead of having to remember if Square was yellow while inside puzzle)
     //add shaders that change theme as a prize at the end of each (or near the end) of each set
 
     //high chance that independent animation that can be fired off and forgotten will be needed (for non-essential/non-sequential animations)
@@ -99,11 +103,32 @@ class MainActivity: AppCompatActivity() {
             val accessToken: AccessToken? = AccessToken.getCurrentAccessToken()
             if(accessToken == null || accessToken.isExpired) return@setOnClickListener
 
+            val set0: JSONObject = JSONObject().also {
+                for(i in 0 until 16) {
+                    if(appData.setData[0]!!.puzzleData[i] == null) {
+                        it.put("puzzle$i", false)
+                    }else {
+                        it.put("puzzle$i", appData.setData[0]!!.puzzleData[i]!!.isCleared)
+                    }
+                }
+            }
+            val set1: JSONObject = JSONObject().also {
+                for(i in 0 until 16) {
+                    if(appData.setData[1]!!.puzzleData[i] == null) {
+                        it.put("puzzle$i", false)
+                    }else {
+                        it.put("puzzle$i", appData.setData[1]!!.puzzleData[i]!!.isCleared)
+                    }
+                }
+            }
+
             //need to add puzzle data I want to update on database here
             val data: JSONObject = JSONObject().also {
                 it.put("fb_id", Profile.getCurrentProfile().id)
                 it.put("access_token", accessToken.token)
                 it.put("app_id", getString(R.string.facebook_app_id))
+                it.put("set0", set0.toString())
+                it.put("set1", set1.toString())
             }
 
             postUserData(getString(R.string.server_url), data)
