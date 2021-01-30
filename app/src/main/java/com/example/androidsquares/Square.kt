@@ -17,6 +17,7 @@ class Square(pos: FloatArray, squareIndex: Int, locked: Boolean, cleared: Boolea
     var mIndex = squareIndex
     var mIsOpen = false
     var mIsLocked = locked
+    var mIsCleared = cleared
 
     init {
         val vertices = vertices1.copyOf()

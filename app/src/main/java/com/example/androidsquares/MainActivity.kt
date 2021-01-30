@@ -1,19 +1,16 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
+    //tutorial (show taps and drags)
     ///////////////////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////SOCIAL FEATURES////////////////////////////////////////////
-    //look at SquaresServer project (index.ts) for the serverside stuff
-    //idea: seed the database with bot data (set id to a negative number)
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////CORE//////////////////////////////////////////////////////////
     //background music - placeholder is fine (set up resource files that can be loaded in on app start)
     //sound effects - placeholders are fine (set up resource files that can be loaded in on app start)
 
     //create main logo (how can it keep with the same simple theme of the rest of the game)
-        //add glow effects to simulate how final design should look
+    //add glow effects to simulate how final design should look
 
 
     //write 4 more set 4 puzzles
@@ -23,6 +20,13 @@
     //once all 8 extra sets are complete, reorganize and cut the similar ones and reorder the ones kept
 
     ////////////////////////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////////SOCIAL FEATURES///////////////////////////////////////////
+    //consider dropping these features (or delaying them until done with core features)
+        //look at SquaresServer project (index.ts) for the serverside stuff
+        //idea: seed the database with bot data (set id to a negative number)
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
     //when a puzzle is cleared for the first time, and after the pulse animations, create an animated white spark in the blocks

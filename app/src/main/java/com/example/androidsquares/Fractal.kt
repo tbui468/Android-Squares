@@ -17,6 +17,8 @@ class Fractal(elements: Array<F>, size: Int, fractalIndex: IntArray, pos: FloatA
     private var mVertexBuffer: FloatBuffer
     private var mIndexBuffer: ShortBuffer
     private var mModelMatrix = FloatArray(16)
+    var mClearedBox: Box? = null
+    var mShowClearedBox: Boolean = false
     val mSize: Int = size
     var mIndex = fractalIndex //fractal index - unrelated to rendering
     var mIsBlock = false
@@ -72,6 +74,13 @@ class Fractal(elements: Array<F>, size: Int, fractalIndex: IntArray, pos: FloatA
             }
         }
 
+
+        if(mIsBlock) {
+            mClearedBox = Box(pos, false)
+            mShowClearedBox = true
+        }
+
+
         val trimmedIndices = ShortArray(indices.size - 6 * emptyFractalCount)
         indices.copyInto(trimmedIndices, 0, 0, trimmedIndices.size)
         mIndexCount = trimmedIndices.size
@@ -79,6 +88,24 @@ class Fractal(elements: Array<F>, size: Int, fractalIndex: IntArray, pos: FloatA
         //put vertices and indices into buffer
         mVertexBuffer = createFloatBuffer(trimmedVertices)
         mIndexBuffer = createShortBuffer(trimmedIndices)
+    }
+
+    override fun onUpdate(t: Float) {
+        super.onUpdate(t)
+        if(mClearedBox != null)
+            mClearedBox!!.onUpdate(t)
+    }
+
+    override fun onAnimationEnd() {
+        super.onAnimationEnd()
+        if(mClearedBox != null)
+            mClearedBox!!.onAnimationEnd()
+    }
+
+    override fun moveTo(newPos: FloatArray) {
+        super.moveTo(newPos)
+        if(mClearedBox != null)
+            mClearedBox!!.moveTo(newPos)
     }
 
 
@@ -98,9 +125,11 @@ class Fractal(elements: Array<F>, size: Int, fractalIndex: IntArray, pos: FloatA
 
         GLES20.glUniformMatrix4fv(SquaresRenderer.mModelUniform, 1, false, mvpMatrix, 0)
 
-//        GLES20.glBlendColor(1f, 1f, 1f, alpha)
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexCount, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer)
- //       GLES20.glBlendColor(1f, 1f, 1f, 1f)
+
+        if(mClearedBox != null && mShowClearedBox) {
+            mClearedBox!!.draw(vpMatrix)
+        }
 
     }
 }

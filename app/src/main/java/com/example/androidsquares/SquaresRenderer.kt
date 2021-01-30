@@ -198,6 +198,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mFractals = square.spawnFractals(appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[square.mIndex]!!.elements) //temp: just grabbing first index
         val puzzleDim = getPuzzleDim(getOpenSet()!!.mIndex, square.mIndex)
         for (fractal in mFractals) {
+            fractal.mShowClearedBox = appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[square.mIndex]!!.isCleared
             fractal.setAlphaData(0f)
             fractal.fadeTo(1f)
             fractal.moveTo(
@@ -582,11 +583,12 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             }
         }
 
-        if (!undo) {
+        if (!undo && !appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[getOpenSquare()!!.mIndex]!!.isCleared) {
             if (puzzleCleared(appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(MAX_PUZZLE_WIDTH, MAX_PUZZLE_HEIGHT))) {
                 mClearedPuzzleIndex = getOpenSquare()!!.mIndex
                 mAnimationQueue.add(::clearSplit)
                 mAnimationQueue.add(::clearPushPulseFractals)
+                mAnimationQueue.add(::clearShowClearedBoxes)
                 mAnimationQueue.add(::closeSquare)
                 mAnimationQueue.add(::clearPuzzle)
                 mAnimationQueue.add(::unlockPuzzles)
@@ -734,11 +736,23 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return SKIP_ANIMATION
     }
 
+    private fun clearShowClearedBoxes(): AnimationSpeed {
+        for(f in mFractals) {
+            if(f.mIsBlock) {
+                f.mClearedBox!!.scalePulse(floatArrayOf(10f, 10f, 1f))
+            }
+        }
+        return NORMAL_ANIMATION
+    }
+
 
     private fun pulseFractals(): AnimationSpeed {
         val group = mPulseFractals.pop()
         for (f in group) {
             f.scalePulse(floatArrayOf(f.scale[0] * 2f, f.scale[1] * 2f, 1f))
+            if(f.mIsBlock) {
+                f.mShowClearedBox = true
+            }
         }
         return NORMAL_ANIMATION * 1.5f
     }
