@@ -28,18 +28,6 @@ const val SET_GRID_WIDTH = 3
 const val SET_GRID_HEIGHT = 4
 
 
-enum class CollisionBox {
-    None,
-    Center,
-    TopLeft,
-    TopRight,
-    BottomLeft,
-    BottomRight,
-    Top,
-    Left,
-    Right,
-    Bottom
-}
 
 enum class Transformation(val value: Int) {
     None(0),
@@ -71,7 +59,7 @@ enum class TouchType {
 //Block types (postfixed with B) are darker than their non-block counterparts and cannot be transformed/split/merged
 //shortening names to make iterating/designing puzzles faster
 enum class F {
-    R, B, G, N, E, RB, BB, GB, NB
+    R, B, G, N, E, RB, BB, GB, NB, W
 }
 
 //quads start at top left.  Left to right.  Top to bottom
@@ -288,6 +276,21 @@ fun calculateSetPosition(setIndex: Int): FloatArray {
 }
 
 
+fun getTexCoords(color: F): FloatArray {
+    return when(color) {
+        F.R-> floatArrayOf(.25f, .25f, .5f, .25f, .5f, 0f, .25f, 0f)
+        F.G-> floatArrayOf(0f, .5f, .25f, .5f, .25f, .25f, 0f, .25f)
+        F.B-> floatArrayOf(.25f, .5f, .5f, .5f, .5f, .25f, .25f, .25f)
+        F.N-> floatArrayOf(0f, .25f, .25f, .25f, .25f, 0f, 0f, 0f)
+        F.RB-> floatArrayOf(.75f, .25f, 1f, .25f, 1f, 0f, .75f, 0f)
+        F.GB-> floatArrayOf(.5f, .5f, .75f, .5f, .75f, .25f, .5f, .25f)
+        F.BB-> floatArrayOf(.75f, .5f, 1f, .5f, 1f, .25f, .75f, .25f)
+        F.NB-> floatArrayOf(.5f, .25f, .75f, .25f, .75f, 0f, .5f, 0f)
+        F.W-> floatArrayOf(.25f, .75f, .5f, .75f, .5f, .5f, .25f, .5f)
+        F.E-> floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f) //use should never call this
+        else-> floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)
+    }
+}
 
 fun getElementsDim(elements: Array<F>): IntArray {
     var width = 0

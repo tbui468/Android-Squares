@@ -583,8 +583,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             }
         }
 
-        if (!undo && !appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[getOpenSquare()!!.mIndex]!!.isCleared) {
-            if (puzzleCleared(appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(MAX_PUZZLE_WIDTH, MAX_PUZZLE_HEIGHT))) {
+        if (!undo && puzzleCleared(appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[getOpenSquare()!!.mIndex]!!.elements, intArrayOf(MAX_PUZZLE_WIDTH, MAX_PUZZLE_HEIGHT))) {
+            if(!appData.setData[getOpenSet()!!.mIndex]!!.puzzleData[getOpenSquare()!!.mIndex]!!.isCleared) { //full animation if cleared for first time
                 mClearedPuzzleIndex = getOpenSquare()!!.mIndex
                 mAnimationQueue.add(::clearSplit)
                 mAnimationQueue.add(::clearPushPulseFractals)
@@ -592,6 +592,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 mAnimationQueue.add(::closeSquare)
                 mAnimationQueue.add(::clearPuzzle)
                 mAnimationQueue.add(::unlockPuzzles)
+            }else { //only pulse blocks if cleared multiple times
+                mAnimationQueue.add(::clearShowClearedBoxes)
             }
         }
 
@@ -742,7 +744,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 f.mClearedBox!!.scalePulse(floatArrayOf(10f, 10f, 1f))
             }
         }
-        return NORMAL_ANIMATION
+        return NORMAL_ANIMATION * .5f
     }
 
 

@@ -5,10 +5,10 @@ import android.opengl.GLES20
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 
-class Box(pos: FloatArray, dark: Boolean) : Entity(pos, floatArrayOf(3f, 3f, 3f), 1) {
+class Box(pos: FloatArray, texColor: F) : Entity(pos, floatArrayOf(3f, 3f, 3f), 1) {
 
     init {
-        if(!dark) {
+        if(texColor == F.N) {
             setAlphaData(0f)
         }
     }
@@ -18,16 +18,16 @@ class Box(pos: FloatArray, dark: Boolean) : Entity(pos, floatArrayOf(3f, 3f, 3f)
             0.5f, -0.5f, 0.0f, .25f, .25f,
             0.5f, 0.5f, 0.0f, .25f, 0f,
             -0.5f, 0.5f, 0.0f, 0f, 0f).also {
-        if(dark) {
-            it[3] = .5f
-            it[4] = .25f
-            it[8] = .75f
-            it[9] = .25f
-            it[13] = .75f
-            it[14] = 0f
-            it[18] = .5f
-            it[19] = 0f
-        }
+
+        val texCoords = getTexCoords(texColor)
+        it[3] = texCoords[0]
+        it[4] = texCoords[1]
+        it[8] = texCoords[2]
+        it[9] = texCoords[3]
+        it[13] = texCoords[4]
+        it[14] = texCoords[5]
+        it[18] = texCoords[6]
+        it[19] = texCoords[7]
     }
 
     val indices = shortArrayOf(0, 1, 2, 0, 2, 3)

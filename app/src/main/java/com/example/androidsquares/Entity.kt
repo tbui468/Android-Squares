@@ -228,90 +228,16 @@ open class Entity(var pos: FloatArray, var scale: FloatArray, var size: Int) {
         for(i in 0 until 4) {
             textureIndex[i] = (row * size + col) * FLOATS_PER_QUAD + 3 + i * 5
         }
-        when (type) {
-            F.N -> {
-                vertices[textureIndex[0]] = 0f
-                vertices[textureIndex[0] + 1] = .25f
-                vertices[textureIndex[1]] = .25f
-                vertices[textureIndex[1] + 1] = .25f
-                vertices[textureIndex[2]] = .25f
-                vertices[textureIndex[2] + 1] = 0f
-                vertices[textureIndex[3]] = 0f
-                vertices[textureIndex[3] + 1] = 0f
-            }
-            F.R -> {
-                vertices[textureIndex[0]] = .25f
-                vertices[textureIndex[0] + 1] = .25f
-                vertices[textureIndex[1]] = .5f
-                vertices[textureIndex[1] + 1] = .25f
-                vertices[textureIndex[2]] = .5f
-                vertices[textureIndex[2] + 1] = 0f
-                vertices[textureIndex[3]] = .25f
-                vertices[textureIndex[3] + 1] = 0f
-            }
-            F.G -> {
-                vertices[textureIndex[0]] = 0f
-                vertices[textureIndex[0] + 1] = .5f
-                vertices[textureIndex[1]] = .25f
-                vertices[textureIndex[1] + 1] = .5f
-                vertices[textureIndex[2]] = .25f
-                vertices[textureIndex[2] + 1] = .25f
-                vertices[textureIndex[3]] = 0f
-                vertices[textureIndex[3] + 1] = .25f
-            }
-            F.B -> {
-                vertices[textureIndex[0]] = .25f
-                vertices[textureIndex[0] + 1] = .5f
-                vertices[textureIndex[1]] = .5f
-                vertices[textureIndex[1] + 1] = .5f
-                vertices[textureIndex[2]] = .5f
-                vertices[textureIndex[2] + 1] = .25f
-                vertices[textureIndex[3]] = .25f
-                vertices[textureIndex[3] + 1] = .25f
-            }
-            F.NB -> {
-                vertices[textureIndex[0]] = .5f
-                vertices[textureIndex[0] + 1] = .25f
-                vertices[textureIndex[1]] = .75f
-                vertices[textureIndex[1] + 1] = .25f
-                vertices[textureIndex[2]] = .75f
-                vertices[textureIndex[2] + 1] = 0f
-                vertices[textureIndex[3]] = .5f
-                vertices[textureIndex[3] + 1] = 0f
-            }
-            F.RB -> {
-                vertices[textureIndex[0]] = .75f
-                vertices[textureIndex[0] + 1] = .25f
-                vertices[textureIndex[1]] = 1f
-                vertices[textureIndex[1] + 1] = .25f
-                vertices[textureIndex[2]] = 1f
-                vertices[textureIndex[2] + 1] = 0f
-                vertices[textureIndex[3]] = .75f
-                vertices[textureIndex[3] + 1] = 0f
-            }
-            F.GB -> {
-                vertices[textureIndex[0]] = .5f
-                vertices[textureIndex[0] + 1] = .5f
-                vertices[textureIndex[1]] = .75f
-                vertices[textureIndex[1] + 1] = .5f
-                vertices[textureIndex[2]] = .75f
-                vertices[textureIndex[2] + 1] = .25f
-                vertices[textureIndex[3]] = .5f
-                vertices[textureIndex[3] + 1] = .25f
-            }
-            F.BB -> {
-                vertices[textureIndex[0]] = .75f
-                vertices[textureIndex[0] + 1] = .5f
-                vertices[textureIndex[1]] = 1f
-                vertices[textureIndex[1] + 1] = .5f
-                vertices[textureIndex[2]] = 1f
-                vertices[textureIndex[2] + 1] = .25f
-                vertices[textureIndex[3]] = .75f
-                vertices[textureIndex[3] + 1] = .25f
-            }
-            F.E -> {
-                //do nothing
-            }
+        val texCoords = getTexCoords(type)
+        if(type != F.E) {
+            vertices[textureIndex[0]] = texCoords[0]
+            vertices[textureIndex[0] + 1] = texCoords[1]
+            vertices[textureIndex[1]] = texCoords[2]
+            vertices[textureIndex[1] + 1] = texCoords[3]
+            vertices[textureIndex[2]] = texCoords[4]
+            vertices[textureIndex[2] + 1] = texCoords[5]
+            vertices[textureIndex[3]] = texCoords[6]
+            vertices[textureIndex[3] + 1] = texCoords[7]
         }
     }
 

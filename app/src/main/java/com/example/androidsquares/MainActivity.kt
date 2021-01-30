@@ -12,7 +12,6 @@
     //create main logo (how can it keep with the same simple theme of the rest of the game)
     //add glow effects to simulate how final design should look
 
-
     //write 4 more set 4 puzzles
     //3 or 4  or 5 transformations (can reorder them later)
     //up to three colors - try to have puzzles that take advantage of 5x6 grid

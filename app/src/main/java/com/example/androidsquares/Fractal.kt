@@ -76,7 +76,7 @@ class Fractal(elements: Array<F>, size: Int, fractalIndex: IntArray, pos: FloatA
 
 
         if(mIsBlock) {
-            mClearedBox = Box(pos, false)
+            mClearedBox = Box(pos, F.W)
             mShowClearedBox = true
         }
 
