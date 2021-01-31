@@ -1,11 +1,15 @@
 //get a complete vertical slice with two puzzle cubes
 
-    ///////////////////////////////////////TODO NOW///////////////////////////////////////////////
-    //tutorial (show taps and drags)
+    ///////////////////////////////////////TODO NOW////////////////////////////////////
+    //main logo
+    //visual design for sets and squares
+    //animation for transitioning from sets and squares to fractals
     ///////////////////////////////////////////////////////////////////////////////////
 
 
     //////////////////////////////////////CORE//////////////////////////////////////////////////////////
+    //tutorial (show taps and drags)
+
     //background music - placeholder is fine (set up resource files that can be loaded in on app start)
     //sound effects - placeholders are fine (set up resource files that can be loaded in on app start)
 

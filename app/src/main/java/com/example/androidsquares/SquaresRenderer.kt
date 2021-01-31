@@ -754,6 +754,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             f.scalePulse(floatArrayOf(f.scale[0] * 2f, f.scale[1] * 2f, 1f))
             if(f.mIsBlock) {
                 f.mShowClearedBox = true
+                f.mClearedBox!!.scalePulse(floatArrayOf(10f, 10f, 1f))
             }
         }
         return NORMAL_ANIMATION * 1.5f
