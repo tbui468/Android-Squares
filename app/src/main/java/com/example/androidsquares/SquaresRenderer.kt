@@ -142,7 +142,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             set.moveTo(calculateSetPosition(set.mIndex))
         }
         mLogo.moveTo(floatArrayOf(30f, 0f, 0f))
-        return NORMAL_ANIMATION * .5f
+        return NORMAL_ANIMATION
     }
 
     fun closeGame(): AnimationSpeed {
@@ -157,7 +157,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mLogo.moveTo(floatArrayOf(0f, 0f, 0f))
         mAnimationQueue.add(::clearSetList)
 
-        return NORMAL_ANIMATION * .5f
+        return NORMAL_ANIMATION
     }
 
     private fun openSet(set: Set): AnimationSpeed {

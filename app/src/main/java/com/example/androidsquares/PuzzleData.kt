@@ -667,6 +667,38 @@ val p411 = PuzzleData(arrayOf(
         F.BB, F.N, F.N, F.BB, F.E,
         F.E, F.E, F.E, F.E, F.E),
         Stack<UndoData>(), 4, false, false, 0f)
+val p412 = PuzzleData(arrayOf(
+        F.GB, F.E, F.E, F.GB, F.E,
+        F.G, F.B, F.B, F.G, F.E,
+        F.G, F.B, F.B, F.G, F.E,
+        F.BB, F.E, F.E, F.BB, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E),
+        Stack<UndoData>(), 2, false, false, 0f)
+val p413 = PuzzleData(arrayOf(
+        F.RB, F.B, F.B, F.RB, F.E,
+        F.E, F.N, F.N, F.E, F.E,
+        F.BB, F.R, F.R, F.BB, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E),
+        Stack<UndoData>(), 3, false, false, 0f)
+val p414 = PuzzleData(arrayOf(
+        F.R, F.R, F.RB, F.E, F.E,
+        F.N, F.N, F.E, F.E, F.E,
+        F.E, F.N, F.E, F.E, F.E,
+        F.E, F.R, F.R, F.E, F.E,
+        F.RB, F.N, F.R, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E),
+        Stack<UndoData>(), 3, false, false, 0f)
+val p415 = PuzzleData(arrayOf(
+        F.E, F.B, F.B, F.B, F.E,
+        F.BB, F.N, F.N, F.N, F.BB,
+        F.GB, F.N, F.N, F.N, F.GB,
+        F.E, F.G, F.G, F.G, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E),
+        Stack<UndoData>(), 4, false, false, 0f)
 
 val p50 = PuzzleData(arrayOf( //easy peasy - should go in an earlier set
         F.E, F.N, F.B, F.RB, F.E,
@@ -896,9 +928,9 @@ val set2 = SetData(arrayOf(p20, p21, p22, p23, p24, p25, p26, p27,
 val set3 = SetData(arrayOf(p30, p31, p32, p33, p34, p35, p36, p37,
         p38, p39, p310, p311, p312, p313, p314, p315), false, false)
 val set4 = SetData(arrayOf(p40, p41, p42, p43, p44, p45, p46, p47,
-        p48, p49, p410, p411, null, null, null, null), false, false)
+        p48, p49, p410, p411, p412, p413, p414, p415), false, false)
 val set5 = SetData(arrayOf(p50, p51, p52, p53, p54, p55, p56, p57,
-        null, null, null, null, null, null, null, null), true, false)
+        null, null, null, null, null, null, null, null), false, false)
 val set6 = SetData(arrayOf(p60, p61, p62, p63, p64, p65, p66, p67,
         null, null, null, null, null, null, null, null), true, false)
 val set7 = SetData(arrayOf(p70, p71, p72, p73, p74, p75, p76, p77,
