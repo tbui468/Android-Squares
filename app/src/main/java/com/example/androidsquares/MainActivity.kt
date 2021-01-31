@@ -1,9 +1,11 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW////////////////////////////////////
-    //main logo
-    //visual design for sets and squares
-    //animation for transitioning from sets and squares to fractals
+    //redo main menu
+    //currently Activity is the main menu.  Need to get rid of 'skip' button
+    //and go straight to surfaceview when opening app.  Have logo appear,
+        //tap logo to go to set menu
+    //white is a reserved color for menu, cleared puzzle status, and tutorials
     ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -69,169 +71,37 @@ import android.util.Log
 import android.os.Bundle
 import android.os.Handler
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.ImageView
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
-import com.facebook.*
 
-import com.facebook.login.LoginManager
-import com.facebook.login.LoginResult
-import org.json.JSONObject
 
 class MainActivity: AppCompatActivity() {
     private lateinit var mSquaresSurfaceView: SquaresSurfaceView
     private var mOnLogin = true
     private lateinit var mSkipButton: Button
-    private lateinit var mLoginButton: Button
-    private lateinit var mLogo: ImageView
-    private lateinit var mCallbackManager: CallbackManager
-    private lateinit var mProfileTracker: ProfileTracker
-    private lateinit var mTestButton: Button
 
     public override fun onCreate(savedInstanceState: Bundle?) {
 //        setTheme(R.style.SplashScreen)
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.login)
+        //setContentView(R.layout.login) //want to get rid of this
 
-        //mSquaresSurfaceView = SquaresSurfaceView(this)
-        mSquaresSurfaceView = findViewById(R.id.surface_view)
+        mSquaresSurfaceView = SquaresSurfaceView(this)
+        setContentView(mSquaresSurfaceView)
+        //mSquaresSurfaceView = findViewById(R.id.surface_view)
+
+        //mSquaresSurfaceView.renderer.openGame()
+/*
         mSkipButton = findViewById(R.id.skip_button)
-        mLoginButton = findViewById(R.id.login_button)
-        mLogo = findViewById(R.id.logo)
-        mTestButton = findViewById(R.id.test_button)
-
-        mTestButton.setOnClickListener {
-
-            if(Profile.getCurrentProfile() == null) return@setOnClickListener
-
-            val accessToken: AccessToken? = AccessToken.getCurrentAccessToken()
-            if(accessToken == null || accessToken.isExpired) return@setOnClickListener
-
-            val set0: JSONObject = JSONObject().also {
-                for(i in 0 until 16) {
-                    if(appData.setData[0]!!.puzzleData[i] == null) {
-                        it.put("puzzle$i", false)
-                    }else {
-                        it.put("puzzle$i", appData.setData[0]!!.puzzleData[i]!!.isCleared)
-                    }
-                }
-            }
-            val set1: JSONObject = JSONObject().also {
-                for(i in 0 until 16) {
-                    if(appData.setData[1]!!.puzzleData[i] == null) {
-                        it.put("puzzle$i", false)
-                    }else {
-                        it.put("puzzle$i", appData.setData[1]!!.puzzleData[i]!!.isCleared)
-                    }
-                }
-            }
-
-            //need to add puzzle data I want to update on database here
-            val data: JSONObject = JSONObject().also {
-                it.put("fb_id", Profile.getCurrentProfile().id)
-                it.put("access_token", accessToken.token)
-                it.put("app_id", getString(R.string.facebook_app_id))
-                it.put("set0", set0.toString())
-                it.put("set1", set1.toString())
-            }
-
-            postUserData(getString(R.string.server_url), data)
-        }
-
-        //login to facebook
-        mLoginButton.setOnClickListener {
-            //LoginManager.getInstance().logInWithReadPermissions(this, mutableListOf("email"))
-        }
-
-        mCallbackManager = CallbackManager.Factory.create()
-
-        //note: object keyword here allows creation of new subclass that can then be overriden (?)
-        LoginManager.getInstance().registerCallback(mCallbackManager, object: FacebookCallback<LoginResult> {
-            override fun onSuccess(loginResult: LoginResult) {
-                Log.d("facebooktest", "success")
-                if(Profile.getCurrentProfile() == null) {
-                    mProfileTracker = MyProfileTracker()
-                }
-            }
-            override fun onCancel() {
-                Log.d("facebooktest", "cancel")
-            }
-            override fun onError(error: FacebookException) {
-                Log.e("facebooktest", "error")
-            }
-        })
 
         mSkipButton.setOnClickListener {
             mOnLogin = false
             moveMenuOffScreen()
             mSquaresSurfaceView.renderer.openGame()
-        }
+        }*/
 
     }
 
-    //send post request to server.  Currently does not contain puzzle data
-    private fun postUserData(url: String, data: JSONObject) {
-        val jsonObjectRequest = JsonObjectRequest(Request.Method.POST, url, data,
-                {
-                    Log.d("facebooktest", "response received")
-                },
-                {
-                    Log.d("facebooktest", "response error")
-                }
-        )
-
-        val queue = Volley.newRequestQueue(this)
-        queue.add(jsonObjectRequest)
-    }
-
-    /*
-    //was used to send request to facebook API, but now this will be done on the server
-    private fun processProfile() {
-        val accessToken: AccessToken? = AccessToken.getCurrentAccessToken()
-
-        if(accessToken == null || accessToken.isExpired) return
-
-        Log.d("facebooktest", "Access token: " + accessToken.toString())
-        Log.d("facebooktest", "profile ID: " + Profile.getCurrentProfile().getId())
-
-        val request: GraphRequest = GraphRequest.newMeRequest(accessToken, object: GraphRequest.GraphJSONObjectCallback {
-            override fun onCompleted(obj: JSONObject, response: GraphResponse) {
-                Log.d("facebooktest", obj.toString())
-            }
-        })
-
-        val parameters = Bundle()
-        parameters.putString("field", "name, id")
-        request.parameters = parameters
-        request.executeAsync()
-    }*/
-
-    class MyProfileTracker : ProfileTracker() {
-        override fun onCurrentProfileChanged(oldProfile: Profile?, currentProfile: Profile?) {
-            stopTracking()
-        }
-    }
 
     private fun moveMenuOffScreen() {
-        ObjectAnimator.ofFloat(mLogo, "translationX", -1200f).apply {
-            duration = 400
-            interpolator = AccelerateDecelerateInterpolator()
-            start()
-        }
-        ObjectAnimator.ofFloat(mLoginButton, "translationX", 1200f).apply {
-            duration = 400
-            interpolator = AccelerateDecelerateInterpolator()
-            start()
-        }
         ObjectAnimator.ofFloat(mSkipButton, "translationX", -1200f).apply {
-            duration = 400
-            interpolator = AccelerateDecelerateInterpolator()
-            start()
-        }
-        ObjectAnimator.ofFloat(mTestButton, "translationX", 1200f).apply {
             duration = 400
             interpolator = AccelerateDecelerateInterpolator()
             start()
@@ -239,22 +109,7 @@ class MainActivity: AppCompatActivity() {
     }
 
     private fun moveMenuOnScreen() {
-        ObjectAnimator.ofFloat(mLogo, "translationX", 0f).apply {
-            duration = 400
-            interpolator = AccelerateDecelerateInterpolator()
-            start()
-        }
-        ObjectAnimator.ofFloat(mLoginButton, "translationX", 0f).apply {
-            duration = 400
-            interpolator = AccelerateDecelerateInterpolator()
-            start()
-        }
         ObjectAnimator.ofFloat(mSkipButton, "translationX", 0f).apply {
-            duration = 400
-            interpolator = AccelerateDecelerateInterpolator()
-            start()
-        }
-        ObjectAnimator.ofFloat(mTestButton, "translationX", 0f).apply {
             duration = 400
             interpolator = AccelerateDecelerateInterpolator()
             start()
@@ -262,13 +117,7 @@ class MainActivity: AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if(!mOnLogin && mSquaresSurfaceView.renderer.getScreenState() == Screen.Set) {
-            Handler(mainLooper).postDelayed({
-                moveMenuOnScreen()
-            }, 500)
-            mSquaresSurfaceView.renderer.closeGame()
-            mOnLogin = true
-        }else if(mOnLogin) {
+        if(mSquaresSurfaceView.renderer.getScreenState() == Screen.Logo) {
             super.onBackPressed()
         }else {
             mSquaresSurfaceView.renderer.mInputQueue.add(InputData(TouchType.Back, 0f, 0f, 0.3f))
@@ -276,7 +125,6 @@ class MainActivity: AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        mCallbackManager.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
     }
 

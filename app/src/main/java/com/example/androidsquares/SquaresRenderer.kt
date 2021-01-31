@@ -115,6 +115,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         mCamera = Camera(floatArrayOf(0f, 0f, 98f))
         mUndoButton = UndoButton(3, 0, floatArrayOf(0f, 100f, 0f))
+        openGame()
         startAnimation(.5f)
     }
 
@@ -138,6 +139,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     }
 
     fun openGame() {
+        mSets = spawnSets()
         for (set in mSets) {
             set.moveTo(calculateSetPosition(set.mIndex))
         }
@@ -153,6 +155,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             else 35f
             set.moveTo(floatArrayOf(pos[0] + offset, pos[1], pos[2]))
         }
+        mAnimationQueue.add(::clearSetList)
         startAnimation(.5f)
     }
 
@@ -250,20 +253,26 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return 1f
     }
 
-    fun clearSquaresList(): AnimationSpeed {
+    private fun clearSquaresList(): AnimationSpeed {
         mSquares.clear()
         return SKIP_ANIMATION
     }
 
-    fun clearFractalsList(): AnimationSpeed {
+    private fun clearFractalsList(): AnimationSpeed {
         mFractals.clear()
+        return SKIP_ANIMATION
+    }
+
+    private fun clearSetList(): AnimationSpeed {
+        mSets.clear()
         return SKIP_ANIMATION
     }
 
     fun getScreenState(): Screen {
         if (mFractals.size > 0) return Screen.Fractal
         if (mSquares.size > 0) return Screen.Square
-        return Screen.Set
+        if(mSets.size > 0) return Screen.Set
+        return Screen.Logo
     }
 
     private fun getOpenSet(): Set? {

@@ -49,7 +49,7 @@ enum class Transformation(val value: Int) {
 }
 
 enum class Screen {
-    Set, Square, Fractal
+    Logo, Set, Square, Fractal
 }
 
 enum class TouchType {
