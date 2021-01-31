@@ -42,6 +42,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private var mPulseIndices = Stack<MutableList<IntArray>>()
     private var mClearedPuzzleIndex  = -1
     private var mClearedSetIndex = -1
+    private var mLogo = Box(floatArrayOf(0f, 0f, 0f), floatArrayOf(10f, 10f, 1f), getTexCoords(F.W))
 
     private var mScreenWidth = 0
     private var mScreenHeight = 0
@@ -111,12 +112,9 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         mTextureHandle = loadTexture(mContext, R.drawable.fractal_colors)
         mProgram = compileShaders()
 
-        mSets = spawnSets()
-
         mCamera = Camera(floatArrayOf(0f, 0f, 98f))
         mUndoButton = UndoButton(3, 0, floatArrayOf(0f, 100f, 0f))
-        openGame()
-        startAnimation(.5f)
+//        startAnimation(openGame())
     }
 
     private fun startAnimation(speed: Float) {
@@ -138,15 +136,16 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         return list
     }
 
-    fun openGame() {
+    fun openGame(): AnimationSpeed {
         mSets = spawnSets()
         for (set in mSets) {
             set.moveTo(calculateSetPosition(set.mIndex))
         }
-        startAnimation(.5f)
+        mLogo.moveTo(floatArrayOf(30f, 0f, 0f))
+        return NORMAL_ANIMATION * .5f
     }
 
-    fun closeGame() {
+    fun closeGame(): AnimationSpeed {
         var pos: FloatArray
         for (set in mSets) {
             //pos = appData.setData[set.mIndex].pos
@@ -155,8 +154,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             else 35f
             set.moveTo(floatArrayOf(pos[0] + offset, pos[1], pos[2]))
         }
+        mLogo.moveTo(floatArrayOf(0f, 0f, 0f))
         mAnimationQueue.add(::clearSetList)
-        startAnimation(.5f)
+
+        return NORMAL_ANIMATION * .5f
     }
 
     private fun openSet(set: Set): AnimationSpeed {
@@ -1366,6 +1367,11 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
     private fun dispatchCommand(touchType: TouchType, x: Float, y: Float): AnimationSpeed {
         when (getScreenState()) {
+            Screen.Logo -> {
+                if (touchType == TouchType.Tap && mLogo.pointCollision(x, y)) {
+                    return openGame()
+                }
+            }
             Screen.Set -> {
                 if (touchType == TouchType.Tap) {
                     for (set in mSets) {
@@ -1373,6 +1379,10 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                             return openSet(set)
                         }
                     }
+                }
+
+                if (touchType == TouchType.Back) {
+                    return closeGame()
                 }
             }
             Screen.Square -> {
@@ -1515,6 +1525,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
         mCamera.onAnimationEnd()
         mUndoButton.onAnimationEnd()
+        mLogo.onAnimationEnd()
 
 
         //this stuff shouldn't be here - fire and forget commands will simplify everything
@@ -1614,6 +1625,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             set.onUpdate(sigmoid)
         }
 
+        mLogo.onUpdate(sigmoid)
+
         mUndoButton.onUpdate(sigmoid)
 
         /////////////////////////////////////draw setup////////////////////////////////////
@@ -1639,6 +1652,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
 
         mUndoButton.draw(mVPMatrix)
+
+        mLogo.draw(mVPMatrix)
 
         for (fractal in mFractals) {
             fractal.draw(mVPMatrix)

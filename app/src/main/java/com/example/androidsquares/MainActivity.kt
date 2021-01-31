@@ -1,11 +1,10 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW////////////////////////////////////
-    //redo main menu
-    //currently Activity is the main menu.  Need to get rid of 'skip' button
-    //and go straight to surfaceview when opening app.  Have logo appear,
-        //tap logo to go to set menu
-    //white is a reserved color for menu, cleared puzzle status, and tutorials
+    //make logo object
+    //add logo object to logo screen
+        //when user taps it, log animates off
+        //when user taps back button from set menu screen, logo animates on
     ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -75,48 +74,20 @@ import android.view.animation.AccelerateDecelerateInterpolator
 
 class MainActivity: AppCompatActivity() {
     private lateinit var mSquaresSurfaceView: SquaresSurfaceView
-    private var mOnLogin = true
     private lateinit var mSkipButton: Button
 
     public override fun onCreate(savedInstanceState: Bundle?) {
 //        setTheme(R.style.SplashScreen)
         super.onCreate(savedInstanceState)
-        //setContentView(R.layout.login) //want to get rid of this
 
         mSquaresSurfaceView = SquaresSurfaceView(this)
         setContentView(mSquaresSurfaceView)
-        //mSquaresSurfaceView = findViewById(R.id.surface_view)
-
-        //mSquaresSurfaceView.renderer.openGame()
-/*
-        mSkipButton = findViewById(R.id.skip_button)
-
-        mSkipButton.setOnClickListener {
-            mOnLogin = false
-            moveMenuOffScreen()
-            mSquaresSurfaceView.renderer.openGame()
-        }*/
-
     }
 
 
-    private fun moveMenuOffScreen() {
-        ObjectAnimator.ofFloat(mSkipButton, "translationX", -1200f).apply {
-            duration = 400
-            interpolator = AccelerateDecelerateInterpolator()
-            start()
-        }
-    }
-
-    private fun moveMenuOnScreen() {
-        ObjectAnimator.ofFloat(mSkipButton, "translationX", 0f).apply {
-            duration = 400
-            interpolator = AccelerateDecelerateInterpolator()
-            start()
-        }
-    }
 
     override fun onBackPressed() {
+        Log.d("ddd", mSquaresSurfaceView.renderer.getScreenState().toString())
         if(mSquaresSurfaceView.renderer.getScreenState() == Screen.Logo) {
             super.onBackPressed()
         }else {

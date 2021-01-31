@@ -8,13 +8,14 @@ class UndoButton(private val mMaxTransformations: Int, private var mTransformati
 
     private var mDarkBoxes = Array<Box?>(mMaxTransformations){null}.also {
         for(i in it.indices) {
-            it[i] = Box(floatArrayOf(pos[0] - mOffset + mSpacing * i, pos[1], pos[2]), F.NB)
+            it[i] = Box(floatArrayOf(pos[0] - mOffset + mSpacing * i, pos[1], pos[2]), floatArrayOf(3f, 3f, 1f), getTexCoords(F.NB))
         }
     }
 
     private var mLightBoxes = Array<Box?>(mMaxTransformations){null}.also {
         for(i in it.indices) {
-            it[i] = Box(floatArrayOf(pos[0] - mOffset - mSpacing, pos[1], pos[2]), F.N)
+            it[i] = Box(floatArrayOf(pos[0] - mOffset - mSpacing, pos[1], pos[2]), floatArrayOf(3f, 3f, 3f), getTexCoords(F.N))
+            it[i]!!.setAlphaData(0f)
         }
     }
 

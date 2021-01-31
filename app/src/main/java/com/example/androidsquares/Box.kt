@@ -5,21 +5,14 @@ import android.opengl.GLES20
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 
-class Box(pos: FloatArray, texColor: F) : Entity(pos, floatArrayOf(3f, 3f, 3f), 1) {
+//should pass the tex coords directly, and scale too so this can also be used for other things
+//rename it Quad to generalize
+class Box(pos: FloatArray, scale: FloatArray, texCoords: FloatArray) : Entity(pos, scale, 1) {
 
-    init {
-        if(texColor == F.N) {
-            setAlphaData(0f)
-        }
-    }
-
-
-    val vertices = floatArrayOf(-0.5f, -0.5f, 0.0f, .0f, .25f,
+    private val vertices = floatArrayOf(-0.5f, -0.5f, 0.0f, .0f, .25f,
             0.5f, -0.5f, 0.0f, .25f, .25f,
             0.5f, 0.5f, 0.0f, .25f, 0f,
             -0.5f, 0.5f, 0.0f, 0f, 0f).also {
-
-        val texCoords = getTexCoords(texColor)
         it[3] = texCoords[0]
         it[4] = texCoords[1]
         it[8] = texCoords[2]
@@ -30,7 +23,7 @@ class Box(pos: FloatArray, texColor: F) : Entity(pos, floatArrayOf(3f, 3f, 3f), 
         it[19] = texCoords[7]
     }
 
-    val indices = shortArrayOf(0, 1, 2, 0, 2, 3)
+    private val indices = shortArrayOf(0, 1, 2, 0, 2, 3)
 
     private var mVertexBuffer: FloatBuffer = createFloatBuffer(vertices)
     private var mIndexBuffer: ShortBuffer = createShortBuffer(indices)
