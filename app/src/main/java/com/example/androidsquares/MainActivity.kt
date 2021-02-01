@@ -1,32 +1,25 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW////////////////////////////////////
-    //background music - placeholder is fine (set up resource files that can be loaded in on app start)
-    //sound effects - placeholders are fine (set up resource files that can be loaded in on app start)
-    ///////////////////////////////////////////////////////////////////////////////////
-
-
-    //////////////////////////////////////CORE//////////////////////////////////////////////////////////
     //write 4 puzzles for set 5
     //3 or 4  or 5 transformations (can reorder them later)
     //up to three colors - try to have puzzles that take advantage of 5x6 grid
     //add puzzles with 4 and 5 transformations too (later)
     //once all 8 extra sets are complete, reorganize and cut the similar ones and reorder the ones kept
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////CORE//////////////////////////////////////////////////////////
+    //background music - placeholder is fine (set up resource files that can be loaded in on app start)
+    //use MediaPlayer
+    //sound effects - placeholders are fine (set up resource files that can be loaded in on app start)
+    //use SoundPool builder??? Apparently there are people who have problems with this
+    //look around for more options before settling on a sound API for sound effects
 
     //tutorial (show taps and drags)
 
-
     //create main logo (how can it keep with the same simple theme of the rest of the game)
     //add glow effects to simulate how final design should look
-
     ////////////////////////////////////////////////////////////////////////////////////////////
-
-    //////////////////////////////////////////////SOCIAL FEATURES///////////////////////////////////////////
-    //consider dropping these features (or delaying them until done with core features)
-        //look at SquaresServer project (index.ts) for the serverside stuff
-        //idea: seed the database with bot data (set id to a negative number)
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
     //////////////////////////////////////////USER EXPERIENCE////////////////////////////////////////////
     //when a puzzle is cleared for the first time, and after the pulse animations, create an animated white spark in the blocks
@@ -54,36 +47,38 @@
         //this is to provide feedback and also keep visual style consistent
         //also provides visual feedback when waiting for a double tap (rather than just showing no animation)
 
-    ////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 package com.example.androidsquares
 
-import android.animation.ObjectAnimator
 import android.content.Intent
+import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
-import android.widget.Button
 import android.util.Log
 import android.os.Bundle
-import android.os.Handler
-import android.view.animation.AccelerateDecelerateInterpolator
 
 
 class MainActivity: AppCompatActivity() {
     private lateinit var mSquaresSurfaceView: SquaresSurfaceView
-    private lateinit var mSkipButton: Button
+    private lateinit var mMediaPlayer: MediaPlayer
 
     public override fun onCreate(savedInstanceState: Bundle?) {
 //        setTheme(R.style.SplashScreen)
         super.onCreate(savedInstanceState)
 
         mSquaresSurfaceView = SquaresSurfaceView(this)
+        mMediaPlayer = MediaPlayer.create(this, R.raw.winter)
+//        mMediaPlayer.start()
         setContentView(mSquaresSurfaceView)
     }
 
 
 
     override fun onBackPressed() {
-        Log.d("ddd", mSquaresSurfaceView.renderer.getScreenState().toString())
+        /*
+        mMediaPlayer.stop()
+        mMediaPlayer.prepare()
+        mMediaPlayer.start()*/
         if(mSquaresSurfaceView.renderer.getScreenState() == Screen.Logo) {
             super.onBackPressed()
         }else {
@@ -96,14 +91,17 @@ class MainActivity: AppCompatActivity() {
     }
 
     public override fun onResume() {
+ //       mMediaPlayer.start()
         super.onResume()
     }
 
     public override fun onPause() {
+  //      mMediaPlayer.pause()
         super.onPause()
     }
 
     public override fun onDestroy() {
+   //     mMediaPlayer.release()
         super.onDestroy()
     }
 }

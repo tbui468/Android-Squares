@@ -766,6 +766,38 @@ val p57 = PuzzleData(arrayOf( ///give players up to 3 transformations
         F.E, F.BB, F.E, F.E, F.E,
         F.E, F.E, F.E, F.E, F.E),
         Stack<UndoData>(), 2, false, false, 0f)
+val p58 = PuzzleData(arrayOf(
+        F.N, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E),
+        Stack<UndoData>(), 2, false, false, 0f)
+val p59 = PuzzleData(arrayOf(
+        F.N, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E),
+        Stack<UndoData>(), 2, false, false, 0f)
+val p510 = PuzzleData(arrayOf(
+        F.N, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E),
+        Stack<UndoData>(), 2, false, false, 0f)
+val p511 = PuzzleData(arrayOf(
+        F.N, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E,
+        F.E, F.E, F.E, F.E, F.E),
+        Stack<UndoData>(), 2, false, false, 0f)
 
 //let's do more 2 or 3 transformation puzzles
 val p60 = PuzzleData(arrayOf(
@@ -930,7 +962,7 @@ val set3 = SetData(arrayOf(p30, p31, p32, p33, p34, p35, p36, p37,
 val set4 = SetData(arrayOf(p40, p41, p42, p43, p44, p45, p46, p47,
         p48, p49, p410, p411, p412, p413, p414, p415), false, false)
 val set5 = SetData(arrayOf(p50, p51, p52, p53, p54, p55, p56, p57,
-        null, null, null, null, null, null, null, null), false, false)
+        p58, p59, p510, p511, null, null, null, null), false, false)
 val set6 = SetData(arrayOf(p60, p61, p62, p63, p64, p65, p66, p67,
         null, null, null, null, null, null, null, null), true, false)
 val set7 = SetData(arrayOf(p70, p71, p72, p73, p74, p75, p76, p77,

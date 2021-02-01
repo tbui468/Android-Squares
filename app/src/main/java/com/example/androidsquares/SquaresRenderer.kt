@@ -173,7 +173,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             square.fadeTo(1f)
         }
 
-        return .5f
+        return NORMAL_ANIMATION
     }
 
     private fun closeSet(): AnimationSpeed {
@@ -189,7 +189,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             s.moveTo(set.pos)
         }
 
-        return .5f
+        return NORMAL_ANIMATION
     }
 
     private fun openSquare(square: Square): AnimationSpeed {
@@ -223,7 +223,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             s.moveTo(getOpenSet()!!.pos)
         }
 
-        return 1f
+        return NORMAL_ANIMATION
     }
 
     private fun closeSquare(): AnimationSpeed {
@@ -251,7 +251,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
             f.moveTo(getOpenSet()!!.pos) //temp: moving to set position for now
         }
 
-        return 1f
+        return NORMAL_ANIMATION
     }
 
     private fun clearSquaresList(): AnimationSpeed {
@@ -754,7 +754,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 f.mClearedBox!!.scalePulse(floatArrayOf(10f, 10f, 1f))
             }
         }
-        return NORMAL_ANIMATION * .5f
+        return NORMAL_ANIMATION
     }
 
 
@@ -767,7 +767,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 f.mClearedBox!!.scalePulse(floatArrayOf(10f, 10f, 1f))
             }
         }
-        return NORMAL_ANIMATION * 1.5f
+        return NORMAL_ANIMATION
     }
 
     private fun resizeRequired(
@@ -1571,7 +1571,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         //delta time
         mPreviousTime = mCurrentTime
         mCurrentTime = SystemClock.uptimeMillis()
-        val deltaTime = 0.002f * (mCurrentTime - mPreviousTime).toInt() * mAnimationSpeed
+        val deltaTime = ((mCurrentTime - mPreviousTime).toInt() / 382f) * mAnimationSpeed //382 is to make animations go at 157 bpm to match music
 
 
         //only want to call onAnimationEnd() once per animation
