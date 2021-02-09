@@ -1,6 +1,12 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW////////////////////////////////////
+    //implement the top/bottom matching transformations
+        //implement rotation and reflection
+            //problem caused with mRecreateFractal - this should really be internal to fractal
+        //need to implement merging and splitting of fractals too (crashing when undoing requires a fractal resize)
+
+
     //write 4 puzzles for set 5
     //3 or 4  or 5 transformations (can reorder them later)
     //up to three colors - try to have puzzles that take advantage of 5x6 grid

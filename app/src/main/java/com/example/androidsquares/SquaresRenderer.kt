@@ -10,6 +10,7 @@ import android.os.SystemClock
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.Bitmap
+import android.util.Log
 import java.util.Stack
 import java.util.Deque
 import java.util.ArrayDeque
@@ -35,7 +36,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     private val mContext = context
     var mInputQueue = InputQueue()
     private var mMergeFractals: Array<MutableList<Fractal>>? = null
-    private var mRecreateFractal: Fractal? = null
+    private var mRecreateFractals = mutableListOf<Fractal>()
     private var mAnimationQueue: Deque<() -> Float> = ArrayDeque()
     private var mUndoQueue: Deque<UndoData> = ArrayDeque()
     private var mPulseFractals = Stack<MutableList<Fractal>>()
@@ -496,75 +497,81 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
     //assumes transformation is valid (remaining transformations, swapped fractal exists)
     //if 'undo' is true, will not push transformation onto stack
     private fun transform(fractal: Fractal, transformation: Transformation, undo: Boolean): AnimationSpeed {
+        val setIndex = getOpenSet()!!.mIndex
+        val puzzleIndex = getOpenSquare()!!.mIndex
+        val puzzleType = appData.setData[setIndex]!!.puzzleData[puzzleIndex]!!.puzzleType
         when (transformation) {
             Transformation.TranslatePosX -> {
+                if(puzzleType == PuzzleType.Shifted) {
+                    val otherFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], (fractal.mIndex[1] + 3) % 6))
+                    val otherSwapped: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, (fractal.mIndex[1] + 3) % 6))
+                    swap(otherFractal!!, otherSwapped!!)
+                }
+
                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] + fractal.mSize, fractal.mIndex[1]))
                 swap(fractal, swappedFractal!!)
+
                 if (!undo)
-                    pushTransformation(
-                            getOpenSet()!!.mIndex,
-                            getOpenSquare()!!.mIndex,
-                            UndoData(Transformation.TranslateNegX, fractal.mIndex, fractal.mSize)
-                    )
+                    pushTransformation(setIndex, puzzleIndex, UndoData(Transformation.TranslateNegX, fractal.mIndex, fractal.mSize))
             }
             Transformation.TranslateNegX -> {
+                if(puzzleType == PuzzleType.Shifted) {
+                    val otherFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], (fractal.mIndex[1] + 3) % 6))
+                    val otherSwapped: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, (fractal.mIndex[1] + 3) % 6))
+                    swap(otherFractal!!, otherSwapped!!)
+                }
+
                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0] - fractal.mSize, fractal.mIndex[1]))
                 swap(fractal, swappedFractal!!)
                 if (!undo)
-                    pushTransformation(
-                            getOpenSet()!!.mIndex,
-                            getOpenSquare()!!.mIndex,
-                            UndoData(Transformation.TranslatePosX, fractal.mIndex, fractal.mSize)
-                    )
+                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.TranslatePosX, fractal.mIndex, fractal.mSize))
             }
             Transformation.TranslatePosY -> {
+                if(puzzleType == PuzzleType.Shifted) {
+                    val otherFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], (fractal.mIndex[1] + 3) % 6))
+                    val otherSwapped: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], (fractal.mIndex[1] + 3 + fractal.mSize) % 6))
+                    swap(otherFractal!!, otherSwapped!!)
+                }
                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] + fractal.mSize))
                 swap(fractal, swappedFractal!!)
                 if (!undo)
-                    pushTransformation(
-                            getOpenSet()!!.mIndex,
-                            getOpenSquare()!!.mIndex,
-                            UndoData(Transformation.TranslateNegY, fractal.mIndex, fractal.mSize)
-                    )
+                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.TranslateNegY, fractal.mIndex, fractal.mSize))
             }
             Transformation.TranslateNegY -> {
+                if(puzzleType == PuzzleType.Shifted) {
+                    val otherFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], (fractal.mIndex[1] + 3) % 6))
+                    val otherSwapped: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], (fractal.mIndex[1] + 3 - fractal.mSize) % 6))
+                    swap(otherFractal!!, otherSwapped!!)
+                }
                 val swappedFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], fractal.mIndex[1] - fractal.mSize))
                 swap(fractal, swappedFractal!!)
                 if (!undo)
-                    pushTransformation(
-                            getOpenSet()!!.mIndex,
-                            getOpenSquare()!!.mIndex,
-                            UndoData(Transformation.TranslatePosY, fractal.mIndex, fractal.mSize)
-                    )
+                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.TranslatePosY, fractal.mIndex, fractal.mSize))
             }
             Transformation.RotateCW -> {
+                val otherFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], (fractal.mIndex[1] + 3) % 6))
+                rotateCW(otherFractal!!)
                 rotateCW(fractal)
                 if (!undo)
-                    pushTransformation(
-                            getOpenSet()!!.mIndex,
-                            getOpenSquare()!!.mIndex,
-                            UndoData(Transformation.RotateCCW, fractal.mIndex, fractal.mSize)
-                    )
+                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.RotateCCW, fractal.mIndex, fractal.mSize))
             }
             Transformation.RotateCCW -> {
+                val otherFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], (fractal.mIndex[1] + 3) % 6))
+                rotateCCW(otherFractal!!)
                 rotateCCW(fractal)
                 if (!undo)
-                    pushTransformation(
-                            getOpenSet()!!.mIndex,
-                            getOpenSquare()!!.mIndex,
-                            UndoData(Transformation.RotateCW, fractal.mIndex, fractal.mSize)
-                    )
+                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.RotateCW, fractal.mIndex, fractal.mSize))
             }
             Transformation.ReflectXTop -> {
+                val otherFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], (fractal.mIndex[1] + 3) % 6))
+                reflectX(otherFractal!!, true)
                 reflectX(fractal, true)
                 if (!undo)
-                    pushTransformation(
-                            getOpenSet()!!.mIndex,
-                            getOpenSquare()!!.mIndex,
-                            UndoData(Transformation.ReflectXBottom, fractal.mIndex, fractal.mSize)
-                    )
+                    pushTransformation(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, UndoData(Transformation.ReflectXBottom, fractal.mIndex, fractal.mSize))
             }
             Transformation.ReflectXBottom -> {
+                val otherFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], (fractal.mIndex[1] + 3) % 6))
+                reflectX(otherFractal!!, false)
                 reflectX(fractal, false)
                 if (!undo)
                     pushTransformation(
@@ -574,6 +581,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     )
             }
             Transformation.ReflectYLeft -> {
+                val otherFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], (fractal.mIndex[1] + 3) % 6))
+                reflectY(otherFractal!!, true)
                 reflectY(fractal, true)
                 if (!undo)
                     pushTransformation(
@@ -583,6 +592,8 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     )
             }
             Transformation.ReflectYRight -> {
+                val otherFractal: Fractal? = getFractal(intArrayOf(fractal.mIndex[0], (fractal.mIndex[1] + 3) % 6))
+                reflectY(otherFractal!!, false)
                 reflectY(fractal, false)
                 if (!undo)
                     pushTransformation(
@@ -991,7 +1002,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         setElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, elements)
         fractal.rotateTo(-90f, floatArrayOf(0f, 0f, 1f))
-        mRecreateFractal = fractal
+        mRecreateFractals.add(fractal)
     }
 
     private fun rotateCCW(fractal: Fractal) {
@@ -1043,7 +1054,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 90f,
                 floatArrayOf(0f, 0f, 1f)
         ) //should recreate on animation end to keep things simple
-        mRecreateFractal = fractal
+        mRecreateFractals.add(fractal)
     }
 
     private fun reflectX(fractal: Fractal, topPushed: Boolean) {
@@ -1065,7 +1076,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         if (topPushed) fractal.rotateTo(-180f, floatArrayOf(1f, 0f, 0f))
         else fractal.rotateTo(180f, floatArrayOf(1f, 0f, 0f))
-        mRecreateFractal = fractal
+        mRecreateFractals.add(fractal)
     }
 
     private fun reflectY(fractal: Fractal, leftPushed: Boolean) {
@@ -1087,7 +1098,7 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
 
         if (leftPushed) fractal.rotateTo(-180f, floatArrayOf(0f, 1f, 0f))
         else fractal.rotateTo(180f, floatArrayOf(0f, 1f, 0f))
-        mRecreateFractal = fractal
+        mRecreateFractals.add(fractal)
     }
 
     //returns true if there is partial overlap between fractal and target fractal
@@ -1546,13 +1557,20 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
         }
 
         //recreate at end of animation (to reduce complexity by not having to save angle state, mostly)
-        if (mRecreateFractal != null) {
+        /*
+        if (mRecreateFractals.isNotEmpty()) {
             mFractals.add(Fractal(getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, mRecreateFractal!!.mIndex, mRecreateFractal!!.mSize),
                             mRecreateFractal!!.mSize, mRecreateFractal!!.mIndex, mRecreateFractal!!.pos))
             mFractals.remove(mRecreateFractal!!)
             mRecreateFractal = null
-        }
+        }*/
 
+        for(fractal in mRecreateFractals) {
+            mFractals.add(Fractal(getElements(getOpenSet()!!.mIndex, getOpenSquare()!!.mIndex, fractal.mIndex, fractal.mSize),
+                    fractal.mSize, fractal.mIndex, fractal.pos))
+            mFractals.remove(fractal)
+        }
+        mRecreateFractals.clear()
 
         writeSaveData()
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -1765,7 +1783,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                     if(appData.setData[i]!!.puzzleData[j] == null) continue
 
                     putBoolean(i.toString() + j.toString() + "isCleared", appData.setData[i]!!.puzzleData[j]!!.isCleared)
-                    putFloat(i.toString() + j.toString() + "percentCleared", appData.setData[i]!!.puzzleData[j]!!.percentCleared)
                     putString(i.toString() + j.toString() + "elements", elementsToString(appData.setData[i]!!.puzzleData[j]!!.elements))
 
                     //copying into temp stack
@@ -1805,8 +1822,6 @@ class SquaresRenderer(context: Context): GLSurfaceView.Renderer {
                 if(appData.setData[i]!!.puzzleData[j] == null) continue
                 appData.setData[i]!!.puzzleData[j]!!.isCleared = sharedPref.getBoolean(i.toString() + j.toString() + "isCleared",
                         defaultAppData.setData[i]!!.puzzleData[j]!!.isCleared)
-                appData.setData[i]!!.puzzleData[j]!!.percentCleared = sharedPref.getFloat(i.toString() + j.toString() + "percentCleared",
-                        defaultAppData.setData[i]!!.puzzleData[j]!!.percentCleared)
                 appData.setData[i]!!.puzzleData[j]!!.elements = stringToElements(sharedPref.getString(i.toString() + j.toString() + "elements",
                         elementsToString(defaultAppData.setData[i]!!.puzzleData[j]!!.elements)))
 

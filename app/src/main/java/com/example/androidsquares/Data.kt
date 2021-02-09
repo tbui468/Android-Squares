@@ -27,6 +27,12 @@ const val PUZZLE_GRID_HEIGHT = 4
 const val SET_GRID_WIDTH = 3
 const val SET_GRID_HEIGHT = 4
 
+enum class PuzzleType {
+    Normal, //normal puzzle type
+    Shifted, //shifted down
+    Reflected //reflected across x axis
+}
+
 
 
 enum class Transformation(val value: Int) {
