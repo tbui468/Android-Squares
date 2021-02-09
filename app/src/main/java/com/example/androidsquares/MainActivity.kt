@@ -1,15 +1,22 @@
 //get a complete vertical slice with two puzzle cubes
 
     ///////////////////////////////////////TODO NOW////////////////////////////////////
-    //implement the top/bottom matching transformations
-        //implement rotation and reflection
-            //problem caused with mRecreateFractal - this should really be internal to fractal
-        //need to implement merging and splitting of fractals too (crashing when undoing requires a fractal resize)
+    //it might be better to have separate puzzles (instead of putting them all in one field)
+        //each puzzle is the composed on 1, 2 or 4 mini puzzles
+        //each 'Mini' is connected to other minis either by shift or reflections
+        //any transformation of fractals in a mini will be easier to keep track of in this case
 
+        //bug: if shifted/reflected puzzle, we don't want to allow translations into the shifted/reflected play field
+        //implement the top/bottom matching transformations
+            //need to implement merging and splitting of fractals too (crashing when undoing requires a fractal resize)
+        //make function to get fractal based on puzzletype and base fractal
+            //getOtherFractalIndex(puzzleType, baseIndex)
+        //expand the flexibility of the shift/reflect puzzles to allow greater puzzle variety
 
     //write 4 puzzles for set 5
     //3 or 4  or 5 transformations (can reorder them later)
     //up to three colors - try to have puzzles that take advantage of 5x6 grid
+    //for shifted and reflected puzzles, only the interactable fractals need to match - blocks don't need to have a corresponding match
     //add puzzles with 4 and 5 transformations too (later)
     //once all 8 extra sets are complete, reorganize and cut the similar ones and reorder the ones kept
     ///////////////////////////////////////////////////////////////////////////////////
@@ -73,15 +80,16 @@ class MainActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         mSquaresSurfaceView = SquaresSurfaceView(this)
+        /*
         mMediaPlayer = MediaPlayer.create(this, R.raw.winter)
-//        mMediaPlayer.start()
+        mMediaPlayer.start()*/
         setContentView(mSquaresSurfaceView)
     }
 
 
 
     override fun onBackPressed() {
-        /*
+/*
         mMediaPlayer.stop()
         mMediaPlayer.prepare()
         mMediaPlayer.start()*/
@@ -97,17 +105,17 @@ class MainActivity: AppCompatActivity() {
     }
 
     public override fun onResume() {
- //       mMediaPlayer.start()
+//        mMediaPlayer.start()
         super.onResume()
     }
 
     public override fun onPause() {
-  //      mMediaPlayer.pause()
+ //       mMediaPlayer.pause()
         super.onPause()
     }
 
     public override fun onDestroy() {
-   //     mMediaPlayer.release()
+  //      mMediaPlayer.release()
         super.onDestroy()
     }
 }
